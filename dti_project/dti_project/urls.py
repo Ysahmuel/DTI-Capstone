@@ -22,7 +22,8 @@ from dti_project import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include("dashboard.urls"))
+    path('', include("dashboard.urls")),
+    path('/documents', include("documents.urls"))
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
