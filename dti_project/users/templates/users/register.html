@@ -1,0 +1,60 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %} Register {% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'users/styles.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="backdrop-layer">
+        <div class="glass-layer">
+            <div class="authentication-form-container">
+
+                <form action="" class="authentication-form">
+                    <header>
+                        <h1>Create an Account</h1>
+                        <h3>Create your account by filling out the form below.</h3>
+                    </header>
+
+                    <div class="row">
+                        <div class="form-group">
+                            <label for="">First Name</label>
+                            <input type="text">
+                        </div>
+                        <div class="form-group">
+                            <label for="">Last Name</label>
+                            <input type="text">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="">Email</label>
+                        <input type="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="">Password</label>
+                        <input type="password">
+                    </div>
+                    <div class="form-group">
+                        <label for="">Confirm Password</label>
+                        <input type="password">
+                    </div>
+                    <button type="button">Create Account</button>
+                </form>
+
+                <div class="graphics-panel">
+                    <header>
+                        <h1>Join now to access your DTI services dashboard.</h1>
+                        <h3>Easily manage your business, track applications, and stay informed with the latest DTI updates.</h3>
+                    </header>
+                    <div class="bar-graph-preview">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
