@@ -2,6 +2,7 @@
 
 :root {
     --primary: rgb(0, 91, 211);
+    --light-gray: rgb(225, 225, 225);
 }
 
 * {
@@ -110,7 +111,7 @@ html, body {
     outline: none;
     font-size: clamp(0.75rem, 0.75vw, 1.5rem);
     font-weight: 600;
-    padding: 8px 16px;
+    padding: 10px 20px;
     width: 100%;
 }
 
@@ -122,7 +123,7 @@ html, body {
     border: none;
     border-radius: 4px;
     outline: none;
-    padding: 10px 20px;
+    padding: 15px 20px;
     width: 75%;
     cursor: pointer;
 }
@@ -150,7 +151,7 @@ html, body {
 
 .graphics-panel h1 {
     color: white;
-    font-size: clamp(1rem, 2.5vw, 4rem);
+    font-size: clamp(1rem, 2vw, 4rem);
     font-weight: 400;
 }
 
@@ -162,10 +163,53 @@ html, body {
 }
 
 .bar-graph-preview {
+    display: flex;
+    flex-direction: column;
     background-color: white;
     border-radius: 12px;
     padding: 1rem;
     outline: solid 8px rgba(200, 200, 200, 0.1);
-    width: 40%;
-    height: 200px;
+    width: 65%;
+    height: 45%;
+}
+
+.bar-graph-preview .wrapper {
+    justify-content: space-between;
+}
+
+.bar-graph-preview .wrapper span {
+    background-color: var(--light-gray);
+}
+
+.bar-graph-preview ul {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(16, 1fr);
+    grid-template-rows: repeat(16, 1fr);
+    gap: 0.5rem;
+    list-style-type: none;
+    margin-top: 0.75rem;
+}
+
+.bar-graph-preview li {
+    width: 100%;
+    height: 100%;
+    background: var(--light-gray);
+    padding: 1rem;
+    border-radius: 4px;
+}
+
+.bar-graph-preview li:nth-of-type(1) {
+    grid-column: span 12;
+    grid-row: span 8;
+}
+
+.bar-graph-preview li:nth-of-type(2) {
+    grid-column: span 4;
+    grid-row: span 16;
+}
+
+.bar-graph-preview li:nth-of-type(n+3) {
+    grid-column: span 6;
+    grid-row: span 4;
 }
