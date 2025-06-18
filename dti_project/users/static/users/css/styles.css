@@ -3,6 +3,7 @@
 :root {
     --primary: rgb(0, 91, 211);
     --light-gray: rgb(225, 225, 225);
+    --dark-gray: rgb(75, 75, 75);
 }
 
 * {
@@ -126,6 +127,31 @@ html, body {
     padding: 15px 20px;
     width: 75%;
     cursor: pointer;
+}
+
+.authentication-form p {
+    color: var(--dark-gray);
+}
+
+.authentication-form a {
+    position: relative;
+    color: black;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.authentication-form a::before {
+    position: absolute;
+    content: '';
+    bottom: -4px;
+    background-color: black;
+    width: 0;
+    height: 2px;
+    transition: 0.3s;
+}
+
+.authentication-form a:hover::before {
+    width: 100%;
 }
 
 .graphics-panel {
