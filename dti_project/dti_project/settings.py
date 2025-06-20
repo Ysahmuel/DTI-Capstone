@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'dashboard',
     'documents',
     'users',
+    'django_browser_reload',
 ]
 
 MIDDLEWARE = [
