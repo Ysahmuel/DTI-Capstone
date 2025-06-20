@@ -1,3 +1,4 @@
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
@@ -34,3 +35,8 @@ class CustomRegisterView(CreateView):
         context = super().get_context_data(**kwargs)
 
         return context
+    
+
+def logout(request):
+    auth_logout(request)
+    return HttpResponseRedirect("/")
