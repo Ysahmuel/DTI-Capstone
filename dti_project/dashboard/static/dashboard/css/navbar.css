@@ -1,0 +1,196 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+
+:root {
+    --primary: rgb(15, 8, 83);
+    --primary-muted: rgba(40, 54, 255, 0.15);
+    --secondary: rgb(200, 200, 200);
+    --secondary-muted: rgba(235, 235, 235, 0.8);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Roboto", sans-serif;
+}
+
+.layout {
+    display: flex;
+    height: 100vh;
+}
+
+.side-navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: var(--primary);
+    color: var(--secondary);
+    border-right: solid 1px rgba(60, 60, 60, 0.1);
+    box-shadow: 2px 1px 7px -2px rgba(0,0,0,0.5);
+    min-width: 10%;
+    height: 100vh;
+    transition: width 0.3s;
+    /* overflow-x: hidden; */
+}
+
+.side-navbar header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-bottom: solid 1px rgba(235, 235, 235, 0.25);
+    padding: 1rem;
+    width: 100%;
+}
+
+.side-navbar section {
+    width: 100%;
+    padding: 0 1rem;
+}
+
+.side-navbar nav {
+    display: flex;
+    align-items: start;
+    flex-direction: column;
+    gap: 2.5rem;
+    height: 100%;
+    padding-bottom: 2.5rem;
+}
+
+.nav-section-heading {
+    color: var(--secondary-muted);
+    font-size: clamp(0.5rem, 0.65vw, 1.5rem);
+    font-weight: 400;
+    text-transform: uppercase;
+}
+
+.side-nav-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    list-style-type: none;
+    margin-top: 0.75rem;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: 0.3s;
+    padding: 0.5rem;
+    border-radius: 4px;
+    backdrop-filter: blur(5px);
+}
+
+.nav-item:not(.nav-item.dropdown):hover {
+    background-color: var(--primary-muted);
+}
+
+.nav-item.dropdown {
+    flex-direction: column;
+    padding: 0;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--secondary);
+    font-size: clamp(0.75rem, 0.8vw, 2rem);
+    text-decoration: none;
+    transition: 0.3s;
+    width: 100%;
+}
+
+.nav-dropdown-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: transparent;
+    color: var(--secondary);
+    padding: 0.5rem;
+    border: none;
+    border-radius: 4px;
+    outline: none;
+    font-size: clamp(0.75rem, 0.8vw, 2rem);
+    text-decoration: none;
+    transition: 0.3s;
+    width: 100%;
+    cursor: pointer;
+}
+
+.nav-dropdown-btn:hover {
+    background-color: var(--primary-muted);
+}
+
+.nav-link i,
+.nav-dropdown-btn i
+{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    width: clamp(0.75rem, 0.75vw, 1.5rem);
+    height: clamp(0.75rem, 0.75vw, 1.5rem);
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 1px;
+}
+
+.nav-dropdown-btn .fa-angle-down {
+    margin-left: auto;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    color: var(--secondary-muted);
+    font-size: clamp(0.25rem, 0.5vw, 0.75rem);
+    margin-bottom: -2px;
+}
+
+.nav-dropdown-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: clamp(0.75rem, 0.8vw, 2rem);
+    list-style-type: none;
+    margin-top: 1rem;
+}
+
+.nav-dropdown-list li {
+    border-radius: 4px;
+    padding: 0.5rem;
+    padding-left: 2.5rem;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.nav-dropdown-list li:hover {
+    background-color: var(--primary-muted);
+}
+
+.side-navbar #account-menu-section {
+    margin-top: auto;
+}
+
+#account-menu-section #profile-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: white;
+}
+
+#account-menu-section #profile-link img {
+    width: clamp(1rem, 2vw, 3rem);
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+}
+
+#account-menu-section #profile-link strong {
+    font-size: clamp(0.75rem, 0.75vw, 2rem);
+    font-weight: 500;
+}
+
+#account-menu-section #profile-link p {
+    color: var(--secondary-muted);
+    font-size: clamp(0.5rem, 0.7vw, 1.5rem);
+    font-weight: 400;
+}

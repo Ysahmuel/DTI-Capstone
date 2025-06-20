@@ -1,24 +1,85 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %} DTI Capstone {% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'dashboard/css/navbar.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
 
-    <aside class="sidebar">
+    <div class="layout">
+        <aside class="side-navbar">
+            <nav>
+                <header>
+                    <i class="fa-solid fa-angles-left"></i>
+                    <h1>Collapse Navbar</h1>
+                </header>
+                <section aria-labelledby="main-menu-heading">
+                    <h2 class="nav-section-heading">Main</h2>
+                    <ul class="side-nav-list">
+                        <li class="nav-item">
+                            <a href="{% url 'dashboard' %}" class="nav-link">
+                                <i class="fa-solid fa-house"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <button class="nav-dropdown-btn">
+                                <i class="fa-solid fa-file"></i>
+                                <span>Create</span>
+                                <i class="fa-solid fa-angle-down"></i>
+                            </button>
+                            <ul class="nav-dropdown-list">
+                                <li>Sales Promotion Application</li>
+                                <li>Product</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </section>
 
-    </aside>
+                <section aria-label="others-menu-heading">
+                    <h2 class="nav-section-heading">Others</h2>
+                    <ul class="side-nav-list">
+                        <li class="nav-item">
+                            <a href="" class="nav-link">
+                                <i class="fa-solid fa-gear"></i>
+                                <span>Settings</span>
+                            </a>
+                        </li>
+                    </ul>
+                </section>
 
-    <nav class="navbar">
-        
-    </nav>
+                <section aria-labelledby="account-menu-heading" id="account-menu-section">
+                    <ul class="side-nav-list">
+                        <li class="nav-item">
+                            <a href="" id="profile-link">
+                                <img src="media/media/default-avatar-icon.jpg" alt="">
+                                <div>
+                                    <strong>Daily Joe Marie</strong>
+                                    <p>Admin</p>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'logout' %}" class="nav-link">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                                <span>Logout</span>
+                            </a>
+                        </li>
+                    </ul>
+                </section>
 
-    <main>
-        {% block body %}
-        {% endblock %}
-    </main>
+            </nav>
+        </aside>
+
+        <div class="main-content">
+            {% block body %}
+            {% endblock %}
+        </div>
+    </div>
 
 </body>
 </html>
