@@ -64,6 +64,7 @@ html, body {
 
 .authentication-form {
     flex: 0 0 45%;
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
