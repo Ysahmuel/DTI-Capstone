@@ -1,0 +1,26 @@
+:root {
+    --primary: rgb(15, 8, 83);
+    --primary-muted: rgba(40, 54, 255, 0.15);
+    --secondary: rgb(200, 200, 200);
+    --secondary-muted: rgba(235, 235, 235, 0.8);
+    --light-gray: rgb(225, 225, 225);
+    --dark-gray: rgb(75, 75, 75);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Roboto", sans-serif;
+}
+
+html, body {
+    width: 100%;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.layout {
+    display: flex;
+    height: 100vh;
+}

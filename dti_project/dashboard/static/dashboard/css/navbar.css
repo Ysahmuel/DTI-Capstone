@@ -1,24 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
 
-:root {
-    --primary: rgb(15, 8, 83);
-    --primary-muted: rgba(40, 54, 255, 0.15);
-    --secondary: rgb(200, 200, 200);
-    --secondary-muted: rgba(235, 235, 235, 0.8);
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: "Roboto", sans-serif;
-}
-
-.layout {
-    display: flex;
-    height: 100vh;
-}
-
 .side-navbar {
     position: fixed;
     top: 0;
