@@ -157,8 +157,8 @@
     flex: 0 0 55%;
     width: 100%;
     height: 100%;
-    background: #4574ed;
-    background: linear-gradient(to bottom,rgba(69, 116, 237, 1) 0%, rgba(10, 66, 207, 1) 66%);
+    background-color: var(--primary);
+    background: linear-gradient(to top, var(--primary) 33%, rgba(27, 20, 120, 1) 100%);
     border-radius: 0.8rem;
     overflow: hidden;
 }
@@ -189,7 +189,7 @@
     background-color: white;
     border-radius: 12px;
     padding: 1rem;
-    outline: solid 8px rgba(200, 200, 200, 0.1);
+    outline: solid 8px rgba(230, 230, 230, 0.2);
     width: 65%;
     height: 45%;
 }
