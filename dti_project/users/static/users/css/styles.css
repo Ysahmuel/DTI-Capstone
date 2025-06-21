@@ -234,3 +234,11 @@
     grid-column: span 6;
     grid-row: span 4;
 }
+
+input:user-valid {
+    background-color: green;
+}
+
+input:user-invalid {
+    background-color: red;
+}
