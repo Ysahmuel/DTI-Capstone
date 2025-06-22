@@ -5,6 +5,8 @@
     --secondary-muted: rgba(235, 235, 235, 0.8);
     --light-gray: rgb(225, 225, 225);
     --dark-gray: rgb(75, 75, 75);
+    --sidebar-collapsed-width: 4.5rem;
+    --sidebar-expanded-width: clamp(8rem, 15vw, 24rem);
 }
 
 * {
