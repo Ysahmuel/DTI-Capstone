@@ -1,6 +1,6 @@
 .main-content {
     flex: 1;
-    margin-left: var(--sidebar-collapsed-width);
+    margin-left: calc(var(--sidebar-collapsed-width) + 1rem);
     transition: margin-left var(--transition-duration) ease-in-out;
     padding: 1rem 2rem;
     min-height: 100vh;
