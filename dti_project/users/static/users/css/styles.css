@@ -106,6 +106,16 @@
     transition: 0.3s;
 }
 
+.authentication-form input:user-valid {
+    background-color: rgb(235, 245, 235);
+    border: solid 1px rgb(28, 168, 28);
+}
+
+.authentication-form input:user-invalid {
+    background-color: rgb(238, 224, 224);
+    border: solid 1px rgb(189, 49, 49);
+}
+
 .authentication-form input:focus {
     background-color: var(--primary-faded);
     border: solid 1px var(--primary);
@@ -233,12 +243,4 @@
 .bar-graph-preview li:nth-of-type(n+3) {
     grid-column: span 6;
     grid-row: span 4;
-}
-
-input:user-valid {
-    background-color: green;
-}
-
-input:user-invalid {
-    background-color: red;
 }
