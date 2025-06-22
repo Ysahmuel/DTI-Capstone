@@ -9,9 +9,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Update icon direction
         if (sideNavbar.classList.contains('extended')) {
-            collapseIcon.className = 'fa-solid fa-angles-left';
+            collapseIcon.className = 'fa-solid fa-angle-left';
         } else {
-            collapseIcon.className = 'fa-solid fa-angles-right';
+            collapseIcon.className = 'fa-solid fa-angle-right';
         }
     });
 
