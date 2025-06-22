@@ -20,8 +20,13 @@ document.addEventListener('DOMContentLoaded', function() {
     dropdownBtns.forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
-            const dropdownItem = this.closest('.nav-item.dropdown');
-            dropdownItem.classList.toggle('active');
+            
+            // Ensure dropdown only works when sidebar is extended
+            if (sideNavbar.classList.contains('extended')) {
+                const dropdownItem = this.closest('.nav-item.dropdown');
+                dropdownItem.classList.toggle('active');
+            }
+
         });
     });
 
