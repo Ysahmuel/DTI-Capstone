@@ -1,0 +1,12 @@
+.main-content {
+    flex: 1;
+    margin-left: var(--sidebar-collapsed-width);
+    transition: margin-left var(--transition-duration) ease-in-out;
+    padding: 2rem;
+    background-color: #f7fafc;
+    min-height: 100vh;
+}
+
+.side-navbar.extended ~ .main-content {
+    margin-left: var(--sidebar-expanded-width);
+}
