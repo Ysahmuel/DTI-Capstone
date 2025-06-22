@@ -188,17 +188,22 @@
 }
 
 .nav-dropdown-list {
-    display: none;
+    display: flex;
     flex-direction: column;
     gap: 0.25rem;
     font-size: 0.85rem;
     list-style-type: none;
     margin-top: 0.5rem;
-    padding-left: 1rem;
+    opacity: 0;
+    max-height: 0;
+    transition: 0.3s;
+    width: 100%;
 }
 
 .nav-item.dropdown.active .nav-dropdown-list {
     display: flex;
+    opacity: 1;
+    max-height: 10rem;
 }
 
 .nav-item.dropdown.active .nav-dropdown-btn .fa-angle-down {
@@ -207,13 +212,15 @@
 
 .nav-dropdown-list li {
     border-radius: 4px;
-    padding: 0.5rem 0.75rem;
+    padding: 0.75rem;
+    padding-left: 3rem;
     cursor: pointer;
     transition: background-color 0.2s;
     color: var(--secondary);
     white-space: nowrap;
     opacity: 0;
     transition: opacity var(--transition-duration) ease-in-out;
+    width: 100%;
 }
 
 .side-navbar.extended .nav-dropdown-list li {
