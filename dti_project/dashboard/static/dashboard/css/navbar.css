@@ -231,6 +231,11 @@
     background-color: var(--primary-muted);
 }
 
+.nav-dropdown-list a {
+    color: var(--secondary-muted);
+    text-decoration: none;
+}
+
 .side-navbar #account-menu-section {
     margin-top: auto;
 }
