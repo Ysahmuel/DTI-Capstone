@@ -1,0 +1,151 @@
+{% extends 'dashboard/layout.html' %}
+
+{% block title %} Create Sales Promotion Permit Application {% endblock %}
+
+{% block body %}
+    <div class="form-container">
+        <header>
+            <h1>Sales Promotion Permit Application</h1>
+        </header>
+        <form class="documents-form" action="{% url 'create-sales-promotion' %}" method="POST">
+            
+            <!-- Promo Title -->
+            <fieldset>
+                <legend>Promotion Details</legend>
+                <div class="row">
+                    <div class="form-group">
+                        <label for="">Promo Title</label>
+                        {{ form.promo_title }}
+                    </div>
+                </div>
+            </fieldset>
+            
+
+            <!-- 1. Sponsors -->
+            <fieldset>
+                <p class="part-count">Part 1 of 5</p>
+                <legend>Sponsor</legend>
+
+                <div class="form-group">
+                    <label for="">Name of Sponsor</label>
+                    {{ form.sponsor_name }}
+                </div>
+
+                <div class="row">
+                    <div class="form-group">
+                        <label for="">Telephone No</label>
+                        {{ form.sponsor_telephone }}
+                    </div>
+                    <div class="form-group">
+                        <label for="">Email</label>
+                        {{ form.sponsor_email }}
+                    </div>
+                    <div class="form-group">
+                        <label for="">Authorized Rep</label>
+                        {{ form.sponsor_authorized_rep }}
+                    </div>
+                    <div class="form-group">
+                        <label for="">Designation</label>
+                        {{ form.sponsor_designation }}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="">Address</label>
+                    {{ form.sponsor_address }}
+                </div>
+
+            </fieldset>
+
+            <!-- 2. Advertising Agency -->
+            <fieldset>
+                <p class="part-count">Part 2 of 5</p>
+                <legend>Advertising Agency</legend>
+
+                <div class="form-group">
+                    <label for="">Name of Advertising Agency</label>
+                    {{ form.advertising_agency_name }}
+                </div>
+
+                <div class="row">
+                    <div class="form-group">
+                        <label for="">Telephone No</label>
+                        {{ form.advertising_agency_telephone }}
+                    </div>
+                    <div class="form-group">
+                        <label for="">Email</label>
+                        {{ form.advertising_agency_email }}
+                    </div>
+                    <div class="form-group">
+                        <label for="">Authorized Rep</label>
+                        {{ form.advertising_agency_authorized_rep }}
+                    </div>
+                    <div class="form-group">
+                        <label for="">Designation</label>
+                        {{ form.advertising_agency_designation }}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="">Address</label>
+                    {{ form.advertising_agency_address }}
+                </div>
+
+            </fieldset>
+
+            <!-- 3. Promo Period -->
+            <fieldset>
+                <p class="part-count">part 3 of 5</p>
+                <legend>Promo Period</legend>
+
+                <div class="row">
+                    <div class="form-group">
+                        <label for="">Promo Start</label>
+                        {{ form.promo_period_start }}
+                    </div>
+                    <div class="form-group">
+                        <label for="">Promo End</label>
+                        {{ form.promo_period_end }}
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- 4. Products Covered -->
+            <fieldset>
+                <p class="part-count">Part 4 of 5</p>
+                <legend>Products Covered</legend>
+
+                {{ product_formset.management_form }}
+                {% for form in product_formset %}
+                    <div class="row">
+                        <div class="form-group">
+                            <label>Product Name</label>
+                            {{ form.name }}
+                        </div>
+                        <div class="form-group">
+                            <label>Brand</label>
+                            {{ form.brand }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Specifications</label>
+                        {{ form.specifications }}
+                    </div>
+                {% endfor %}
+            </fieldset>
+
+            <!-- 5. Coverage -->
+            <fieldset>
+                <p class="part-count">Part 5 of 5</p>
+                <legend>Coverage</legend>
+
+                <div class="row">
+                    <div class="form-group">
+                        {{ form.coverage }}
+                    </div>
+                </div>
+            </fieldset>
+
+        </form>
+    </div>
+{% endblock %}
