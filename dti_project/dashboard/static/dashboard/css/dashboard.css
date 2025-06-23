@@ -1,4 +1,5 @@
 .main-content {
+    background-color: rgba(242, 242, 242);
     flex: 1;
     margin-left: calc(var(--sidebar-collapsed-width) + 1rem);
     transition: margin-left var(--transition-duration) ease-in-out;
