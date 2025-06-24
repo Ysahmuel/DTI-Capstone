@@ -114,6 +114,7 @@
             <fieldset>
                 <p class="part-count">Part 4 of 5</p>
                 <legend>Products Covered</legend>
+                <p id="description"></p>
 
                 {{ product_formset.management_form }}
                 {% for form in product_formset %}
@@ -139,11 +140,49 @@
                 <p class="part-count">Part 5 of 5</p>
                 <legend>Coverage</legend>
 
-                <div class="row">
-                    <div class="form-group">
-                        {{ form.coverage }}
+                <ul class="coverage-choice-list">
+                    <div class="row">
+                        <li>
+                            <div class="icon-group">
+                                <i class="fa-solid fa-city"></i>
+                            </div>
+                            <div id="details">
+                                <strong>NCR</strong>
+                                <p>or several regions including Metro Manila</p>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="icon-group">
+                                <i class="fa fa-map"></i>
+                                <i class="fa-solid fa-2" id="number-icon"></i>
+                            </div>
+                            <div id="details">
+                                <strong>2+ regions</strong>
+                                <p>or more outside of NCR or Metro Manila</p>
+                            </div>
+                        </li>
                     </div>
-                </div>
+                    <div class="row">
+                        <li>
+                            <div class="icon-group">
+                                <i class="fa fa-map"></i>
+                                <i class="fa-solid fa-1" id="number-icon"></i>
+                            </div>
+                            <div id="details">
+                                <strong>Single Region</strong>
+                                <p>covering 2 provinces or more</p>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="icon-group">
+                                <i class="fa fa-map-marker-alt"></i>
+                            </div>
+                            <div id="details">
+                                <strong>Single Province</strong>
+                            </div>
+                        </li>
+                    </div>
+                </ul>
             </fieldset>
 
         </form>

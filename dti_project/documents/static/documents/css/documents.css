@@ -36,8 +36,6 @@
     font-weight: 600;
     margin-bottom: 1rem;
 }
-
-
 .form-container .row {
     display: flex;
     align-items: center;
@@ -79,4 +77,82 @@
     padding: 0.5rem 1rem;
     resize: none;
     height: 6rem;
+}
+
+.coverage-choice-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    list-style-type: none;
+    width: 100%;
+}
+
+.coverage-choice-list li {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    border: solid 2px rgba(200, 200, 200, 0.5);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.icon-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background-color: rgb(188, 193, 197);
+    color: white;
+    width: clamp(2rem, 2.5vw, 5rem);
+    height:clamp(2rem, 2.5vw, 5rem);
+    padding: 2.5rem;
+    border-radius: 50%;
+    overflow: hidden;
+    transition:  0.3s;
+}
+
+.icon-group i:first-of-type {
+    font-size: clamp(2rem, 2vw, 2.5rem);
+}
+
+.icon-group #number-icon {
+    position: absolute;
+    color: rgb(188, 193, 197);
+    font-size: clamp(0.75rem, 0.7vw, 2rem);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.coverage-choice-list li:hover {
+    background-color: rgb(234, 242, 255);
+    border: solid 2px rgb(0, 102, 255);
+}
+
+.coverage-choice-list li:hover .icon-group {
+    background-color: rgb(0, 102, 255);
+}
+
+.coverage-choice-list li:hover #number-icon {
+    color: rgb(0, 102, 255);
+}
+
+.coverage-choice-list li #details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.coverage-choice-list li strong {
+    font-size: clamp(0.75rem, 1vw, 3rem);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.coverage-choice-list li p {
+    color: rgb(150, 150, 150);
 }
