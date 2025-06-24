@@ -178,18 +178,18 @@
     transform: translate(-50%, -50%);
 }
 
-.coverage-choice-list li .details {
+.coverage-choice .details {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
 }
 
-.coverage-choice-list li strong {
+.coverage-choice label {
     font-size: clamp(0.75rem, 1vw, 3rem);
     font-weight: 600;
     text-transform: uppercase;
 }
 
-.coverage-choice-list li p {
+.coverage-choice p {
     color: rgb(150, 150, 150);
 }
