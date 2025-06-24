@@ -96,7 +96,7 @@
     border: solid 2px rgba(200, 200, 200, 0.5);
     border-radius: 8px;
     cursor: pointer;
-    transition: 0.3s;
+    transition: 0.3s ease-in-out;
 }
 
 .coverage-choice-list li:hover {
@@ -149,7 +149,7 @@
     padding: 2.5rem;
     border-radius: 50%;
     overflow: hidden;
-    transition:  0.3s;
+    transition: 0.3s ease-in-out;
 }
 
 .icon-group i:first-of-type {
