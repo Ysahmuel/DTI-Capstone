@@ -99,25 +99,38 @@
     transition: 0.3s ease-in-out;
 }
 
-.coverage-choice:hover {
+.coverage-choice:hover,
+.coverage-choice.selected
+{
     background-color: rgb(234, 242, 255);
     border: solid 2px rgb(0, 102, 255);
 }
 
-.coverage-choice:hover .icon-group {
+.coverage-choice:hover .icon-group,
+.coverage-choice.selected .icon-group
+{
     background-color: rgb(0, 102, 255);
 }
 
-.coverage-choice:hover .option-selected-icon {
-    opacity: 1;
-}
-
-.coverage-choice:hover .number-icon {
+.coverage-choice:hover .number-icon,
+.coverage-choice.selected .number-icon
+{
     color: rgb(0, 102, 255);
 }
 
-.coverage-choice:hover p {
+.coverage-choice:hover p,
+.coverage-choice.selected p
+{
     color: rgb(40, 40, 40);
+}
+
+.coverage-choice input[type="radio"] {
+    display: none;
+    visibility: hidden;
+}
+
+.coverage-choice.selected .option-selected-icon {
+    visibility: visible;
 }
 
 .option-selected-icon {
@@ -133,7 +146,7 @@
     outline: solid 3px white;
     padding: 0.75rem;
     border-radius: 50%;
-    opacity: 0;
+    visibility: hidden;
 }
 
 .icon-group {
