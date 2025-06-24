@@ -1,5 +1,24 @@
 from django import forms
 from .models import ProductCovered, SalesPromotionPermitApplication
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout, LayoutObject, TEMPLATE_PACK, Fieldset, HTML, Div, Row, Column, Submit
+from django.template.loader import render_to_string
+
+class FormsetLayout(LayoutObject):
+    template = 'documents/partials/formset.html'
+
+    def __init__(self, formset_name, **kwargs):
+        self.formset_name = formset_name
+        self.kwargs = kwargs
+
+    def render(self, form, form_style, context, template_pack=TEMPLATE_PACK):
+        formset = context.get(self.formset_name)
+        context.update({
+            'formset': formset,
+            'formset_name': self.formset_name
+        })
+
+        return render_to_string(self.template, context)
 
 class SalesPromotionPermitApplicationForm(forms.ModelForm):
     class Meta:
