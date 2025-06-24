@@ -87,7 +87,7 @@
     width: 100%;
 }
 
-.coverage-choice-list li {
+.coverage-choice {
     position: relative;
     display: flex;
     align-items: center;
@@ -99,24 +99,24 @@
     transition: 0.3s ease-in-out;
 }
 
-.coverage-choice-list li:hover {
+.coverage-choice:hover {
     background-color: rgb(234, 242, 255);
     border: solid 2px rgb(0, 102, 255);
 }
 
-.coverage-choice-list li:hover .icon-group {
+.coverage-choice:hover .icon-group {
     background-color: rgb(0, 102, 255);
 }
 
-.coverage-choice-list li:hover .option-selected-icon {
+.coverage-choice:hover .option-selected-icon {
     opacity: 1;
 }
 
-.coverage-choice-list li:hover .number-icon {
+.coverage-choice:hover .number-icon {
     color: rgb(0, 102, 255);
 }
 
-.coverage-choice-list li:hover p {
+.coverage-choice:hover p {
     color: rgb(40, 40, 40);
 }
 
