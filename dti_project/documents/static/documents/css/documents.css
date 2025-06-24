@@ -80,8 +80,8 @@
 }
 
 .coverage-choice-list {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
     list-style-type: none;
     width: 100%;
@@ -89,7 +89,6 @@
 
 .coverage-choice-list li {
     position: relative;
-    flex: 1;
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -109,11 +108,11 @@
     background-color: rgb(0, 102, 255);
 }
 
-.coverage-choice-list li:hover #option-selected-icon {
+.coverage-choice-list li:hover .option-selected-icon {
     opacity: 1;
 }
 
-.coverage-choice-list li:hover #number-icon {
+.coverage-choice-list li:hover .number-icon {
     color: rgb(0, 102, 255);
 }
 
@@ -121,7 +120,7 @@
     color: rgb(40, 40, 40);
 }
 
-#option-selected-icon {
+.option-selected-icon {
     position: absolute;
     display: flex;
     align-items: center;
@@ -157,7 +156,7 @@
     font-size: clamp(2rem, 2vw, 2.5rem);
 }
 
-.icon-group #number-icon {
+.icon-group .number-icon {
     position: absolute;
     color: rgb(188, 193, 197);
     font-size: clamp(0.75rem, 0.7vw, 2rem);
@@ -166,7 +165,7 @@
     transform: translate(-50%, -50%);
 }
 
-.coverage-choice-list li #details {
+.coverage-choice-list li .details {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
