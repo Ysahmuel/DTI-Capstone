@@ -88,6 +88,7 @@
 }
 
 .coverage-choice-list li {
+    position: relative;
     flex: 1;
     display: flex;
     align-items: center;
@@ -97,6 +98,43 @@
     border-radius: 8px;
     cursor: pointer;
     transition: 0.3s;
+}
+
+.coverage-choice-list li:hover {
+    background-color: rgb(234, 242, 255);
+    border: solid 2px rgb(0, 102, 255);
+}
+
+.coverage-choice-list li:hover .icon-group {
+    background-color: rgb(0, 102, 255);
+}
+
+.coverage-choice-list li:hover #option-selected-icon {
+    opacity: 1;
+}
+
+.coverage-choice-list li:hover #number-icon {
+    color: rgb(0, 102, 255);
+}
+
+.coverage-choice-list li:hover p {
+    color: rgb(40, 40, 40);
+}
+
+#option-selected-icon {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    top: -8%;
+    right: -2%;
+    background-color: rgb(0, 102, 255);
+    color: white;
+    font-size: clamp(0.5rem, 0.7vw, 1.25rem);
+    outline: solid 3px white;
+    padding: 0.75rem;
+    border-radius: 50%;
+    opacity: 0;
 }
 
 .icon-group {
@@ -126,19 +164,6 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-}
-
-.coverage-choice-list li:hover {
-    background-color: rgb(234, 242, 255);
-    border: solid 2px rgb(0, 102, 255);
-}
-
-.coverage-choice-list li:hover .icon-group {
-    background-color: rgb(0, 102, 255);
-}
-
-.coverage-choice-list li:hover #number-icon {
-    color: rgb(0, 102, 255);
 }
 
 .coverage-choice-list li #details {
