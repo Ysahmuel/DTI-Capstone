@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'documents',
     'users',
     'django_browser_reload',
+    'crispy_forms',
+    'crispy_bootstrap5',
 ]
 
 MIDDLEWARE = [
@@ -142,3 +144,5 @@ AUTH_USER_MODEL = 'users.User'
 AUTHENTICATION_BACKENDS = [
     'users.backends.EmailBackend',
 ]
+
+CRISPY_TEMPLATE_PACK = "bootstrap5"
