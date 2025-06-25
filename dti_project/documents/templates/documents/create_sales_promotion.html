@@ -10,8 +10,8 @@
         <form class="documents-form" action="{% url 'create-sales-promotion' %}" method="POST">
             
             <!-- Promo Title -->
-            <fieldset>
-                <legend>Promotion Details</legend>
+                <fieldset id="promo-title-fieldset">
+                    <legend>Promotion Details</legend>
                 <div class="row">
                     <div class="form-group">
                         <label for="">Promo Title</label>
@@ -22,8 +22,8 @@
             
 
             <!-- 1. Sponsors -->
-            <fieldset>
-                <p class="part-count">Part 1 of 5</p>
+                <fieldset id="sponsors-fieldset">
+                    <p class="part-count">Part 1 of 5</p>
                 <legend>Sponsor</legend>
 
                 <div class="form-group">
@@ -58,8 +58,8 @@
             </fieldset>
 
             <!-- 2. Advertising Agency -->
-            <fieldset>
-                <p class="part-count">Part 2 of 5</p>
+                <fieldset id="advertising-fieldset">
+                    <p class="part-count">Part 2 of 5</p>
                 <legend>Advertising Agency</legend>
 
                 <div class="form-group">
@@ -94,8 +94,8 @@
             </fieldset>
 
             <!-- 3. Promo Period -->
-            <fieldset>
-                <p class="part-count">part 3 of 5</p>
+                <fieldset id="promo-period-fieldset">
+                    <p class="part-count">part 3 of 5</p>
                 <legend>Promo Period</legend>
 
                 <div class="row">
@@ -111,8 +111,8 @@
             </fieldset>
 
             <!-- 4. Products Covered -->
-            <fieldset>
-                <p class="part-count">Part 4 of 5</p>
+                <fieldset id="products-fieldset">
+                    <p class="part-count">Part 4 of 5</p>
                 <legend>Products Covered</legend>
                 <p id="description"></p>
 
@@ -136,8 +136,8 @@
             </fieldset>
 
             <!-- 5. Coverage -->
-            <fieldset>
-                <p class="part-count">Part 5 of 5</p>
+                <fieldset id="coverage-fieldset">
+                    <p class="part-count">Part 5 of 5</p>
                 <legend>Coverage</legend>
 
                 <ul class="coverage-choice-list">
@@ -215,32 +215,32 @@
 
             <aside class="form-progress-nav">
                 <ol>
-                    <li>
+                    <li data-target="promo-title-fieldset">
                         <span class="step-circle"></span>
                         <strong>Promotion Details</strong>
                         <i class="fa-solid fa-angle-right"></i>
                     </li>
-                    <li>
+                    <li data-target="sponsors-fieldset">
                         <span class="step-circle"></span>
                         <strong>Sponsor</strong>
                         <i class="fa-solid fa-angle-right"></i>
                     </li>
-                    <li>
+                    <li data-target="advertising-fieldset">
                         <span class="step-circle"></span>
                         <strong>Advertising Agency</strong>
                         <i class="fa-solid fa-angle-right"></i>
                     </li>
-                    <li>
+                    <li data-target="promo-period-fieldset">
                         <span class="step-circle"></span>
                         <strong>Promo Period</strong>
                         <i class="fa-solid fa-angle-right"></i>
                     </li>
-                    <li>
+                    <li data-target="products-fieldset">
                         <span class="step-circle"></span>
                         <strong>Products Covered</strong>
                         <i class="fa-solid fa-angle-right"></i>
                     </li>
-                    <li>
+                    <li data-target="coverage-fieldset">
                         <span class="step-circle"></span>
                         <strong>Coverage</strong>
                         <i class="fa-solid fa-angle-right"></i>

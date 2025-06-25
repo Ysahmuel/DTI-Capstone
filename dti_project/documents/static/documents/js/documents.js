@@ -33,4 +33,17 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    const stepItems = document.querySelectorAll('.form-progress-nav li');
+
+    stepItems.forEach(item => {
+        item.addEventListener('click', function () {
+            const targetId = this.getAttribute('data-target');
+            const targetElement = document.getElementById(targetId);
+
+            if (targetElement) {
+                targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+
 });
