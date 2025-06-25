@@ -26,14 +26,21 @@ class SalesPromotionPermitApplicationForm(forms.ModelForm):
         fields = '__all__'
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args,**kwargs)
+        super().__init__(*args, **kwargs)
+
         for name, field in self.fields.items():
+            # Add 'Required' to required fields' labels
             if field.required:
                 field.label = f"{field.label or name.replace('_', ' ').title()} (Required)"
 
-        # Add 'form-group' class to each widget
-        existing_classes = field.widget.attrs.get('class', '')
-        field.widget.attrs['class'] = f"{existing_classes} form-group".strip()
+            # Add 'form-group' class to each widget
+            existing_classes = field.widget.attrs.get('class', '')
+            field.widget.attrs['class'] = f"{existing_classes} form-group".strip()
+
+        # Set DateInput widgets for date fields
+        self.fields['promo_period_start'].widget = forms.DateInput(attrs={'type': 'date', 'class': 'form-group'})
+        self.fields['promo_period_end'].widget = forms.DateInput(attrs={'type': 'date', 'class': 'form-group'})
+
 
 class ProductCoveredForm(forms.ModelForm):
     class Meta:
