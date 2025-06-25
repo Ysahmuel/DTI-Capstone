@@ -68,6 +68,7 @@
     color: rgb(40, 40, 40);
     font-size: clamp(0.75rem, 0.75vw, 1.5rem);
     font-weight: 600;
+    text-transform: capitalize;
 }
 
 .documents-form .form-group input {
@@ -91,6 +92,10 @@
     padding: 0.5rem 1rem;
     resize: none;
     height: 6rem;
+}
+
+.required-label {
+    color: rgb(192, 16, 16);
 }
 
 .coverage-choice-list {

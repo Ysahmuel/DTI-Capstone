@@ -31,7 +31,7 @@ class SalesPromotionPermitApplicationForm(forms.ModelForm):
         for name, field in self.fields.items():
             # Add 'Required' to required fields' labels
             if field.required:
-                field.label = f"{field.label or name.replace('_', ' ').title()} (Required)"
+                field.label = f"{field.label or name.replace('_', ' ').title()} <span class='required-label'>*</span>"
 
             # Add 'form-group' class to each widget
             existing_classes = field.widget.attrs.get('class', '')
