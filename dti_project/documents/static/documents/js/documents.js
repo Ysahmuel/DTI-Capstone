@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     const coverageChoices = document.querySelectorAll('.coverage-choice');
+    const textInputs = document.querySelectorAll('.coverage-text-inputs');
 
     coverageChoices.forEach(choice => {
         choice.addEventListener('click', function () {
@@ -16,6 +17,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 radioBtn.checked = true;
                 choice.classList.add('selected');
             }
+
+            // Hide all text input groups first
+            textInputs.forEach(inputGroup => inputGroup.style.display = 'none');
+
+            // Show the one that matches the selected radio's value (if any)
+            const selectedValue = radioBtn ? radioBtn.value : null;
+            if (selectedValue) {
+                const correspondingInputs = document.getElementById(`id_${selectedValue}`);
+                if (correspondingInputs) {
+                    correspondingInputs.style.display = 'flex';
+                }
+            }
+
         });
     });
+
 });
