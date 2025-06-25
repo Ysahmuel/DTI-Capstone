@@ -7,177 +7,191 @@
         <header>
             <h1>Sales Promotion Permit Application</h1>
         </header>
-        <form class="documents-form" action="{% url 'create-sales-promotion' %}" method="POST">
+        <div class="form-wrapper">
+            <form class="documents-form" action="{% url 'create-sales-promotion' %}" method="POST">
             
-            <!-- Promo Title -->
+                <!-- Promo Title -->
                 <fieldset id="promo-title-fieldset">
                     <legend>Promotion Details</legend>
-                <div class="row">
-                    <div class="form-group">
-                        <label for="">Promo Title</label>
-                        {{ form.promo_title }}
-                    </div>
-                </div>
-            </fieldset>
-            
-
-            <!-- 1. Sponsors -->
-                <fieldset id="sponsors-fieldset">
-                    <p class="part-count">Part 1 of 5</p>
-                <legend>Sponsor</legend>
-
-                <div class="form-group">
-                    <label for="">Name of Sponsor</label>
-                    {{ form.sponsor_name }}
-                </div>
-
-                <div class="row">
-                    <div class="form-group">
-                        <label for="">Telephone No</label>
-                        {{ form.sponsor_telephone }}
-                    </div>
-                    <div class="form-group">
-                        <label for="">Email</label>
-                        {{ form.sponsor_email }}
-                    </div>
-                    <div class="form-group">
-                        <label for="">Authorized Rep</label>
-                        {{ form.sponsor_authorized_rep }}
-                    </div>
-                    <div class="form-group">
-                        <label for="">Designation</label>
-                        {{ form.sponsor_designation }}
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="">Address</label>
-                    {{ form.sponsor_address }}
-                </div>
-
-            </fieldset>
-
-            <!-- 2. Advertising Agency -->
-                <fieldset id="advertising-fieldset">
-                    <p class="part-count">Part 2 of 5</p>
-                <legend>Advertising Agency</legend>
-
-                <div class="form-group">
-                    <label for="">Name of Advertising Agency</label>
-                    {{ form.advertising_agency_name }}
-                </div>
-
-                <div class="row">
-                    <div class="form-group">
-                        <label for="">Telephone No</label>
-                        {{ form.advertising_agency_telephone }}
-                    </div>
-                    <div class="form-group">
-                        <label for="">Email</label>
-                        {{ form.advertising_agency_email }}
-                    </div>
-                    <div class="form-group">
-                        <label for="">Authorized Rep</label>
-                        {{ form.advertising_agency_authorized_rep }}
-                    </div>
-                    <div class="form-group">
-                        <label for="">Designation</label>
-                        {{ form.advertising_agency_designation }}
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="">Address</label>
-                    {{ form.advertising_agency_address }}
-                </div>
-
-            </fieldset>
-
-            <!-- 3. Promo Period -->
-                <fieldset id="promo-period-fieldset">
-                    <p class="part-count">part 3 of 5</p>
-                <legend>Promo Period</legend>
-
-                <div class="row">
-                    <div class="form-group">
-                        <label for="">Promo Start</label>
-                        {{ form.promo_period_start }}
-                    </div>
-                    <div class="form-group">
-                        <label for="">Promo End</label>
-                        {{ form.promo_period_end }}
-                    </div>
-                </div>
-            </fieldset>
-
-            <!-- 4. Products Covered -->
-                <fieldset id="products-fieldset">
-                    <p class="part-count">Part 4 of 5</p>
-                <legend>Products Covered</legend>
-                <p id="description"></p>
-
-                {{ product_formset.management_form }}
-                {% for form in product_formset %}
                     <div class="row">
                         <div class="form-group">
-                            <label>Product Name</label>
-                            {{ form.name }}
+                            <label for="">Promo Title</label>
+                            {{ form.promo_title }}
+                        </div>
+                    </div>
+                </fieldset>
+                
+
+                <!-- 1. Sponsors -->
+                <fieldset id="sponsors-fieldset">
+                    <p class="part-count">Part 1 of 5</p>
+                    <legend>Sponsor</legend>
+
+                    <div class="form-group">
+                        <label for="">Name of Sponsor</label>
+                        {{ form.sponsor_name }}
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group">
+                            <label for="">Telephone No</label>
+                            {{ form.sponsor_telephone }}
                         </div>
                         <div class="form-group">
-                            <label>Brand</label>
-                            {{ form.brand }}
+                            <label for="">Email</label>
+                            {{ form.sponsor_email }}
+                        </div>
+                        <div class="form-group">
+                            <label for="">Authorized Rep</label>
+                            {{ form.sponsor_authorized_rep }}
+                        </div>
+                        <div class="form-group">
+                            <label for="">Designation</label>
+                            {{ form.sponsor_designation }}
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label>Specifications</label>
-                        {{ form.specifications }}
-                    </div>
-                {% endfor %}
-            </fieldset>
 
-            <!-- 5. Coverage -->
+                    <div class="form-group">
+                        <label for="">Address</label>
+                        {{ form.sponsor_address }}
+                    </div>
+
+                </fieldset>
+
+                <!-- 2. Advertising Agency -->
+                <fieldset id="advertising-fieldset">
+                    <p class="part-count">Part 2 of 5</p>
+                    <legend>Advertising Agency</legend>
+
+                    <div class="form-group">
+                        <label for="">Name of Advertising Agency</label>
+                        {{ form.advertising_agency_name }}
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group">
+                            <label for="">Telephone No</label>
+                            {{ form.advertising_agency_telephone }}
+                        </div>
+                        <div class="form-group">
+                            <label for="">Email</label>
+                            {{ form.advertising_agency_email }}
+                        </div>
+                        <div class="form-group">
+                            <label for="">Authorized Rep</label>
+                            {{ form.advertising_agency_authorized_rep }}
+                        </div>
+                        <div class="form-group">
+                            <label for="">Designation</label>
+                            {{ form.advertising_agency_designation }}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="">Address</label>
+                        {{ form.advertising_agency_address }}
+                    </div>
+
+                </fieldset>
+
+                <!-- 3. Promo Period -->
+                <fieldset id="promo-period-fieldset">
+                    <p class="part-count">part 3 of 5</p>
+                    <legend>Promo Period</legend>
+
+                    <div class="row">
+                        <div class="form-group">
+                            <label for="">Promo Start</label>
+                            {{ form.promo_period_start }}
+                        </div>
+                        <div class="form-group">
+                            <label for="">Promo End</label>
+                            {{ form.promo_period_end }}
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- 4. Products Covered -->
+                <fieldset id="products-fieldset">
+                    <p class="part-count">Part 4 of 5</p>
+                    <legend>Products Covered</legend>
+                    <p id="description"></p>
+
+                    {{ product_formset.management_form }}
+                    {% for form in product_formset %}
+                        <div class="row">
+                            <div class="form-group">
+                                <label>Product Name</label>
+                                {{ form.name }}
+                            </div>
+                            <div class="form-group">
+                                <label>Brand</label>
+                                {{ form.brand }}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Specifications</label>
+                            {{ form.specifications }}
+                        </div>
+                    {% endfor %}
+                </fieldset>
+
+                <!-- 5. Coverage -->
                 <fieldset id="coverage-fieldset">
                     <p class="part-count">Part 5 of 5</p>
-                <legend>Coverage</legend>
+                    <legend>Coverage</legend>
 
-                <ul class="coverage-choice-list">
-                    <li class="coverage-choice">
-                        <div class="icon-group">
-                            <i class="fa-solid fa-city"></i>
-                        </div>
-                        <div class="details">
-                            <label for="id_coverage_NCR">NCR</label>
-                            <p>or several regions including Metro Manila</p>
-                            <input type="radio" name="coverage" id="id_coverage_ncr" value="NCR">
-                        </div>
-                        <i class="fa-solid fa-check option-selected-icon"></i>
-                    </li>
+                    <ul class="coverage-choice-list">
+                        <li class="coverage-choice">
+                            <div class="icon-group">
+                                <i class="fa-solid fa-city"></i>
+                            </div>
+                            <div class="details">
+                                <label for="id_coverage_NCR">NCR</label>
+                                <p>or several regions including Metro Manila</p>
+                                <input type="radio" name="coverage" id="id_coverage_ncr" value="NCR">
+                            </div>
+                            <i class="fa-solid fa-check option-selected-icon"></i>
+                        </li>
 
-                    <li class="coverage-choice">
-                        <div class="icon-group">
-                            <i class="fa fa-map"></i>
-                            <i class="fa-solid fa-2 number-icon"></i>
-                        </div>
-                        <div class="details">
-                            <label for="id_coverage_2_REGIONS">2+ Regions</label>
-                            <p>or more outside of NCR or Metro Manila</p>
-                            <input type="radio" name="coverage" id="id_coverage_2_REGIONS" value="2_REGIONS">
-                        </div>
-                        <i class="fa-solid fa-check option-selected-icon"></i>
-                    </li>
+                        <li class="coverage-choice">
+                            <div class="icon-group">
+                                <i class="fa fa-map"></i>
+                                <i class="fa-solid fa-2 number-icon"></i>
+                            </div>
+                            <div class="details">
+                                <label for="id_coverage_2_REGIONS">2+ Regions</label>
+                                <p>or more outside of NCR or Metro Manila</p>
+                                <input type="radio" name="coverage" id="id_coverage_2_REGIONS" value="2_REGIONS">
+                            </div>
+                            <i class="fa-solid fa-check option-selected-icon"></i>
+                        </li>
 
-                    <li class="coverage-choice">
-                        <div class="icon-group">
-                            <i class="fa fa-map"></i>
-                            <i class="fa-solid fa-1 number-icon"></i>
-                        </div>
-                        <div class="details">
-                            <label for="id_coverage_1_REGION_2_PROVINCES">Single Region</label>
-                            <p>covering 2 provinces or more</p>
-                            <input type="radio" name="coverage" id="id_coverage_1_REGION_2_PROVINCES" value="1_REGION_2_PROVINCES">
-                        </div>
-                        <i class="fa-solid fa-check option-selected-icon"></i>
-                    </li>
+                        <li class="coverage-choice">
+                            <div class="icon-group">
+                                <i class="fa fa-map"></i>
+                                <i class="fa-solid fa-1 number-icon"></i>
+                            </div>
+                            <div class="details">
+                                <label for="id_coverage_1_REGION_2_PROVINCES">Single Region</label>
+                                <p>covering 2 provinces or more</p>
+                                <input type="radio" name="coverage" id="id_coverage_1_REGION_2_PROVINCES" value="1_REGION_2_PROVINCES">
+                            </div>
+                            <i class="fa-solid fa-check option-selected-icon"></i>
+                        </li>
+
+                        <li class="coverage-choice">
+                            <div class="icon-group">
+                                <i class="fa fa-map-marker-alt"></i>
+                            </div>
+                            <div class="details">
+                                <label for="id_coverage_1_PROVINCE">Single Province</label>
+                                <p>covers only one province plus city/ies or municipality/ies</p>
+                                <input type="radio" name="coverage" id="id_coverage_1_PROVINCE" value="1_PROVINCE">
+                            </div>
+                            <i class="fa-solid fa-check option-selected-icon"></i>
+                        </li>
+                    </ul>
 
                     <div class="coverage-text-inputs" id="id_2_REGIONS">
                         <div class="form-group">
@@ -212,6 +226,9 @@
                         </div>
                     </div>
 
+                </fieldset>
+
+            </form>
 
             <aside class="form-progress-nav">
                 <ol>
