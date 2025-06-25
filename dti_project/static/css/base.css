@@ -3,8 +3,12 @@
     --primary-muted: rgba(40, 54, 255, 0.15);
     --secondary: rgb(200, 200, 200);
     --secondary-muted: rgba(235, 235, 235, 0.8);
+
+    --input-focus: rgb(234, 242, 255);
+
     --light-gray: rgb(225, 225, 225);
     --dark-gray: rgb(75, 75, 75);
+
     --sidebar-collapsed-width: 5rem; 
     --sidebar-expanded-width: clamp(12rem, 15vw, 24rem);
 }

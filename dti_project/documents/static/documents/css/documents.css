@@ -121,7 +121,7 @@
 .coverage-choice:hover,
 .coverage-choice.selected
 {
-    background-color: rgb(234, 242, 255);
+    background-color: var(--input-focus);
     border: solid 2px rgb(0, 102, 255);
 }
 
@@ -255,7 +255,7 @@
 }
 
 .form-progress-nav li:hover {
-    background-color: rgb(235, 235, 235);
+    background-color: var(--input-focus);
 }
 
 .form-progress-nav li:hover::before {
