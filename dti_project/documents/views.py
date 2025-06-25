@@ -18,6 +18,17 @@ class CreateSalesPromotionView(CreateView):
             context['product_formset'] = ProductCoveredFormSet(self.request.POST, queryset=ProductCovered.objects.none())
         else:
             context['product_formset'] = ProductCoveredFormSet(queryset=ProductCovered.objects.none())
+
+        # For dynamic reusable progress indicator partial template
+        context['form_steps'] = [
+            {'target': 'promo-title-fieldset', 'label': 'Promotion Details'},
+            {'target': 'sponsors-fieldset', 'label': 'Sponsor'},
+            {'target': 'advertising-fieldset', 'label': 'Advertising Agency'},
+            {'target': 'promo-period-fieldset', 'label': 'Promo Period'},
+            {'target': 'products-fieldset', 'label': 'Products Covered'},
+            {'target': 'coverage-fieldset', 'label': 'Coverage'},
+        ]
+        
         return context
 
     def form_valid(self, form):
