@@ -179,19 +179,38 @@
                         <i class="fa-solid fa-check option-selected-icon"></i>
                     </li>
 
-                    <li class="coverage-choice">
-                        <div class="icon-group">
-                            <i class="fa fa-map-marker-alt"></i>
+                    <div class="coverage-text-inputs" id="id_2_REGIONS">
+                        <div class="form-group">
+                            <label for="">Region of Sponsor</label>
+                            {{ form.region_location_of_sponsor }}
                         </div>
-                        <div class="details">
-                            <label for="id_coverage_1_PROVINCE">Single Province</label>
-                            <p>covers only one province plus city/ies or municipality/ies</p>
-                            <input type="radio" name="coverage" id="id_coverage_1_PROVINCE" value="1_PROVINCE">
+                        <div class="form-group">
+                            <label for="">Regions Covered</label>
+                            {{ form.regions_covered }}
                         </div>
-                        <i class="fa-solid fa-check option-selected-icon"></i>
-                    </li>
-                </ul>
-            </fieldset>
+                    </div>
+
+                    <div class="coverage-text-inputs" id="id_1_REGION_2_PROVINCES">
+                        <div class="form-group">
+                            <label for="">Region</label>
+                            {{ form.single_region }}
+                        </div>
+                        <div class="form-group">
+                            <label for="">Provinces</label>
+                            {{ form.provinces_covered }}
+                        </div>
+                    </div>
+
+                    <div class="coverage-text-inputs" id="id_1_PROVINCE">
+                        <div class="form-group">
+                            <label for="">Single Province</label>
+                            {{ form.single_province }}
+                        </div>
+                        <div class="form-group">
+                            <label for="">City/ies or Municipality/ies covered</label>
+                            {{ form.cities_or_municipalities_covered }}
+                        </div>
+                    </div>
 
         </form>
     </div>
