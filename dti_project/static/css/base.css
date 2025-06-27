@@ -1,5 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,100..900;1,100..900&display=swap');
+
 :root {
     --primary: rgb(15, 8, 83);
+    --primary-light: rgb(9, 29, 145);
     --primary-muted: rgba(40, 54, 255, 0.15);
     --secondary: rgb(200, 200, 200);
     --secondary-muted: rgba(235, 235, 235, 0.8);
@@ -17,7 +20,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: "Roboto", sans-serif;
+    font-family: "Archivo", sans-serif;
 }
 
 html, body {
@@ -29,4 +32,13 @@ html, body {
 .layout {
     display: flex;
     height: 100vh;
+}
+
+button {
+        font-family: "Archivo", sans-serif;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
 }
