@@ -232,7 +232,7 @@
     list-style-type: none;
 }
 
-.form-progress-nav li {
+.step-item {
     position: relative;
     display: flex;
     align-items: center;
@@ -243,7 +243,7 @@
     transition: 0.3s;
 }
 
-.form-progress-nav li::before {
+.step-item::before {
     position: absolute;
     top: 0;
     left: 0;
@@ -254,29 +254,29 @@
     opacity: 0;
 }
 
-.form-progress-nav li:hover {
+.step-item:hover {
     background-color: var(--input-focus);
 }
 
-.form-progress-nav li:hover::before {
+.step-item:hover::before {
     opacity: 1;
 }
 
-.form-progress-nav li:hover .step-circle {
+.step-item:hover .step-circle {
     border: solid 1px var(--primary);
 }
 
-.form-progress-nav li:hover strong {
+.step-item:hover strong {
     color: rgb(40, 40, 40);
 }
 
-.form-progress-nav li:hover .fa-angle-right {
+.step-item:hover .fa-angle-right {
     opacity: 1;
     right: 5%;
     color: var(--primary);
 }
 
-.form-progress-nav .step-circle {
+.step-item .step-circle {
     position: relative;
     display: flex;
     align-items: center;
@@ -289,7 +289,12 @@
     border-radius: 50%;
 }
 
-.form-progress-nav .step-circle::before {
+.step-item .step-circle.complete {
+    background-color: var(--input-focus);
+    border: solid 1px var(--primary);
+}
+
+.step-item .step-circle::before {
     position: absolute;
     content: '';
     top: 50%;
@@ -303,11 +308,11 @@
     opacity: 0;
 }
 
-.form-progress-nav li .fa-check {
+.step-item .fa-check {
     color: var(--primary);
 }
 
-.form-progress-nav .fa-angle-right {
+.step-item .fa-angle-right {
     position: absolute;
     top: 50%;
     right: 7.5%;
@@ -318,7 +323,7 @@
     transition: 0.3s ease-in-out;
 }
 
-.form-progress-nav li strong {
+.step-item strong {
     color: rgb(180, 180, 180);
     font-size: clamp(0.5rem, 0.75vw, 2rem);
     font-weight: 500;

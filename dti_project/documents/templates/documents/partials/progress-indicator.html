@@ -1,7 +1,7 @@
 <aside class="form-progress-nav">
     <ol>
         {% for step in form_steps %}
-            <li data-target="{{ step.target }}">
+            <li data-target="{{ step.target }}" class="step-item">
                 <span class="step-circle"></span>
                 <strong>{{ step.label }}</strong>
                 <i class="fa-solid fa-angle-right"></i>
