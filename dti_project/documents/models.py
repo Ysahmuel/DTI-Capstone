@@ -1,10 +1,21 @@
 from django.db import models
 
 # Create your models here.
-class SalesPromotionPermitApplication(models.Model):
-    promo_title = models.CharField(max_length=255)
+class ApplicationBase(models.Model):
+    STATUS_CHOICES = [
+        ('draft', 'Draft'),
+        ('submitted', 'Submitted'),
+    ]
+
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
     date_filed = models.DateField(auto_now_add=True)
 
+    class Meta:
+        abstract = True
+
+class SalesPromotionPermitApplication(ApplicationBase):
+    promo_title = models.CharField(max_length=255)
+    
     sponsor_name = models.CharField(max_length=255)
     sponsor_address = models.TextField()
     sponsor_telephone = models.CharField(max_length=50, blank=True)
@@ -31,15 +42,12 @@ class SalesPromotionPermitApplication(models.Model):
 
     coverage = models.CharField(max_length=20, choices=COVERAGE_CHOICES)
 
-    # Location-specific fields depending on coverage
-    region_location_of_sponsor = models.CharField(max_length=255, blank=True)  # For '2_REGIONS'
-    regions_covered = models.TextField(blank=True)                             # For '2_REGIONS'
-
-    single_region = models.CharField(max_length=255, blank=True)               # For '1_REGION_2_PROVINCES'
-    provinces_covered = models.TextField(blank=True)                           # For '1_REGION_2_PROVINCES'
-
-    single_province = models.CharField(max_length=255, blank=True)             # For '1_PROVINCE'
-    cities_or_municipalities_covered = models.TextField(blank=True)            # For '1_PROVINCE'
+    region_location_of_sponsor = models.CharField(max_length=255, blank=True)
+    regions_covered = models.TextField(blank=True)
+    single_region = models.CharField(max_length=255, blank=True)
+    provinces_covered = models.TextField(blank=True)
+    single_province = models.CharField(max_length=255, blank=True)
+    cities_or_municipalities_covered = models.TextField(blank=True)
 
     def __str__(self):
         return self.promo_title
