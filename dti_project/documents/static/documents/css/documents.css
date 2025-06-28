@@ -347,10 +347,11 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    background: linear-gradient(234deg,rgba(9, 9, 121, 1) 0%, rgba(0, 0, 0, 1) 100%);
+    background: linear-gradient(234deg, rgba(9, 9, 121, 1) 0%, rgba(0, 0, 0, 1) 100%);
     border: solid 1px rgba(200, 200, 200, 0.5);
     padding: 1.5rem;
     border-radius: 12px;
+    width: 300px;
 }
 
 .completion-percentage .column {
@@ -365,22 +366,56 @@
 }
 
 .completion-percentage .value {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: clamp(1rem, 1.25vw, 2rem);
-    height: clamp(1rem, 1.25vw, 2rem);
-    padding: 2rem;
-    border: solid 5px rgba(9, 9, 121, 0.5);
-    border-radius: 50%;
-    font-size: clamp(0.5rem, 0.85vw, 1.5rem);
+    width: clamp(3rem, 4vw, 5rem);
+    height: clamp(3rem, 4vw, 5rem);
+    font-size: clamp(0.8rem, 1vw, 1.2rem);
     font-weight: 600;
     color: white;
+    flex-shrink: 0;
+}
+
+.completion-percentage .value::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: conic-gradient(
+        from 0deg,
+        #ffffff var(--progress-angle),
+        rgba(9, 9, 121, 0.3) var(--progress-angle)
+    );
+    z-index: 1;
+    transition: background 0.3s ease;
+}
+
+.completion-percentage .value::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    height: 80%;
+    border-radius: 50%;
+    background: linear-gradient(234deg, rgba(9, 9, 121, 1) 0%, rgba(0, 0, 0, 1) 100%);
+    z-index: 2;
+}
+
+.completion-percentage .value span {
+    position: relative;
+    z-index: 3;
 }
 
 .completion-percentage .status {
     color: white;
-    font-weight: 500;
+    font-weight: 400;
 }
 
 .completion-percentage .progress-bar {
@@ -400,6 +435,40 @@
     border: none;
     border-radius: 1000px;
     height: 100%;
-    width: 50%;
+    width: var(--progress-width);
     z-index: 2;
+    transition: width 0.3s ease;
+}
+
+.completion-percentage .actions {
+    display: flex;
+    align-items: center;
+    background-color: transparent;
+    margin-top: 0.75rem;
+    border-radius: 1000px;
+    width: 100%;
+}
+
+.completion-percentage button {
+    flex: 1;
+    background-color: rgba(0, 47, 255, 0.3);
+    color: white;
+    font-weight: 500;
+    padding: 0.4rem;
+    border: none;
+    border-radius: 1000px;
+    outline: none;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.completion-percentage .save-draft-btn {
+    color: rgb(66, 164, 255);
+    padding-right: 1rem;
+}
+
+.completion-percentage .submit-btn {
+    background-color: white;
+    color: black;
+    margin-left: -1.5rem;
 }
