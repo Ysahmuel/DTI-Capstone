@@ -280,7 +280,9 @@
     border: solid 1px var(--primary);
 }
 
-.step-item:hover strong {
+.step-item:hover strong,
+.step-item.complete strong
+{
     color: rgb(40, 40, 40);
 }
 
@@ -303,9 +305,18 @@
     border-radius: 50%;
 }
 
-.step-item.complete .step-circle {
-    background-color: var(--input-focus);
+.step-item .fa-check {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: clamp(0.5rem, 1.25vw, 2rem);
+    height: clamp(0.5rem, 1.25vw, 2rem);
+    padding: 1rem;
+    background-color: var(--primary);
+    color: white;
     border: solid 1px var(--primary);
+    border-radius: 50%;
+    font-size: clamp(0.5rem, 0.8vw, 1.5rem);
 }
 
 .step-item .step-circle::before {
@@ -320,10 +331,6 @@
     border-radius: 50%;
     z-index: 2;
     opacity: 0;
-}
-
-.step-item .fa-check {
-    color: var(--primary);
 }
 
 .step-item .fa-angle-right {
