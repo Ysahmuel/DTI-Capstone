@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView
 from .forms import ProductCoveredFormSet, SalesPromotionPermitApplicationForm
 from .models import ProductCovered, SalesPromotionPermitApplication
@@ -11,7 +12,8 @@ class CreateSalesPromotionView(CreateView):
     model = SalesPromotionPermitApplication
     context_object_name = 'sales_promo'
     form_class = SalesPromotionPermitApplicationForm
-
+    success_url = reverse_lazy('dashboard')
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.request.POST:
