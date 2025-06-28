@@ -17,9 +17,14 @@ class CreateSalesPromotionView(CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.request.POST:
-            context['product_formset'] = ProductCoveredFormSet(self.request.POST, queryset=ProductCovered.objects.none())
+            context['product_formset'] = ProductCoveredFormSet(
+                self.request.POST, 
+                instance=self.object if hasattr(self, 'object') else None
+            )
         else:
-            context['product_formset'] = ProductCoveredFormSet(queryset=ProductCovered.objects.none())
+            context['product_formset'] = ProductCoveredFormSet(
+                instance=self.object if hasattr(self, 'object') else None
+            )
 
         # For dynamic reusable progress indicator partial template
         context['form_steps'] = [
@@ -43,15 +48,10 @@ class CreateSalesPromotionView(CreateView):
             self.object = form.save()
 
             if product_formset.is_valid():
-                # Save formset instances with the relationship
-                instances = product_formset.save(commit=False)
-                for instance in instances:
-                    # Assuming ProductCovered has a ForeignKey to SalesPromotionPermitApplication
-                    instance.sales_promotion = self.object
-                    instance.save()
-
-                # Handle any deletions
-                product_formset.save_m2m()
+                # Set the instance for the formset
+                product_formset.instance = self.object
+                # Save the formset
+                product_formset.save()
 
                 messages.success(
                     self.request,
@@ -59,9 +59,24 @@ class CreateSalesPromotionView(CreateView):
                 )
                 return super().form_valid(form)
             else:
-                # If formset is invalid, return to form with errors
+                # Add formset errors to messages for debugging
+                for form_errors in product_formset.errors:
+                    for field, errors in form_errors.items():
+                        for error in errors:
+                            messages.error(self.request, f"Product {field}: {error}")
+                
+                # Also check non-form errors
+                if product_formset.non_form_errors():
+                    for error in product_formset.non_form_errors():
+                        messages.error(self.request, f"Formset error: {error}")
+                
                 return self.form_invalid(form)
             
     def form_invalid(self, form):
+        # Add main form errors to messages
+        for field, errors in form.errors.items():
+            for error in errors:
+                messages.error(self.request, f"{field}: {error}")
+        
         messages.error(self.request, 'Please correct the errors below.')
-        return super().form_invalid()
+        return super().form_invalid(form)

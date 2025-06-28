@@ -24,6 +24,7 @@ class SalesPromotionPermitApplicationForm(forms.ModelForm):
     class Meta:
         model = SalesPromotionPermitApplication
         fields = '__all__'
+        exclude = ['date_filed']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -45,7 +46,14 @@ class SalesPromotionPermitApplicationForm(forms.ModelForm):
 class ProductCoveredForm(forms.ModelForm):
     class Meta:
         model = ProductCovered
-        fields = '__all__'
+        fields = ['name', 'brand', 'specifications']
         
 # Formset for products
-ProductCoveredFormSet = forms.modelformset_factory(ProductCovered, form=ProductCoveredForm, extra=1, can_delete=True)
+ProductCoveredFormSet = forms.inlineformset_factory(
+    SalesPromotionPermitApplication, 
+    ProductCovered, 
+    form=ProductCoveredForm,
+    fields=['name', 'brand', 'specifications'],
+    extra=1,
+    can_delete=True
+)

@@ -1,21 +1,11 @@
 from django.db import models
+from django.utils import timezone
 
 # Create your models here.
-class ApplicationBase(models.Model):
-    STATUS_CHOICES = [
-        ('draft', 'Draft'),
-        ('submitted', 'Submitted'),
-    ]
-
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
-    date_filed = models.DateField(auto_now_add=True)
-
-    class Meta:
-        abstract = True
-
-class SalesPromotionPermitApplication(ApplicationBase):
+class SalesPromotionPermitApplication(models.Model):
     promo_title = models.CharField(max_length=255)
-    
+    date_filed = models.DateField(default=timezone.now)
+
     sponsor_name = models.CharField(max_length=255)
     sponsor_address = models.TextField()
     sponsor_telephone = models.CharField(max_length=50, blank=True)
