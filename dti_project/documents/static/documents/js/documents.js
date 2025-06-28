@@ -141,7 +141,17 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Initialize
     checkStepCompletion();
+
+    const documentsForm = document.querySelector('.documents-form');
+    const documentsFormSubmitBtn = document.querySelector('.form-progress-nav .submit-btn');
+
+    documentsFormSubmitBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+
+        if (documentsForm) {
+            documentsForm.submit()
+        }
+    })
 
 });
