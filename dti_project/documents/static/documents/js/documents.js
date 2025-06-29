@@ -57,21 +57,23 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!stepFieldset) return;
 
             let allFilled = true;
+            let stepRequiredFields = 0;
+            let stepCompletedFields = 0;
 
             if (stepId === 'coverage-fieldset') {
-                totalRequiredFields++;
+                stepRequiredFields++;
 
                 const selectedCoverage = stepFieldset.querySelector('input[name="coverage"]:checked');
                 if (selectedCoverage) {
-                    completedFields++;
+                    stepCompletedFields++;
 
                     const selectedValue = selectedCoverage.value;
                     const dependentInputs = stepFieldset.querySelectorAll(`#id_${selectedValue} input, #id_${selectedValue} textarea, #id_${selectedValue} select`);
                     dependentInputs.forEach(input => {
                         if (input.disabled || input.offsetParent === null) return;
 
-                        totalRequiredFields++;
-                        if (input.value.trim()) completedFields++;
+                        stepRequiredFields++;
+                        if (input.value.trim()) stepCompletedFields++;
                         else allFilled = false;
 
                         input.removeEventListener('input', checkStepCompletion);
@@ -91,34 +93,47 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
 
             } else {
-                const allFields = stepFieldset.querySelectorAll('input, textarea, select');
                 const requiredFields = stepFieldset.querySelectorAll('[required]');
 
-                // Mark fieldset as optional if no required fields
                 if (requiredFields.length === 0) {
                     item.classList.add('optional');
                 } else {
                     item.classList.remove('optional');
                 }
 
+                const allFields = stepFieldset.querySelectorAll('input, textarea, select');
+
                 allFields.forEach(field => {
                     if (field.disabled || field.offsetParent === null) return;
 
-                    totalRequiredFields++;
+                    const isRequired = field.hasAttribute('required');
 
-                    let isFieldFilled = false;
+                    // Only add required fields to progress totals
+                    if (isRequired) {
+                        stepRequiredFields++;
 
-                    if (field.type === 'radio' || field.type === 'checkbox') {
-                        const group = stepFieldset.querySelectorAll(`[name="${field.name}"]`);
-                        const isChecked = Array.from(group).some(input => input.checked);
-                        if (isChecked) isFieldFilled = true;
-                        else allFilled = false;
+                        let isFieldFilled = false;
+                        if (field.type === 'radio' || field.type === 'checkbox') {
+                            const group = stepFieldset.querySelectorAll(`[name="${field.name}"]`);
+                            const isChecked = Array.from(group).some(input => input.checked);
+                            if (isChecked) isFieldFilled = true;
+                            else allFilled = false;
+                        } else {
+                            if (field.value.trim()) isFieldFilled = true;
+                            else allFilled = false;
+                        }
+
+                        if (isFieldFilled) stepCompletedFields++;
                     } else {
-                        if (field.value.trim()) isFieldFilled = true;
-                        else allFilled = false;
+                        // For optional steps, check if every visible+enabled field is filled to consider step "complete"
+                        if (item.classList.contains('optional')) {
+                            if (field.value.trim()) {
+                                // do nothing
+                            } else {
+                                allFilled = false;
+                            }
+                        }
                     }
-
-                    if (isFieldFilled) completedFields++;
 
                     field.removeEventListener('input', checkStepCompletion);
                     field.removeEventListener('change', checkStepCompletion);
@@ -127,11 +142,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
             }
 
+            totalRequiredFields += stepRequiredFields;
+            completedFields += stepCompletedFields;
+
             // Visual indicator logic
             const stepCircle = item.querySelector('.step-circle');
             const existingCheckIcon = item.querySelector('.fa-check');
 
-            if (allFilled && totalRequiredFields > 0) {
+            if (allFilled && (stepRequiredFields === 0 || stepCompletedFields === stepRequiredFields)) {
                 item.classList.add('complete');
 
                 if (!existingCheckIcon) {
@@ -157,6 +175,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         updateProgress(progressPercentage);
     }
+
 
     function updateProgress(percentage) {
         const completionPercentage = document.querySelector('.completion-percentage');
