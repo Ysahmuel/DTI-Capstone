@@ -59,7 +59,6 @@ document.addEventListener('DOMContentLoaded', function () {
             let allFilled = true;
 
             if (stepId === 'coverage-fieldset') {
-                // Coverage radio group is always required
                 totalRequiredFields++;
 
                 const selectedCoverage = stepFieldset.querySelector('input[name="coverage"]:checked');
@@ -68,11 +67,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     const selectedValue = selectedCoverage.value;
                     const dependentInputs = stepFieldset.querySelectorAll(`#id_${selectedValue} input, #id_${selectedValue} textarea, #id_${selectedValue} select`);
-
                     dependentInputs.forEach(input => {
+                        if (input.disabled || input.offsetParent === null) return;
+
                         totalRequiredFields++;
                         if (input.value.trim()) completedFields++;
-                        
+                        else allFilled = false;
+
                         input.removeEventListener('input', checkStepCompletion);
                         input.removeEventListener('change', checkStepCompletion);
                         input.addEventListener('input', checkStepCompletion);
@@ -83,7 +84,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     allFilled = false;
                 }
 
-                // Attach change listener to coverage radios
                 const radios = stepFieldset.querySelectorAll('input[name="coverage"]');
                 radios.forEach(radio => {
                     radio.removeEventListener('change', checkStepCompletion);
@@ -91,9 +91,19 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
 
             } else {
-                // Standard required fields
+                const allFields = stepFieldset.querySelectorAll('input, textarea, select');
                 const requiredFields = stepFieldset.querySelectorAll('[required]');
-                requiredFields.forEach(field => {
+
+                // Mark fieldset as optional if no required fields
+                if (requiredFields.length === 0) {
+                    item.classList.add('optional');
+                } else {
+                    item.classList.remove('optional');
+                }
+
+                allFields.forEach(field => {
+                    if (field.disabled || field.offsetParent === null) return;
+
                     totalRequiredFields++;
 
                     let isFieldFilled = false;
@@ -117,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
             }
 
-            // Visual indicator for step status
+            // Visual indicator logic
             const stepCircle = item.querySelector('.step-circle');
             const existingCheckIcon = item.querySelector('.fa-check');
 
@@ -141,7 +151,10 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        const progressPercentage = totalRequiredFields > 0 ? Math.round((completedFields / totalRequiredFields) * 100) : 0;
+        const progressPercentage = totalRequiredFields > 0
+            ? Math.round((completedFields / totalRequiredFields) * 100)
+            : 0;
+
         updateProgress(progressPercentage);
     }
 

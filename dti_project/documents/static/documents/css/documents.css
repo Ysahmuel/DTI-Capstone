@@ -286,6 +286,10 @@
     color: rgb(40, 40, 40);
 }
 
+.step-item.optional {
+    
+}
+
 .step-item:hover .fa-angle-right {
     opacity: 1;
     right: 5%;
