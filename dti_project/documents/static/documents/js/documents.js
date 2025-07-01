@@ -179,6 +179,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function updateProgress(percentage) {
         const completionPercentage = document.querySelector('.completion-percentage');
+        if (!completionPercentage) return;  // Exit if not on this page
+
         const valueElement = completionPercentage.querySelector('.value');
         const fillElement = completionPercentage.querySelector('.fill');
         const statusElement = completionPercentage.querySelector('.status');
@@ -188,7 +190,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         valueElement.style.setProperty('--progress-angle', `${angle}deg`);
         fillElement.style.setProperty('--progress-width', `${percentage}%`);
-
         valueSpan.textContent = `${percentage}%`;
         valueElement.setAttribute('data-percentage', percentage);
 
@@ -204,17 +205,29 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Initial run
-    checkStepCompletion();
+    if (typeof checkStepCompletion === "function") {
+        checkStepCompletion();
+    }
 
     const documentsForm = document.querySelector('.documents-form');
     const documentsFormSubmitBtn = document.querySelector('.form-progress-nav .submit-btn');
 
-    documentsFormSubmitBtn.addEventListener('click', (e) => {
-        e.preventDefault();
+    if (documentsForm && documentsFormSubmitBtn) {
+        documentsFormSubmitBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            documentsForm.submit();
+        });
+    }
 
-        if (documentsForm) {
-            documentsForm.submit()
-        }
-    })
+    // Fill empty details in document detail pages
+    const documentsDetailsList = document.querySelector('.details-list');
+    if (documentsDetailsList) {
+        const emptyValues = Array.from(documentsDetailsList.querySelectorAll('.label-value-row p'))
+            .filter(p => !p.textContent.trim());
+
+        emptyValues.forEach(value => {
+            value.textContent = '-';
+        });
+    }
 
 });
