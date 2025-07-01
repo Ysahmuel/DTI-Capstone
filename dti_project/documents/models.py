@@ -1,8 +1,16 @@
 from django.db import models
 from django.utils import timezone
+from users.models import User
 
 # Create your models here.
-class SalesPromotionPermitApplication(models.Model):
+class BaseApplication(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    date_filed = models.DateField(default=timezone.now)
+
+    class Meta:
+        abstract = True
+
+class SalesPromotionPermitApplication(BaseApplication):
     promo_title = models.CharField(max_length=255)
     date_filed = models.DateField(default=timezone.now)
 
