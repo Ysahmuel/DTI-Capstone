@@ -24,7 +24,7 @@ class SalesPromotionPermitApplicationForm(forms.ModelForm):
     class Meta:
         model = SalesPromotionPermitApplication
         fields = '__all__'
-        exclude = ['date_filed']
+        exclude = ['date_filed', 'user']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

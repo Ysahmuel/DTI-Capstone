@@ -5,9 +5,10 @@ from .forms import ProductCoveredFormSet, SalesPromotionPermitApplicationForm
 from .models import ProductCovered, SalesPromotionPermitApplication
 from django.contrib import messages
 from django.db import transaction
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 # Create your views here.
-class CreateSalesPromotionView(CreateView):
+class CreateSalesPromotionView(LoginRequiredMixin, CreateView):
     template_name = 'documents/create_sales_promotion.html'
     model = SalesPromotionPermitApplication
     context_object_name = 'sales_promo'
@@ -44,7 +45,8 @@ class CreateSalesPromotionView(CreateView):
 
         # Use transaction to ensure data integrity
         with transaction.atomic():
-            # Save the main form first
+            # Set the user before saving the main form
+            form.instance.user = self.request.user
             self.object = form.save()
 
             if product_formset.is_valid():
