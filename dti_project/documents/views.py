@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.views.generic import ListView, CreateView
+from django.views.generic import ListView, CreateView, DetailView
 from .forms import ProductCoveredFormSet, SalesPromotionPermitApplicationForm
 from .models import ProductCovered, SalesPromotionPermitApplication
 from django.contrib import messages
@@ -13,7 +13,6 @@ class CreateSalesPromotionView(LoginRequiredMixin, CreateView):
     model = SalesPromotionPermitApplication
     context_object_name = 'sales_promo'
     form_class = SalesPromotionPermitApplicationForm
-    success_url = reverse_lazy('dashboard')
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -82,3 +81,15 @@ class CreateSalesPromotionView(LoginRequiredMixin, CreateView):
         
         messages.error(self.request, 'Please correct the errors below.')
         return super().form_invalid(form)
+    
+    def get_success_url(self):
+        return reverse_lazy('sales-promotion-application', kwargs={'pk': self.object.pk})
+
+class SalesPromotionDetailView(DetailView):
+    model = SalesPromotionPermitApplication
+    template_name = 'documents/sales_promotion_detail.html'
+    context_object_name = 'sales_promo'
+
+    def get_context_data(self, **kwargs):
+        context =  super().get_context_data(**kwargs)
+        return context
