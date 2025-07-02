@@ -125,12 +125,58 @@
         </section>
 
         <section class="grid-item" id="products-covered-grid-item">
-
+            <div class="row">
+                <div class="name-and-count">
+                    <h4>Products Covered</h4>
+                    <span class="products-count">{{ sales_promo.products.count }}</span>
+                </div>
+                <div class="actions">
+                    <button id="search-product-btn">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                    <button id="export-file-btn">
+                        <i class="fa-solid fa-file-export"></i>
+                    </button>
+                    <button id="add-product-btn">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>
+                            Product Name
+                            <button class="sort-products-btn">
+                                <i class="fa-solid fa-sort"></i>
+                            </button>
+                        </th>
+                        <th>
+                            Brand
+                            <button class="sort-products-btn">
+                                <i class="fa-solid fa-sort"></i>
+                            </button>
+                        </th>
+                        <th>
+                            Specifications
+                            <button class="sort-products-btn">
+                                <i class="fa-solid fa-sort"></i>
+                            </button>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for product in sales_promo.products.all %}
+                    <tr class="value-tr">
+                        <td class="product-name-td">{{ product.name }}</td>
+                        <td>{{ product.brand }}</td>
+                        <td>{{ product.specifications }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         </section>
 
-        <section class="coverage-details">
-            
-        </section>
 
     </div>
 
