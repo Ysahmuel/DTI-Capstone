@@ -58,3 +58,35 @@ class ProductCovered(models.Model):
 
     def __str__(self):
         return f"{self.name} {self.brand}"
+    
+class PersonalDataSheet(models.Model):
+    GENDER_CHOICES = [
+        ('Male', 'Male'),
+        ('Female', 'Female'),
+        ('Non-Binary', 'Non-binary'),
+        ('Prefer not to say', 'Prefer not to say'),
+    ]
+
+    CIVIL_STATUS_CHOICES = [
+        ('Single', 'Single'),
+        ('Married', 'Married'),
+        ('Widowed', 'Widowed'),
+        ('Separated', 'Separated'),
+        ('Divorced', 'Divorced')
+    ]
+
+    first_name = models.CharField(max_length=50)
+    middle_name = models.CharField(max_length=50, blank=True, null=True)
+    last_name = models.CharField(max_length=50)
+    image = models.ImageField(upload_to="personal_data_images")
+    position = models.CharField(max_length=50)
+    sex = models.CharField(choices=GENDER_CHOICES, max_length=20, blank=True)
+    civil_status = models.CharField(choices=CIVIL_STATUS_CHOICES, max_length=30, blank=True)
+    nationality = models.CharField(max_length=30)
+    date_of_birth = models.DateField()
+    current_address = models.TextField()
+    contact_number = models.CharField(max_length=20)
+    email_address = models.EmailField()
+
+    def __str__(self):
+        return f"{self.last_name} {self.first_name}"
