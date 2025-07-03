@@ -25,6 +25,10 @@ class SalesPromotionPermitApplicationForm(forms.ModelForm):
         model = SalesPromotionPermitApplication
         fields = '__all__'
         exclude = ['date_filed', 'user']
+        widgets = {
+            'promo_period_start': forms.DateInput(attrs={'type': 'date', 'class': 'form-group'}),
+            'promo_period_end': forms.DateInput(attrs={'type': 'date', 'class': 'form-group'}),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
