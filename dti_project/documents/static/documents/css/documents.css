@@ -706,7 +706,7 @@
 }
 
 #coverage-grid-item header {
-    background: linear-gradient(to top, rgba(9, 9, 121, 1) 0%, rgb(6, 6, 68) 100%);
+    background: var(--primary);
     color: white;
     width: 100%;
     padding: 1rem;
