@@ -1,3 +1,4 @@
+import re
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, DetailView
@@ -92,4 +93,36 @@ class SalesPromotionDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context =  super().get_context_data(**kwargs)
+        sales_promo = self.get_object()
+
+        covered_locations = []
+        coverage_type = None
+        coverage_area_name = None  # for region_location_of_sponsor / single_region / single_province
+
+        if sales_promo.coverage == 'NCR':
+            coverage_type = 'NCR or several regions including Metro Manila'
+            coverage_area_name = sales_promo.region_location_of_sponsor
+
+        elif sales_promo.coverage == '2_REGIONS':
+            coverage_type = '2 regions or more outside NCR'
+            coverage_area_name = sales_promo.region_location_of_sponsor
+            covered_locations = sales_promo.regions_covered
+
+        elif sales_promo.coverage == '1_REGION_2_PROVINCES':
+            coverage_type = 'Single region covering 2 provinces or more'
+            coverage_area_name = sales_promo.single_region
+            covered_locations = sales_promo.provinces_covered
+
+        elif sales_promo.coverage == '1_PROVINCE':
+            coverage_type = 'Single province'
+            coverage_area_name = sales_promo.single_province
+            covered_locations = sales_promo.cities_or_municipalities_covered
+
+        context.update({
+            'covered_locations': covered_locations,
+            'location_count': len(covered_locations),
+            'coverage_type': coverage_type,
+            'coverage_area_name': coverage_area_name,
+        })
+
         return context
