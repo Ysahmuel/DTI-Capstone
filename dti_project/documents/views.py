@@ -95,6 +95,11 @@ class SalesPromotionDetailView(DetailView):
         context =  super().get_context_data(**kwargs)
         sales_promo = self.get_object()
 
+        def split_locations(value):
+            if value:
+                return [item.strip() for item in re.split(r',|\n', value) if item.strip()]
+            return []
+
         covered_locations = []
         coverage_type = None
         coverage_area_name = None  # for region_location_of_sponsor / single_region / single_province
@@ -120,7 +125,7 @@ class SalesPromotionDetailView(DetailView):
 
         context.update({
             'covered_locations': covered_locations,
-            'location_count': len(covered_locations),
+            'location_count': len(split_locations(covered_locations)),
             'coverage_type': coverage_type,
             'coverage_area_name': coverage_area_name,
         })
