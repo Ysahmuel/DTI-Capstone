@@ -177,6 +177,45 @@
             </table>
         </section>
 
+        <section class="grid-item" id="coverage-grid-item">
+            <header>
+                <h4>Coverage</h4>
+            </header>
+
+            <div class="content">
+                <ul class="summary">
+                    <li>
+                        <strong>{{ coverage_type }}</strong>
+                        <p>Coverage Type</p>
+                    </li>
+
+                    {% if coverage_area_name %}
+                        <li>
+                            <strong>{{ coverage_area_name }}</strong>
+                            <p>
+                                {% if sales_promo.coverage == '1_PROVINCE' %}
+                                Province
+                                {% elif sales_promo.coverage == '1_REGION_2_PROVINCES' %}
+                                Region
+                                {% elif sales_promo.coverage in 'NCR 2_REGIONS' %}
+                                Region / Area of Sponsor
+                                {% endif %}
+                            </p>
+                        </li>
+                    {% endif %}
+
+                    <li>
+                        <strong>{{ location_count }}</strong>
+                        <p>Covered Locations</p>
+                    </li>
+                </ul>
+
+
+                <strong>Locations: </strong>
+                <p id="covered-locations">{{ covered_locations }}</p>
+            </div>
+
+        </section>
 
     </div>
 
