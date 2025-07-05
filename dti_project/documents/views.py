@@ -2,8 +2,8 @@ import re
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, DetailView
-from .forms import ProductCoveredFormSet, SalesPromotionPermitApplicationForm
-from .models import ProductCovered, SalesPromotionPermitApplication
+from .forms import PersonalDataSheetForm, ProductCoveredFormSet, SalesPromotionPermitApplicationForm
+from .models import PersonalDataSheet, ProductCovered, SalesPromotionPermitApplication
 from django.contrib import messages
 from django.db import transaction
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -130,4 +130,19 @@ class SalesPromotionDetailView(DetailView):
             'coverage_area_name': coverage_area_name,
         })
 
+        return context
+    
+class CreatePersonalDataSheetView(LoginRequiredMixin, CreateView):
+    template_name = 'documents/create_personal_data_sheet.html'
+    model = PersonalDataSheet
+    form_class = PersonalDataSheetForm
+    context_object_name = 'personal_data'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['form_steps'] = [
+            {'target': 'personal-background-fieldset', 'label': 'Personal Background'},
+        ]
+    
         return context
