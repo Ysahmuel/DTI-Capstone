@@ -51,6 +51,12 @@ class ProductCoveredForm(forms.ModelForm):
     class Meta:
         model = ProductCovered
         fields = ['name', 'brand', 'specifications']
+
+class PersonalDataSheetForm(forms.ModelForm):
+    class Meta:
+        model = PersonalDataSheet
+        fields = '__all__'
+            
         
 # Formset for products
 ProductCoveredFormSet = forms.inlineformset_factory(
