@@ -799,6 +799,16 @@
     width: 100%;
 }
 
+#current-address-group {
+    grid-column: span 2;
+    width: 100%;
+}
+
+#id_current_address {
+    width: 100%;
+    box-sizing: border-box;
+}
+
 .upload-image-container {
     display: flex;
     align-items: center;
@@ -808,7 +818,6 @@
     padding: 4rem;
     border: dashed 2px rgb(190, 190, 190);
     border-radius: 4px;
-    margin-top: 1rem;
     width: 100%;
     cursor: pointer;
     transition: 0.3s;
