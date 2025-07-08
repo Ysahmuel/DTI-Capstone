@@ -62,7 +62,25 @@
                                 <label for="{{ form.date_of_birth_for_label }}">{{ form.date_of_birth.label|safe }}</label>
                                 {{ form.date_of_birth }}
                             </div>
+                            <div class="form-group">
+                                <label for="{{ form.sex_for_label }}">{{ form.sex.label|safe }}</label>
+                                {{ form.sex }}
+                            </div>
+                            <div class="form-group">
+                                <label for="{{ form.civil_status_for_label }}">{{ form.civil_status.label|safe }}</label>
+                                {{ form.civil_status }}
+                            </div>
                             
+                        </div>
+
+
+                        <div class="step-grid">
+
+                            <div class="form-group" id="current-address-group">
+                                <label for="{{ form.current_address_for_label }}">{{ form.current_address.label|safe }}</label>
+                                {{ form.current_address }}
+                            </div>
+
                         </div>
 
 
