@@ -78,6 +78,12 @@
     padding: 0.5rem 1rem;
 }
 
+.documents-form .form-group input::placeholder,
+.documents-form .form-group textarea::placeholder
+{
+    color: rgb(170, 170, 170);
+}
+
 .documents-form .form-group input:focus,
 .documents-form .form-group textarea:focus
 {
