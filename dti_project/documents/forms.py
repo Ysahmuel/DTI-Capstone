@@ -1,26 +1,39 @@
 from django import forms
-from .models import ProductCovered, SalesPromotionPermitApplication
+from .models import ProductCovered, SalesPromotionPermitApplication, PersonalDataSheet
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, LayoutObject, TEMPLATE_PACK, Fieldset, HTML, Div, Row, Column, Submit
 from django.template.loader import render_to_string
 
-class FormsetLayout(LayoutObject):
-    template = 'documents/partials/formset.html'
+class SortForm(forms.Form):
+    SORT_CHOICES = [
+        ('name_asc', 'Name (A-Z)'),
+        ('name_desc', 'Name (Z-A)')
+    ]
 
-    def __init__(self, formset_name, **kwargs):
-        self.formset_name = formset_name
-        self.kwargs = kwargs
+    sort_by = forms.ChoiceField(choices=SORT_CHOICES, required=False, label='sort_by')
 
-    def render(self, form, form_style, context, template_pack=TEMPLATE_PACK):
-        formset = context.get(self.formset_name)
-        context.update({
-            'formset': formset,
-            'formset_name': self.formset_name
-        })
+class BaseCustomForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-        return render_to_string(self.template, context)
+        if hasattr(self, 'fields'):
+            for name, field in self.fields.items():
+                # Convert field name to title and replace underscores
+                label_text = field.label if field.label else name.replace('_', ' ').title()
 
-class SalesPromotionPermitApplicationForm(forms.ModelForm):
+                # Add 'Required' to required fields' labels
+                if field.required:
+                    field.label = f"{label_text} <span class='required-label'>*</span>"
+                    field.widget.attrs['placeholder'] = f"Enter {label_text}"
+                else:
+                    field.label = label_text                
+
+                # Add 'form-group' class to each widget
+                existing_classes = field.widget.attrs.get('class', '')
+                field.widget.attrs['class'] = f"{existing_classes} form-group".strip()
+
+
+class SalesPromotionPermitApplicationForm(BaseCustomForm):
     class Meta:
         model = SalesPromotionPermitApplication
         fields = '__all__'
@@ -30,33 +43,15 @@ class SalesPromotionPermitApplicationForm(forms.ModelForm):
             'promo_period_end': forms.DateInput(attrs={'type': 'date', 'class': 'form-group'}),
         }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        for name, field in self.fields.items():
-            # Add 'Required' to required fields' labels
-            if field.required:
-                field.label = f"{field.label or name.replace('_', ' ').title()} <span class='required-label'>*</span>"
-
-            # Add 'form-group' class to each widget
-            existing_classes = field.widget.attrs.get('class', '')
-            field.widget.attrs['class'] = f"{existing_classes} form-group".strip()
-
-        # Set DateInput widgets for date fields
-        self.fields['promo_period_start'].widget = forms.DateInput(attrs={'type': 'date', 'class': 'form-group'})
-        self.fields['promo_period_end'].widget = forms.DateInput(attrs={'type': 'date', 'class': 'form-group'})
-
-
-class ProductCoveredForm(forms.ModelForm):
+class ProductCoveredForm(BaseCustomForm):
     class Meta:
         model = ProductCovered
         fields = ['name', 'brand', 'specifications']
 
-class PersonalDataSheetForm(forms.ModelForm):
+class PersonalDataSheetForm(BaseCustomForm):
     class Meta:
         model = PersonalDataSheet
         fields = '__all__'
-            
         
 # Formset for products
 ProductCoveredFormSet = forms.inlineformset_factory(
