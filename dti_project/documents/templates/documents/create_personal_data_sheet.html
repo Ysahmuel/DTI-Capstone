@@ -16,42 +16,56 @@
                     <p class="part-count">Part 1 of 5</p>
                     <legend>Personal Background</legend>
 
-                    <div class="row">
-                        <div class="form-group">
-                            <label for="{{ form.last_name.id_for_label }}">{{ form.last_name.label|safe }}</label>
-                            {{ form.last_name }}
+                    <div class="stepped-layout">
+
+                        <div class="step-grid">
+
+                            <div class="form-group">
+                                <label for="{{ form.last_name.id_for_label }}">{{ form.last_name.label|safe }}</label>
+                                {{ form.last_name }}
+                            </div>
+                            <div class="form-group">
+                                <label for="{{ form.first_name_for_label }}">{{ form.first_name.label|safe }}</label>
+                                {{ form.first_name }}
+                            </div>
+                            <div class="form-group">
+                                <label for="{{ form.middle_name_for_label }}">{{ form.middle_name.label|safe }}</label>
+                                {{ form.middle_name }}
+                            </div>
+
                         </div>
-                        <div class="form-group">
-                            <label for="{{ form.first_name_for_label }}">{{ form.first_name.label|safe }}</label>
-                            {{ form.first_name }}
+
+                        <div class="step-grid">
+
+                            <div class="form-group">
+                                <label for="{{ form.email_address_for_label }}">{{ form.email_address.label|safe }}</label>
+                                {{ form.email_address }}
+                            </div>
+                            <div class="form-group">
+                                <label for="{{ form.contact_number_for_label }}">{{ form.contact_number.label|safe }}</label>
+                                {{ form.contact_number }}
+                            </div>
+                            
                         </div>
-                        <div class="form-group">
-                            <label for="{{ form.middle_name_for_label }}">{{ form.middle_name.label|safe }}</label>
-                            {{ form.middle_name }}
+
+                        <div class="step-grid">
+
+                            <div class="form-group">
+                                <label for="{{ form.position_for_label }}">{{ form.position.label|safe }}</label>
+                                {{ form.position }}
+                            </div>
+                            <div class="form-group">
+                                <label for="{{ form.nationality_for_label }}">{{ form.nationality.label|safe }}</label>
+                                {{ form.nationality }}
+                            </div>
+                            <div class="form-group">
+                                <label for="{{ form.date_of_birth_for_label }}">{{ form.date_of_birth.label|safe }}</label>
+                                {{ form.date_of_birth }}
+                            </div>
+                            
                         </div>
-                        <div class="form-group">
-                            <label for="{{ form.email_address_for_label }}">{{ form.email_address.label|safe }}</label>
-                            {{ form.email_address }}
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="form-group">
-                            <label for="{{ form.position_for_label }}">{{ form.position.label|safe }}</label>
-                            {{ form.position }}
-                        </div>
-                        <div class="form-group">
-                            <label for="{{ form.nationality_for_label }}">{{ form.nationality.label|safe }}</label>
-                            {{ form.nationality }}
-                        </div>
-                        <div class="form-group">
-                            <label for="{{ form.date_of_birth_for_label }}">{{ form.date_of_birth.label|safe }}</label>
-                            {{ form.date_of_birth }}
-                        </div>
-                        <div class="form-group">
-                            <label for="{{ form.contact_number_for_label }}">{{ form.contact_number.label|safe }}</label>
-                            {{ form.contact_number }}
-                        </div>
+
+
                     </div>
 
                         
@@ -66,26 +80,6 @@
                         {{ form.image }}
 
                     </div>
-
-                    <!-- <div class="form-group">
-                        <label for="{{ form.sex_for_label }}">{{ form.sex.label|safe }}</label>
-                        {{ form.sex }}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="{{ form.civil_status_for_label }}">{{ form.civil_status.label|safe }}</label>
-                        {{ form.civil_status }}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="{{ form.current_address_for_label }}">{{ form.current_address.label|safe }}</label>
-                        {{ form.current_address }}
-                    </div> -->
-<!-- 
-                    <div class="form-group">
-                        <label for="{{ form.image_for_label }}">{{ form.image.label|safe }}</label>
-                        {{ form.image.as_hidden }}
-                    </div> -->
 
                 </fieldset>
 
