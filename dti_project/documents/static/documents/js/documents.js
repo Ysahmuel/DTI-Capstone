@@ -230,4 +230,52 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    const uploadFileContainer = document.querySelector('.upload-image-container');
+    
+    uploadFileContainer.addEventListener('click', function() {
+        const input = uploadFileContainer.querySelector('input[type="file"]');
+        const dragDropChooseText = uploadFileContainer.querySelector('#drag-drop-text');
+        const fileText = uploadFileContainer.querySelector('#file-text');
+        const uploadBtn = uploadFileContainer.querySelector('.upload-file-btn')
+
+        input.click()
+
+        input.addEventListener('change', function () {
+            if (input.files.length > 0) {
+                const file = input.files[0];
+                uploadBtn.style.display = 'none';
+
+                uploadFileContainer.classList.add('filled');
+
+                // Check if it's an image
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.alt = 'Selected Image';
+
+                        // Remove previous image if re-selecting
+                        const oldImg = uploadFileContainer.querySelector('img');
+                        if (oldImg) {
+                            oldImg.remove();
+                        }
+
+                        // Insert image above file name text
+                        uploadFileContainer.insertBefore(img, dragDropChooseText);
+                    };
+                    reader.readAsDataURL(file);
+
+                    dragDropChooseText.innerHTML = 'Click to <span class="highlighted-span">change image</span>';
+                    fileText.textContent = file.name;
+                }
+            } else {
+                uploadFileContainer.classList.remove('filled');
+                dragDropChooseText.innerHTML = '<h3>Drag and drop or <span class="highlighted-span">choose file</span> to upload</h3>'
+                fileText.textContent = 'No file chosen yet';
+            }
+        });
+
+    })
+
 });
