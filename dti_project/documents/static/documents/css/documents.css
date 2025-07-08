@@ -759,3 +759,67 @@
     font-size: clamp(0.5rem, 0.9vw, 1.25rem);
     margin-top: 0.25rem;
 }
+
+.upload-image-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 2rem;
+    border: dashed 2px rgb(190, 190, 190);
+    border-radius: 4px;
+    width: 100%;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.upload-image-container:hover,
+.upload-image-container.filled
+{
+    background-color: var(--input-focus);
+    border: dashed 2px var(--accent);
+}
+
+.upload-file-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    width: clamp(0.5rem, 0.75vw, 4rem);
+    height: clamp(0.5rem, 0.75vw, 4rem);
+    background-color: var(--primary);
+    color: white;
+    font-size: clamp(0.5rem, 1vw, 1.5rem);
+    border: none;
+    border-radius: 12px;
+    outline: none;
+    pointer-events: none;
+    margin-bottom: 1rem;
+}
+
+.upload-image-container img {
+    width: clamp(3rem, 7.5vw, 6rem);
+    aspect-ratio: 1 / 1;
+    border-radius: 4px;
+    object-fit: cover;
+    margin-bottom: 1rem;
+}
+
+.upload-image-container h3 {
+    color: rgb(70, 70, 70);
+    font-weight: 500;
+}
+
+.upload-image-container p {
+    color: rgb(150, 150, 150);
+    font-weight: 400;
+}
+
+.highlighted-span {
+    color: rgb(0, 102, 255);
+}
+
+.upload-image-container input[type="file"] {
+    display: none;
+}
