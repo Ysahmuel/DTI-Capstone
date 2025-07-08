@@ -52,6 +52,10 @@ class PersonalDataSheetForm(BaseCustomForm):
     class Meta:
         model = PersonalDataSheet
         fields = '__all__'
+        widgets = {
+            'current_address': forms.TextInput(attrs={'class': 'form-group'}),
+            'date_of_birth': forms.DateInput(attrs={'type': 'date', 'class': 'form-group'})
+        }
         
 # Formset for products
 ProductCoveredFormSet = forms.inlineformset_factory(
