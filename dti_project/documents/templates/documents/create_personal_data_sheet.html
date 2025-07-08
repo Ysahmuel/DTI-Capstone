@@ -87,16 +87,19 @@
                     </div>
 
                         
-                    <div class="upload-image-container">
+                    <div class="form-group">
+                        <label for="{{ form.image_for_label }}">{{ form.image.label|safe }} (Passport Size Photo)</label>
+                        <div class="upload-image-container">
 
-                        <button class="upload-file-btn" type="button">
-                            <i class="fa-solid fa-upload"></i>
-                        </button>
+                            <button class="upload-file-btn" type="button">
+                                <i class="fa-solid fa-upload"></i>
+                            </button>
 
-                        <h3 id="drag-drop-text">Drag and drop or <span class="highlighted-span">choose file</span> to upload</h3>
-                        <p id="file-text">No file chosen yet.</p>
-                        {{ form.image }}
+                            <h3 id="drag-drop-text">Drag and drop or <span class="highlighted-span">choose file</span> to upload</h3>
+                            <p id="file-text">No file chosen yet.</p>
+                            {{ form.image }}
 
+                        </div>
                     </div>
 
                 </fieldset>
