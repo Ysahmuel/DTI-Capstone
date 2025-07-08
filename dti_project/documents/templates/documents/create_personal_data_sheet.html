@@ -45,6 +45,10 @@
                                 <label for="{{ form.contact_number_for_label }}">{{ form.contact_number.label|safe }}</label>
                                 {{ form.contact_number }}
                             </div>
+                            <div class="form-group" id="current-address-group">
+                                <label for="{{ form.current_address_for_label }}">{{ form.current_address.label|safe }}</label>
+                                {{ form.current_address }}
+                            </div>
                             
                         </div>
 
@@ -74,20 +78,10 @@
                         </div>
 
 
-                        <div class="step-grid">
-
-                            <div class="form-group" id="current-address-group">
-                                <label for="{{ form.current_address_for_label }}">{{ form.current_address.label|safe }}</label>
-                                {{ form.current_address }}
-                            </div>
-
-                        </div>
-
-
                     </div>
 
                         
-                    <div class="form-group">
+                    <div class="form-group" style="margin-top: 1rem;">
                         <label for="{{ form.image_for_label }}">{{ form.image.label|safe }} (Passport Size Photo)</label>
                         <div class="upload-image-container">
 
