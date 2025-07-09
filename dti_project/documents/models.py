@@ -103,3 +103,15 @@ class EmployeeBackground(models.Model):
 
     def __str__(self):
         return f"{self.position} - {self.employer}"
+    
+class TrainingsAttended(models.Model):
+    personal_data_sheet = models.ForeignKey(PersonalDataSheet, related_name='trainings_attended', on_delete=models.CASCADE)
+    training_course = models.CharField(max_length=255)
+    conducted_by = models.CharField(max_length=255)
+
+    # Training Period
+    start_date = models.DateField()
+    end_date = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return self.training_course
