@@ -6,3 +6,4 @@ def get_full_name_from_personal_data(obj):
     except AttributeError:
         return f"(No name)"
     
+get_full_name_from_personal_data.short_description = 'Full Name' 
