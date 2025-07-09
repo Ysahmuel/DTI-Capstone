@@ -1,4 +1,5 @@
 from django.db import models
+from django.forms import ValidationError
 from django.utils import timezone
 from users.models import User
 
@@ -90,3 +91,15 @@ class PersonalDataSheet(models.Model):
 
     def __str__(self):
         return f"{self.last_name} {self.first_name}"
+
+class EmployeeBackground(models.Model):
+    personal_data_sheet = models.ForeignKey(PersonalDataSheet, related_name='employee_backgrounds', on_delete=models.CASCADE)
+    employer = models.CharField(max_length=255)
+    position = models.CharField(max_length=255)
+
+    # Period Covered 
+    start_date = models.DateField()
+    end_date = models.DateField(null=True, blank=True)  # in case it’s current/ongoing
+
+    def __str__(self):
+        return f"{self.position} - {self.employer}"
