@@ -1,5 +1,7 @@
 from django.contrib import admin
-from .models import PersonalDataSheet, ProductCovered, SalesPromotionPermitApplication
+from .utils.admin_helpers import get_full_name_from_personal_data
+from .models import EmployeeBackground, PersonalDataSheet, ProductCovered, SalesPromotionPermitApplication
+
 
 # Register your models here.
 @admin.register(SalesPromotionPermitApplication)
@@ -21,3 +23,8 @@ class PersonalDataSheetAdmin(admin.ModelAdmin):
     list_display = ('last_name', 'first_name', 'email_address', 'sex')
     search_fields = ('last_name', 'first_name', 'email_address')
     list_filter = ('sex', 'civil_status')
+
+@admin.register(EmployeeBackground)
+class EmployeeBackgroundAdmin(admin.ModelAdmin):
+    list_display = (get_full_name_from_personal_data, 'employer', 'position', 'start_date', 'end_date')
+    search_fields = ('employer', 'position')
