@@ -115,3 +115,15 @@ class TrainingsAttended(models.Model):
 
     def __str__(self):
         return self.training_course
+    
+class EducationalAttainment(models.Model):
+    personal_data_sheet = models.ForeignKey(PersonalDataSheet, related_name='educational_attainment', on_delete=models.CASCADE)
+    school = models.CharField(max_length=255)
+    course = models.CharField(max_length=255)
+
+    # Period
+    start_date = models.DateField()
+    end_date = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.school} - {self.course}"
