@@ -47,3 +47,10 @@ class FormsetMixin:
         messages.error(self.request, "Please correct the errors below.")
         return super().form_invalid(form)
 
+class FormStepsMixin:
+    form_steps = []
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form_steps'] = self.form_steps
+        return context
