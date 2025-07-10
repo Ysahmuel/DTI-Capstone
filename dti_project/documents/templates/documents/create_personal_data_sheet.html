@@ -98,6 +98,11 @@
 
                 </fieldset>
 
+                {{ employee_formset.management_form }}
+                {% for form in employee_formset %}
+                    {{ form }}
+                {% endfor %}
+
             </form>
 
             {% include 'documents/partials/progress-indicator.html' %}
