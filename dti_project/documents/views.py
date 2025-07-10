@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, DetailView
 from .mixins import FormStepsMixin, FormsetMixin
-from .forms import EmployeeBackgroundFormset, PersonalDataSheetForm, ProductCoveredFormSet, SalesPromotionPermitApplicationForm, TrainingsAttendedFormset
+from .forms import PersonalDataSheetForm, SalesPromotionPermitApplicationForm, FORMSET_CLASSES
 from .models import PersonalDataSheet, ProductCovered, SalesPromotionPermitApplication
 from django.contrib import messages
 from django.db import transaction
@@ -16,7 +16,7 @@ class CreateSalesPromotionView(LoginRequiredMixin, FormStepsMixin, FormsetMixin,
     context_object_name = 'sales_promo'
     form_class = SalesPromotionPermitApplicationForm
     formset_classes = {
-        'product': ProductCoveredFormSet 
+        'product': FORMSET_CLASSES['product_covered']
     }
 
     form_steps = [

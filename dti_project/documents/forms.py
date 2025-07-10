@@ -99,10 +99,7 @@ FORMSET_CONFIGS = {
         'parent_model': PersonalDataSheet,
         'child_model': TrainingsAttended,
         'form_class': TrainingsAttendedForm
-    }
-}
+FORMSET_CLASSES = {}
 
-# Create formsets using the generic function
-ProductCoveredFormSet = create_inline_formset(**FORMSET_CONFIGS['product_covered'])
-EmployeeBackgroundFormset = create_inline_formset(**FORMSET_CONFIGS['employee_background'])
-TrainingsAttendedFormset = create_inline_formset(**FORMSET_CONFIGS['trainings_attended'])
+for key, config in FORMSET_CONFIGS.items():
+    FORMSET_CLASSES[key] = create_inline_formset(**config)
