@@ -1,7 +1,7 @@
 from django import forms
 from .utils.form_helpers import create_inline_formset
 from .validators import validate_period
-from .models import EmployeeBackground, ProductCovered, SalesPromotionPermitApplication, PersonalDataSheet
+from .models import EmployeeBackground, ProductCovered, SalesPromotionPermitApplication, PersonalDataSheet, TrainingsAttended
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, LayoutObject, TEMPLATE_PACK, Fieldset, HTML, Div, Row, Column, Submit
 from django.template.loader import render_to_string
@@ -76,6 +76,11 @@ class EmployeeBackgroundForm(BaseCustomForm):
         fields = '__all__'
         exclude = ['personal_data_sheet']
 
+class TrainingsAttendedForm(BaseCustomForm):
+    class Meta:
+        model = TrainingsAttended
+        fields = '__all__'
+        exclude = ['personal_data_sheet']
 
 # Formset configurations
 FORMSET_CONFIGS = {
@@ -84,20 +89,20 @@ FORMSET_CONFIGS = {
         'child_model': ProductCovered,
         'form_class': ProductCoveredForm,
         'fields': ['name', 'brand', 'specifications'],
-        'extra': 1,
-        'can_delete': True
     },
     'employee_background': {
         'parent_model': PersonalDataSheet,  
         'child_model': EmployeeBackground,
         'form_class': EmployeeBackgroundForm,
-        'fields': '__all__',
-        'extra': 1,
-        'can_delete': True
     },
-
+    'trainings_attended': {
+        'parent_model': PersonalDataSheet,
+        'child_model': TrainingsAttended,
+        'form_class': TrainingsAttendedForm
+    }
 }
 
 # Create formsets using the generic function
 ProductCoveredFormSet = create_inline_formset(**FORMSET_CONFIGS['product_covered'])
 EmployeeBackgroundFormset = create_inline_formset(**FORMSET_CONFIGS['employee_background'])
+TrainingsAttendedFormset = create_inline_formset(**FORMSET_CONFIGS['trainings_attended'])

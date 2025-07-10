@@ -98,8 +98,15 @@
 
                 </fieldset>
 
+                <h3>Employee Background</h3>
                 {{ employee_formset.management_form }}
                 {% for form in employee_formset %}
+                    {{ form }}
+                {% endfor %}
+
+                <h3>Trainings Attended</h3>
+                {{ training_formset.management_form }}
+                {% for form in training_formset %}
                     {{ form }}
                 {% endfor %}
 

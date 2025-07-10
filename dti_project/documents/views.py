@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, DetailView
 from .mixins import FormStepsMixin, FormsetMixin
-from .forms import EmployeeBackgroundFormset, PersonalDataSheetForm, ProductCoveredFormSet, SalesPromotionPermitApplicationForm
+from .forms import EmployeeBackgroundFormset, PersonalDataSheetForm, ProductCoveredFormSet, SalesPromotionPermitApplicationForm, TrainingsAttendedFormset
 from .models import PersonalDataSheet, ProductCovered, SalesPromotionPermitApplication
 from django.contrib import messages
 from django.db import transaction
@@ -82,12 +82,15 @@ class CreatePersonalDataSheetView(LoginRequiredMixin, FormStepsMixin, FormsetMix
     model = PersonalDataSheet
     form_class = PersonalDataSheetForm
     formset_classes = {
-        'employee': EmployeeBackgroundFormset
+        'employee': EmployeeBackgroundFormset,
+        'training': TrainingsAttendedFormset
     }
     context_object_name = 'personal_data'
 
     form_steps = [
         {'target': 'personal-background-fieldset', 'label': 'Personal Background'},
+        {'target': 'employee-fieldset', 'label': 'Employee Background'},
+        {'target': 'training-fieldset', 'label': 'Trainings Attended'},
     ]
 
     def get_context_data(self, **kwargs):
