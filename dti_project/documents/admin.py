@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .utils.admin_helpers import get_full_name_from_personal_data
-from .models import EmployeeBackground, PersonalDataSheet, ProductCovered, SalesPromotionPermitApplication
+from .models import EducationalAttainment, EmployeeBackground, PersonalDataSheet, ProductCovered, SalesPromotionPermitApplication, TrainingsAttended
 
 
 # Register your models here.
@@ -33,3 +33,8 @@ class EmployeeBackgroundAdmin(admin.ModelAdmin):
 class TrainingsAttendedAdmin(admin.ModelAdmin):
     list_display = (get_full_name_from_personal_data, 'training_course', 'conducted_by')
     search_fields = ('training_course', 'conducted_by')
+
+@admin.register(EducationalAttainment)
+class EducationalAttainmentAdmin(admin.ModelAdmin):
+    list_display = (get_full_name_from_personal_data, 'school', 'course')
+    search_fields = ('school', 'course')
