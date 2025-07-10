@@ -15,7 +15,9 @@ class CreateSalesPromotionView(LoginRequiredMixin, FormStepsMixin, FormsetMixin,
     model = SalesPromotionPermitApplication
     context_object_name = 'sales_promo'
     form_class = SalesPromotionPermitApplicationForm
-    formset_class = ProductCoveredFormSet 
+    formset_classes = {
+        'product': ProductCoveredFormSet 
+    }
 
     form_steps = [
         {'target': 'promo-title-fieldset', 'label': 'Promotion Details'},

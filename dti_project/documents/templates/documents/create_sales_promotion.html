@@ -116,20 +116,20 @@
                     <p id="description"></p>
 
                     {{ product_formset.management_form }}
-                    {% for product_form in product_formset %}
+                    {% for form in product_formset %}
                         <div class="row">
                             <div class="form-group">
-                                <label for="{{ product_form.name.id_for_label }}">{{ product_form.name.label|safe }}</label>
-                                {{ product_form.name }}
+                                <label for="{{ form.name.id_for_label }}">{{ form.name.label|safe }}</label>
+                                {{ form.name }}
                             </div>
                             <div class="form-group">
-                                <label for="{{ product_form.brand.id_for_label }}">{{ product_form.brand.label|safe }}</label>
-                                {{ product_form.brand }}
+                                <label for="{{ form.brand.id_for_label }}">{{ form.brand.label|safe }}</label>
+                                {{ form.brand }}
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="{{ product_form.specifications.id_for_label }}">{{ product_form.specifications.label|safe }}</label>
-                            {{ product_form.specifications }}
+                            <label for="{{ form.specifications.id_for_label }}">{{ form.specifications.label|safe }}</label>
+                            {{ form.specifications }}
                         </div>
                     {% endfor %}
                 </fieldset>
