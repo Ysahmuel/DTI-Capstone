@@ -2,7 +2,7 @@ import re
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, DetailView
-from .mixins import FormsetMixin
+from .mixins import FormStepsMixin, FormsetMixin
 from .forms import PersonalDataSheetForm, ProductCoveredFormSet, SalesPromotionPermitApplicationForm
 from .models import PersonalDataSheet, ProductCovered, SalesPromotionPermitApplication
 from django.contrib import messages
@@ -10,27 +10,21 @@ from django.db import transaction
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 # Create your views here.
-class CreateSalesPromotionView(LoginRequiredMixin, FormsetMixin, CreateView):
+class CreateSalesPromotionView(LoginRequiredMixin, FormStepsMixin, FormsetMixin, CreateView):
     template_name = 'documents/create_sales_promotion.html'
     model = SalesPromotionPermitApplication
     context_object_name = 'sales_promo'
     form_class = SalesPromotionPermitApplicationForm
     formset_class = ProductCoveredFormSet 
 
-    def get_success_url(self):
-        return reverse_lazy('sales-promotion-application', kwargs={'pk': self.object.pk})
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['form_steps'] = [
-            {'target': 'promo-title-fieldset', 'label': 'Promotion Details'},
-            {'target': 'sponsors-fieldset', 'label': 'Sponsor'},
-            {'target': 'advertising-fieldset', 'label': 'Advertising Agency'},
-            {'target': 'promo-period-fieldset', 'label': 'Promo Period'},
-            {'target': 'products-fieldset', 'label': 'Products Covered'},
-            {'target': 'coverage-fieldset', 'label': 'Coverage'},
-        ]
-        return context
+    form_steps = [
+        {'target': 'promo-title-fieldset', 'label': 'Promotion Details'},
+        {'target': 'sponsors-fieldset', 'label': 'Sponsor'},
+        {'target': 'advertising-fieldset', 'label': 'Advertising Agency'},
+        {'target': 'promo-period-fieldset', 'label': 'Promo Period'},
+        {'target': 'products-fieldset', 'label': 'Products Covered'},
+        {'target': 'coverage-fieldset', 'label': 'Coverage'},
+    ]
     
     def get_success_url(self):
         return reverse_lazy('sales-promotion-application', kwargs={'pk': self.object.pk})
