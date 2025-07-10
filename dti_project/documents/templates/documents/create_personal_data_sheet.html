@@ -101,12 +101,27 @@
 
                 {% for label, formset in formsets.items %}
 
-                    <h3>{{ label|titlecase }}</h3>
-                    {{ formset.management_form }}
+                    <fieldset>
+                        <p class="part-count">Part {{ forloop.counter|add:"1" }} of {{ formsets_count }}</p>
+                        <legend>{{ label|titlecase }}</legend>
+                        {{ formset.management_form }}
 
-                    {% for form in formset %}
-                        {{ form }}
-                    {% endfor %}
+                        <div class="stepped-layout">
+                            <div class="step-grid">
+                                {% for form in formset %}
+
+                                    {% for field in form.visible_fields %}
+                                        <div class="form-group">
+                                            <label for="{{ field.id_for_label }}">{{ field.label|safe }}</label>
+                                            {{ field }}
+                                            {{ field.errors }}
+                                        </div>
+                                    {% endfor %}
+
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </fieldset>
 
                 {% endfor %}
 

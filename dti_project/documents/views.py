@@ -93,9 +93,12 @@ class CreatePersonalDataSheetView(LoginRequiredMixin, FormStepsMixin, FormsetMix
         {'target': 'personal-background-fieldset', 'label': 'Personal Background'},
         {'target': 'employee-fieldset', 'label': 'Employee Background'},
         {'target': 'training-fieldset', 'label': 'Trainings Attended'},
+        {'target': 'educational-fieldset', 'label': 'Educational Attainment'},
+        {'target': 'character-fieldset', 'label': 'Character References'},
     ]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['formsets_count'] = len(self.formset_classes) + 1
     
         return context
