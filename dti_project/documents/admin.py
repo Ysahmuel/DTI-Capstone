@@ -28,3 +28,8 @@ class PersonalDataSheetAdmin(admin.ModelAdmin):
 class EmployeeBackgroundAdmin(admin.ModelAdmin):
     list_display = (get_full_name_from_personal_data, 'employer', 'position', 'start_date', 'end_date')
     search_fields = ('employer', 'position')
+
+@admin.register(TrainingsAttended)
+class TrainingsAttendedAdmin(admin.ModelAdmin):
+    list_display = (get_full_name_from_personal_data, 'training_course', 'conducted_by')
+    search_fields = ('training_course', 'conducted_by')
