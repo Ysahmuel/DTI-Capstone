@@ -1,7 +1,7 @@
 from django import forms
-
-from dti_project.documents.validators import validate_period
-from .models import ProductCovered, SalesPromotionPermitApplication, PersonalDataSheet
+from .utils.form_helpers import create_inline_formset
+from .validators import validate_period
+from .models import EmployeeBackground, ProductCovered, SalesPromotionPermitApplication, PersonalDataSheet
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, LayoutObject, TEMPLATE_PACK, Fieldset, HTML, Div, Row, Column, Submit
 from django.template.loader import render_to_string
@@ -45,15 +45,16 @@ class SalesPromotionPermitApplicationForm(BaseCustomForm):
             'promo_period_end': forms.DateInput(attrs={'type': 'date', 'class': 'form-group'}),
         }
 
-        def clean(self):
-            cleaned_data = super().clean()
-            promo_start_date = cleaned_data.get('promo_start_date')
-            promo_end_date = cleaned_data.get('promo_end_date')
+    def clean(self):
+        cleaned_data = super().clean()
+        promo_start_date = cleaned_data.get('promo_period_start')  # Fixed field name
+        promo_end_date = cleaned_data.get('promo_period_end')      # Fixed field name
 
-            # Call your dynamic validator
+        # Call your dynamic validator
+        if promo_start_date and promo_end_date:
             validate_period(promo_start_date, promo_end_date, 'Promo start date', 'Promo end date')
 
-            return cleaned_data
+        return cleaned_data
 
 class ProductCoveredForm(BaseCustomForm):
     class Meta:
@@ -68,13 +69,35 @@ class PersonalDataSheetForm(BaseCustomForm):
             'current_address': forms.TextInput(attrs={'class': 'form-group'}),
             'date_of_birth': forms.DateInput(attrs={'type': 'date', 'class': 'form-group'})
         }
-        
-# Formset for products
-ProductCoveredFormSet = forms.inlineformset_factory(
-    SalesPromotionPermitApplication, 
-    ProductCovered, 
-    form=ProductCoveredForm,
-    fields=['name', 'brand', 'specifications'],
-    extra=1,
-    can_delete=True
-)
+
+class EmployeeBackgroundForm(BaseCustomForm):
+    class Meta:
+        model = EmployeeBackground
+        fields = '__all__'
+        exclude = ['personal_data_sheet']
+
+
+# Formset configurations
+FORMSET_CONFIGS = {
+    'product_covered': {
+        'parent_model': SalesPromotionPermitApplication,
+        'child_model': ProductCovered,
+        'form_class': ProductCoveredForm,
+        'fields': ['name', 'brand', 'specifications'],
+        'extra': 1,
+        'can_delete': True
+    },
+    'employee_background': {
+        'parent_model': PersonalDataSheet,  
+        'child_model': EmployeeBackground,
+        'form_class': EmployeeBackgroundForm,
+        'fields': '__all__',
+        'extra': 1,
+        'can_delete': True
+    },
+
+}
+
+# Create formsets using the generic function
+ProductCoveredFormSet = create_inline_formset(**FORMSET_CONFIGS['product_covered'])
+EmployeeBackgroundFormset = create_inline_formset(**FORMSET_CONFIGS['employee_background'])
