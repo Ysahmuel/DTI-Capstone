@@ -9,12 +9,18 @@ class FormsetMixin:
         context = super().get_context_data(**kwargs)
         instance = getattr(self, 'object', None)
 
+        context['formsets'] = {}
+
         # Add all formsets to context
         for key, formset_class in self.formset_classes.items():
             if self.request.POST:
-                context[f'{key}_formset'] = formset_class(self.request.POST, instance=instance)
+                formset_instance = formset_class(self.request.POST, instance=instance)
             else:
-                context[f'{key}_formset'] = formset_class(instance=instance)
+                formset_instance = formset_class(instance=instance)
+
+            context[f'{key}_formset'] = formset_instance  # Keep individual formset context variables
+            context['formsets'][key] = formset_instance   # Add to formsets dict
+
         return context
 
     def form_valid(self, form):
