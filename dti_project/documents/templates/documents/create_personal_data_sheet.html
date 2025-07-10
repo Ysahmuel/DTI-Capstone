@@ -1,4 +1,5 @@
 {% extends 'dashboard/layout.html' %}
+{% load custom_filters %}
 
 {% block title %} Create Personal Data Sheet {% endblock %}
 
@@ -100,7 +101,7 @@
 
                 {% for label, formset in formsets.items %}
 
-                    <h3>{{ label }}</h3>
+                    <h3>{{ label|titlecase }}</h3>
                     {{ formset.management_form }}
 
                     {% for form in formset %}
