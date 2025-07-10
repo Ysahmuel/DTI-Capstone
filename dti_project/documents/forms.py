@@ -1,7 +1,7 @@
 from django import forms
 from .utils.form_helpers import create_inline_formset
 from .validators import validate_period
-from .models import EmployeeBackground, ProductCovered, SalesPromotionPermitApplication, PersonalDataSheet, TrainingsAttended
+from .models import CharacterReference, EducationalAttainment, EmployeeBackground, ProductCovered, SalesPromotionPermitApplication, PersonalDataSheet, TrainingsAttended
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, LayoutObject, TEMPLATE_PACK, Fieldset, HTML, Div, Row, Column, Submit
 from django.template.loader import render_to_string
@@ -82,14 +82,29 @@ class TrainingsAttendedForm(BaseCustomForm):
         fields = '__all__'
         exclude = ['personal_data_sheet']
 
+class EducationalAttainmentForm(BaseCustomForm):
+    class Meta:
+        model = EducationalAttainment
+        fields = '__all__'
+        exclude = ['personal_data_sheet']     
+
+class CharacterReferenceForm(BaseCustomForm):
+    class Meta:
+        model = CharacterReference
+        fields = '__all__'
+        exclude = ['personal_data_sheet']     
+
 # Formset configurations
 FORMSET_CONFIGS = {
+    # Sales Application Formsets
     'product_covered': {
         'parent_model': SalesPromotionPermitApplication,
         'child_model': ProductCovered,
         'form_class': ProductCoveredForm,
         'fields': ['name', 'brand', 'specifications'],
     },
+
+    # Personal Data Sheet Formsets
     'employee_background': {
         'parent_model': PersonalDataSheet,  
         'child_model': EmployeeBackground,
@@ -99,6 +114,19 @@ FORMSET_CONFIGS = {
         'parent_model': PersonalDataSheet,
         'child_model': TrainingsAttended,
         'form_class': TrainingsAttendedForm
+    },
+    'educational_attainment': {
+        'parent_model': PersonalDataSheet,
+        'child_model': EducationalAttainment,
+        'form_class': EducationalAttainmentForm
+    },
+    'character_references': {
+        'parent_model': PersonalDataSheet,
+        'child_model': CharacterReference,
+        'form_class': CharacterReferenceForm
+    },
+}
+
 FORMSET_CLASSES = {}
 
 for key, config in FORMSET_CONFIGS.items():

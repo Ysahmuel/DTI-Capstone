@@ -82,8 +82,10 @@ class CreatePersonalDataSheetView(LoginRequiredMixin, FormStepsMixin, FormsetMix
     model = PersonalDataSheet
     form_class = PersonalDataSheetForm
     formset_classes = {
-        'employee_background': EmployeeBackgroundFormset,
-        'trainings_attended': TrainingsAttendedFormset
+        'employee_background': FORMSET_CLASSES['employee_background'],
+        'trainings_attended': FORMSET_CLASSES['trainings_attended'],
+        'educational_attainment': FORMSET_CLASSES['educational_attainment'],
+        'character_references': FORMSET_CLASSES['character_references'],
     }
     context_object_name = 'personal_data'
 
