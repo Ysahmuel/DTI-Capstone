@@ -1,4 +1,6 @@
 from django import forms
+
+from dti_project.documents.validators import validate_period
 from .models import ProductCovered, SalesPromotionPermitApplication, PersonalDataSheet
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, LayoutObject, TEMPLATE_PACK, Fieldset, HTML, Div, Row, Column, Submit
@@ -42,6 +44,16 @@ class SalesPromotionPermitApplicationForm(BaseCustomForm):
             'promo_period_start': forms.DateInput(attrs={'type': 'date', 'class': 'form-group'}),
             'promo_period_end': forms.DateInput(attrs={'type': 'date', 'class': 'form-group'}),
         }
+
+        def clean(self):
+            cleaned_data = super().clean()
+            promo_start_date = cleaned_data.get('promo_start_date')
+            promo_end_date = cleaned_data.get('promo_end_date')
+
+            # Call your dynamic validator
+            validate_period(promo_start_date, promo_end_date, 'Promo start date', 'Promo end date')
+
+            return cleaned_data
 
 class ProductCoveredForm(BaseCustomForm):
     class Meta:
