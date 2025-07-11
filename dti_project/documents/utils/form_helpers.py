@@ -1,7 +1,7 @@
 from django import forms
 
 # Generic formset factory function to reduce redundancy
-def create_inline_formset(parent_model, child_model, form_class, fields='__all__', extra=1, can_delete=True, **kwargs):
+def create_inline_formset(parent_model, child_model, form_class, fields='__all__', extra=1, can_delete=False, **kwargs):
     """
     Generic function to create inline formsets with consistent defaults.
     
