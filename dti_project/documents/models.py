@@ -2,6 +2,7 @@ from django.db import models
 from django.forms import ValidationError
 from django.utils import timezone
 from users.models import User
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 # Create your models here.
 class BaseApplication(models.Model):
@@ -144,3 +145,93 @@ class CharacterReference(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.company})"
+
+class ServiceRepairAccreditationApplication(models.Model):
+    APPLICATION_TYPES = [
+        ('NEW', 'New'),
+        ('RENEWAL', 'Renewal'),
+    ]
+
+    CATEGORIES = [
+        ('MOTOR VEHICLES & HEAVY EQUIPMENT', 'Motor Vehicles & Heavy Equipment'),
+        ('MEDICAL & DENTAL EQUIPMENT', 'Medical & Dental Equipment'),
+        ('OFFICE MACHINE/DATA PROCESSING EQUIPMENT', 'Office Machine/Data Processing Equipment'),
+        ('ENGINES & ENGINEERING WORKS (MACHINE SHOPS)', 'Engines & Engineering Works (Machine Shops)'),
+        ('ELECTRONICS, ELECTRICAL, AIRCONDITIONING & REFRIGERATION', 'Electronics, Electrical, Airconditioning & Refrigeration'),
+        ('OTHER CONSUMER MECHANICAL & INDUSTRIAL EQUIPMENT, APPLIANCES OR DEVICES', 'Other Consumer Mechanical & Industrial Equipment, Appliances or Devices'),
+    ]
+
+    SEX_CHOICES = [
+        ('MALE', 'Male'),
+        ('FEMALE', 'Female'),
+    ]
+
+    SOCIAL_CLASSIFICATION_CHOICES = [
+        ('ABLED', 'Abled'),
+        ('PWD', 'Differently Abled'),
+        ('IP', 'Indigenous Person'),
+        ('SENIOR', 'Senior Citizen'),
+        ('YOUTH', 'Youth'),
+        ('OSY', 'Out-of-School Youth'),
+    ]
+
+    ASSET_SIZE_CHOICES = [
+        ('MICRO', 'Micro (<Php3M)'),
+        ('SMALL', 'Small (Php3M - <15M)'),
+        ('MEDIUM', 'Medium (Php15M - 100M)'),
+        ('LARGE', 'Large (>Php100M)'),
+    ]
+
+    FORM_OF_ORGANIZATION_CHOICES = [
+        ('SP', 'Single Proprietorship'),
+        ('CORP', 'Corporation'),
+        ('PARTNERSHIP', 'Partnership'),
+        ('COOP', 'Cooperative'),
+    ]
+
+    application_type = models.CharField(max_length=10, choices=APPLICATION_TYPES)
+    category = models.CharField(max_length=100, choices=CATEGORIES)
+    star_rating = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+
+    name_of_business = models.CharField(max_length=255)
+
+    # Business Address Fields
+    building_name_or_number = models.CharField(max_length=50)
+    street_name = models.CharField(max_length=50)
+    barangay = models.CharField(max_length=50)
+    city_or_municipality = models.CharField(max_length=50)
+    province = models.CharField(max_length=50)
+    region = models.CharField(max_length=50)
+    zip_code = models.CharField(max_length=10)
+
+    telephone_number = models.CharField(max_length=20)
+    mobile_number = models.CharField(max_length=20)
+    fax_number = models.CharField(max_length=20)
+    email_address = models.EmailField(max_length=40)
+
+    # Authorized Signatory
+    title = models.CharField(max_length=20)
+    first_name = models.CharField(max_length=30)
+    middle_name = models.CharField(max_length=30)
+    last_name = models.CharField(max_length=30)
+    suffix = models.CharField(max_length=10, blank=True)
+    designation = models.CharField(max_length=255)
+
+    # Additional Info
+    sex = models.CharField(max_length=6, choices=SEX_CHOICES)
+    social_classification = models.CharField(max_length=10, choices=SOCIAL_CLASSIFICATION_CHOICES)
+    asset_size = models.CharField(max_length=10, choices=ASSET_SIZE_CHOICES)
+    form_of_organization = models.CharField(max_length=20, choices=FORM_OF_ORGANIZATION_CHOICES)
+    industry_classification = models.TextField()
+
+    annual_gross_service_revenue = models.DecimalField(max_digits=15, decimal_places=2)
+    capital_investment = models.DecimalField(max_digits=15, decimal_places=2)
+    tax_identification_number = models.CharField(max_length=20)
+    date_established = models.DateField()
+    total_employees = models.PositiveIntegerField()
+
+    # Warranty/Undertaking Fields
+    warranty_period = models.PositiveIntegerField(help_text="Number of days warranty is valid", default=0)
+
+    def __str__(self):
+        return self.name_of_business
