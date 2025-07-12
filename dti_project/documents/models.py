@@ -206,13 +206,13 @@ class ServiceRepairAccreditationApplication(models.Model):
 
     telephone_number = models.CharField(max_length=20)
     mobile_number = models.CharField(max_length=20)
-    fax_number = models.CharField(max_length=20)
+    fax_number = models.CharField(max_length=20, blank=True)
     email_address = models.EmailField(max_length=40)
 
     # Authorized Signatory
     title = models.CharField(max_length=20)
     first_name = models.CharField(max_length=30)
-    middle_name = models.CharField(max_length=30)
+    middle_name = models.CharField(max_length=30, blank=True)
     last_name = models.CharField(max_length=30)
     suffix = models.CharField(max_length=10, blank=True)
     designation = models.CharField(max_length=255)
@@ -222,12 +222,12 @@ class ServiceRepairAccreditationApplication(models.Model):
     social_classification = models.CharField(max_length=10, choices=SOCIAL_CLASSIFICATION_CHOICES)
     asset_size = models.CharField(max_length=10, choices=ASSET_SIZE_CHOICES)
     form_of_organization = models.CharField(max_length=20, choices=FORM_OF_ORGANIZATION_CHOICES)
-    industry_classification = models.TextField()
+    industry_classification = models.TextField(blank=True)
 
-    annual_gross_service_revenue = models.DecimalField(max_digits=15, decimal_places=2)
-    capital_investment = models.DecimalField(max_digits=15, decimal_places=2)
+    annual_gross_service_revenue = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    capital_investment = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     tax_identification_number = models.CharField(max_length=20)
-    date_established = models.DateField()
+    date_established = models.DateField(blank=True, null=True)
     total_employees = models.PositiveIntegerField()
 
     # Warranty/Undertaking Fields
