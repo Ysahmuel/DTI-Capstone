@@ -18,8 +18,19 @@ document.addEventListener('DOMContentLoaded', function () {
                 choice.classList.add('selected');
             }
 
-            // Hide all text input groups first
-            textInputs.forEach(inputGroup => inputGroup.style.display = 'none');
+            // Hide all text input groups and clear their values
+            textInputs.forEach(inputGroup => {
+                // Clear all inputs inside the inputGroup
+                const inputs = inputGroup.querySelectorAll('input, textarea, select');
+                inputs.forEach(input => {
+                    input.value = '';  // Clear value
+                    if (input.type === 'checkbox' || input.type === 'radio') {
+                        input.checked = false;  // Uncheck if any
+                    }
+                });
+
+                inputGroup.style.display = 'none';
+            });
 
             // Show the one that matches the selected radio's value (if any)
             const selectedValue = radioBtn ? radioBtn.value : null;
