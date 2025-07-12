@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .utils.admin_helpers import get_full_name_from_personal_data
-from .models import EducationalAttainment, EmployeeBackground, PersonalDataSheet, ProductCovered, SalesPromotionPermitApplication, TrainingsAttended
+from .models import EducationalAttainment, EmployeeBackground, PersonalDataSheet, ProductCovered, SalesPromotionPermitApplication, ServiceRepairAccreditationApplication, TrainingsAttended
 
 
 # Register your models here.
@@ -38,3 +38,14 @@ class TrainingsAttendedAdmin(admin.ModelAdmin):
 class EducationalAttainmentAdmin(admin.ModelAdmin):
     list_display = (get_full_name_from_personal_data, 'school', 'course')
     search_fields = ('school', 'course')
+
+@admin.register(ServiceRepairAccreditationApplication)
+class ServiceRepairAccreditationApplicationAdmin(admin.ModelAdmin):
+    list_display = ('name_of_business', 'full_name', 'application_type', 'category', 'star_rating')
+    search_fields = ('name_of_business', 'first_name', 'last_name')
+    list_filter = ('application_type', 'category', 'star_rating', 'social_classification', 'asset_size', 'form_of_organization')
+
+    def full_name(self, obj):
+        return f"{obj.first_name} {obj.middle_name or ''} {obj.last_name}".strip()
+    
+    full_name.short_description = 'Full Name'
