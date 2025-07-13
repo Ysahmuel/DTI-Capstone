@@ -1,7 +1,9 @@
 import re
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, DetailView
+from .constants import PERSONAL_DATA_SHEET_FIELD_GROUPS, SALES_PROMOTION_FIELD_GROUPS, SERVICE_REPAIR_ACCREDITATION_FIELD_GROUPS
 from .mixins import FormStepsMixin, FormsetMixin
 from .forms import PersonalDataSheetForm, SalesPromotionPermitApplicationForm, FORMSET_CLASSES, ServiceRepairAccreditationApplicationForm
 from .models import PersonalDataSheet, ProductCovered, SalesPromotionPermitApplication, ServiceRepairAccreditationApplication
@@ -112,5 +114,23 @@ class CreatePersonalDataSheetView(LoginRequiredMixin, FormStepsMixin, FormsetMix
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['formsets_count'] = len(self.formset_classes) + 1
-    
+        context['field_groups'] = self.FIELD_GROUPS
+
         return context
+    
+class PersonalDataSheetDetailView(DetailView):
+    pass
+    
+class CreateServiceRepairAccreditationApplication(LoginRequiredMixin, FormStepsMixin, FormsetMixin, CreateView):
+    template_name = 'documents/create_service_repair.html'
+    model = ServiceRepairAccreditationApplication
+    form_class = ServiceRepairAccreditationApplicationForm
+
+    FIELD_GROUPS = SERVICE_REPAIR_ACCREDITATION_FIELD_GROUPS
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['field_groups'] = SERVICE_REPAIR_ACCREDITATION_FIELD_GROUPS
+
+        return context
+    
