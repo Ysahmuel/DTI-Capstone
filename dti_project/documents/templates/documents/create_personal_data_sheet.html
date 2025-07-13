@@ -13,100 +13,53 @@
             <form class="documents-form" action="{% url 'create-personal-data-sheet' %}" method="POST">
                 {% csrf_token %}
 
-                <fieldset id="personal-background-fieldset">
-                    <p class="part-count">Part 1 of 5</p>
-                    <legend>Personal Background</legend>
+                {% for group in field_groups %}
+                    <fieldset id="{{ group.2 }}-fieldset">
+                        <p class="part-count">Part {{ forloop.counter }} of {{ field_groups|length }}</p>
+                        <legend>{{ group.0 }}</legend>
+                        <div class="stepped-layout">
+                            {% for row in group.1 %}
+                                {% if row.0 == 'image' %}
+                                    <div class="form-group" style="margin-top: 1rem;">
+                                        <label for="{{ form.image_for_label }}">{{ form.image.label|safe }} (Passport Size Photo)</label>
+                                        <div class="upload-image-container">
 
-                    <div class="stepped-layout">
+                                            <button class="upload-file-btn" type="button">
+                                                <i class="fa-solid fa-upload"></i>
+                                            </button>
 
-                        <div class="step-grid">
+                                            <h3 id="drag-drop-text">Drag and drop or <span class="highlighted-span">choose file</span> to upload</h3>
+                                            <p id="file-text">No file chosen yet.</p>
+                                            {{ form.image }}
 
-                            <div class="form-group">
-                                <label for="{{ form.last_name.id_for_label }}">{{ form.last_name.label|safe }}</label>
-                                {{ form.last_name }}
-                            </div>
-                            <div class="form-group">
-                                <label for="{{ form.first_name_for_label }}">{{ form.first_name.label|safe }}</label>
-                                {{ form.first_name }}
-                            </div>
-                            <div class="form-group">
-                                <label for="{{ form.middle_name_for_label }}">{{ form.middle_name.label|safe }}</label>
-                                {{ form.middle_name }}
-                            </div>
-
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <div class="step-grid">
+                                        {% for field_name in row %}
+                                            {% with form_field=form|get_form_field:field_name %}
+                                                <div class="form-group">
+                                                    <label for="{{ form_field.id_for_label }}">{{ form_field.label|safe }}</label>
+                                                    {{ form_field }}
+                                                </div>
+                                            {% endwith %}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
                         </div>
-
-                        <div class="step-grid">
-
-                            <div class="form-group">
-                                <label for="{{ form.email_address_for_label }}">{{ form.email_address.label|safe }}</label>
-                                {{ form.email_address }}
-                            </div>
-                            <div class="form-group">
-                                <label for="{{ form.contact_number_for_label }}">{{ form.contact_number.label|safe }}</label>
-                                {{ form.contact_number }}
-                            </div>
-                            <div class="form-group" id="current-address-group">
-                                <label for="{{ form.current_address_for_label }}">{{ form.current_address.label|safe }}</label>
-                                {{ form.current_address }}
-                            </div>
-                            
-                        </div>
-
-                        <div class="step-grid">
-
-                            <div class="form-group">
-                                <label for="{{ form.position_for_label }}">{{ form.position.label|safe }}</label>
-                                {{ form.position }}
-                            </div>
-                            <div class="form-group">
-                                <label for="{{ form.nationality_for_label }}">{{ form.nationality.label|safe }}</label>
-                                {{ form.nationality }}
-                            </div>
-                            <div class="form-group">
-                                <label for="{{ form.date_of_birth_for_label }}">{{ form.date_of_birth.label|safe }}</label>
-                                {{ form.date_of_birth }}
-                            </div>
-                            <div class="form-group">
-                                <label for="{{ form.sex_for_label }}">{{ form.sex.label|safe }}</label>
-                                {{ form.sex }}
-                            </div>
-                            <div class="form-group">
-                                <label for="{{ form.civil_status_for_label }}">{{ form.civil_status.label|safe }}</label>
-                                {{ form.civil_status }}
-                            </div>
-                            
-                        </div>
-
-
-                    </div>
-
-                        
-                    <div class="form-group" style="margin-top: 1rem;">
-                        <label for="{{ form.image_for_label }}">{{ form.image.label|safe }} (Passport Size Photo)</label>
-                        <div class="upload-image-container">
-
-                            <button class="upload-file-btn" type="button">
-                                <i class="fa-solid fa-upload"></i>
-                            </button>
-
-                            <h3 id="drag-drop-text">Drag and drop or <span class="highlighted-span">choose file</span> to upload</h3>
-                            <p id="file-text">No file chosen yet.</p>
-                            {{ form.image }}
-
-                        </div>
-                    </div>
-
-                </fieldset>
+                    </fieldset>
+                {% endfor %}
 
                 {% for label, formset in formsets.items %}
 
-                    <fieldset>
+                    <fieldset id="{{ label }}-formset">
                         <p class="part-count">Part {{ forloop.counter|add:"1" }} of {{ formsets_count }}</p>
                         <legend>{{ label|titlecase }}</legend>
                         {{ formset.management_form }}
 
                         <div class="stepped-layout">
+
                             <div class="step-grid">
                                 {% for form in formset %}
 
@@ -120,7 +73,10 @@
 
                                 {% endfor %}
                             </div>
+
                         </div>
+
+
                     </fieldset>
 
                 {% endfor %}

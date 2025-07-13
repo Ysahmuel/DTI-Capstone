@@ -3,8 +3,8 @@ from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, DetailView
 from .mixins import FormStepsMixin, FormsetMixin
-from .forms import PersonalDataSheetForm, SalesPromotionPermitApplicationForm, FORMSET_CLASSES
-from .models import PersonalDataSheet, ProductCovered, SalesPromotionPermitApplication
+from .forms import PersonalDataSheetForm, SalesPromotionPermitApplicationForm, FORMSET_CLASSES, ServiceRepairAccreditationApplicationForm
+from .models import PersonalDataSheet, ProductCovered, SalesPromotionPermitApplication, ServiceRepairAccreditationApplication
 from django.contrib import messages
 from django.db import transaction
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -19,6 +19,8 @@ class CreateSalesPromotionView(LoginRequiredMixin, FormStepsMixin, FormsetMixin,
         'product': FORMSET_CLASSES['product_covered']
     }
 
+    FIELD_GROUPS = SALES_PROMOTION_FIELD_GROUPS
+
     form_steps = [
         {'target': 'promo-title-fieldset', 'label': 'Promotion Details'},
         {'target': 'sponsors-fieldset', 'label': 'Sponsor'},
@@ -27,6 +29,14 @@ class CreateSalesPromotionView(LoginRequiredMixin, FormStepsMixin, FormsetMixin,
         {'target': 'products-fieldset', 'label': 'Products Covered'},
         {'target': 'coverage-fieldset', 'label': 'Coverage'},
     ]
+
+    def get_context_data(self, **kwargs):
+        context =  super().get_context_data(**kwargs)
+
+        context['field_groups'] = self.FIELD_GROUPS
+
+
+        return context
     
     def get_success_url(self):
         return reverse_lazy('sales-promotion-application', kwargs={'pk': self.object.pk})
@@ -88,6 +98,8 @@ class CreatePersonalDataSheetView(LoginRequiredMixin, FormStepsMixin, FormsetMix
         'character_references': FORMSET_CLASSES['character_references'],
     }
     context_object_name = 'personal_data'
+
+    FIELD_GROUPS = PERSONAL_DATA_SHEET_FIELD_GROUPS
 
     form_steps = [
         {'target': 'personal-background-fieldset', 'label': 'Personal Background'},
