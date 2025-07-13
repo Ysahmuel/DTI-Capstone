@@ -222,7 +222,7 @@ class ServiceRepairAccreditationApplication(models.Model):
     social_classification = models.CharField(max_length=10, choices=SOCIAL_CLASSIFICATION_CHOICES)
     asset_size = models.CharField(max_length=10, choices=ASSET_SIZE_CHOICES)
     form_of_organization = models.CharField(max_length=20, choices=FORM_OF_ORGANIZATION_CHOICES)
-    industry_classification = models.TextField(blank=True)
+    industry_classification = models.CharField(max_length=255, blank=True)
 
     annual_gross_service_revenue = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     capital_investment = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
