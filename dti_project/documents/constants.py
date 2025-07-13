@@ -47,5 +47,13 @@ SERVICE_REPAIR_ACCREDITATION_FIELD_GROUPS = [
         ['sex', 'social_classification'] 
     ], 'business-information'),
     ("Authorized Signatory", [['title', 'first_name', 'middle_name', 'last_name', 'suffix', 'designation']]),
-    ("Business Classification", [['asset_size', 'form_of_organization', 'industry_classification']]),
+    ("Business Classification", 
+     [
+        ['asset_size', 'form_of_organization', 'industry_classification', 
+         'industry_classification', 'annual_gross_service_revenue', 'capital_investment', 'tax_identification_number',
+         'date_established', 'total_employees'
+         ]
+        
+        ]
+    ),
 ]
