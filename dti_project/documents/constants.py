@@ -1,16 +1,29 @@
+# SERVICE_REPAIR_ACCREDITATION_FIELD_GROUPS defines the structure of each form step.
+# Each item in the list represents a fieldset (form section) and follows this structure:
+# (
+#     "Fieldset Title",                  # str: Legend/title of the fieldset
+#     [                                  # list: A list of rows
+#         [field_name_1, field_name_2],  # Each row is a list of field names to be rendered together
+#         [field_name_3],
+#         ...
+#     ],
+#     "fieldset-id"                      # str: The HTML id attribute to assign to this fieldset
+#     "stepped"                          # str: The type of fieldset structure whether stepped grid or 5 field fieldset
+# )
+
 SALES_PROMOTION_FIELD_GROUPS = [
-    ("Promotion Details", ['promo_title']),
+    ("Promotion Details", ['promo_title'], 'promo-title'),
     ("Sponsor", [
         'sponsor_name', 'sponsor_telephone', 'sponsor_email',
         'sponsor_authorized_rep', 'sponsor_designation',
         'sponsor_address'
-    ]),
+    ], 'sponsors'),
     ("Advertising Agency", [
         'advertising_agency_name', 'advertising_agency_telephone',
         'advertising_agency_email', 'advertising_agency_authorized_rep',
         'advertising_agency_designation', 'advertising_agency_address'
-    ]),
-    ("Promo Period", ['promo_period_start', 'promo_period_end']),
+    ], 'advertising'),
+    ("Promo Period", ['promo_period_start', 'promo_period_end'], 'promo-period'),
 ]
 
 PERSONAL_DATA_SHEET_FIELD_GROUPS = [
