@@ -405,3 +405,26 @@
   width: 100%;
   box-sizing: border-box;
 } 
+
+.add-btn {
+  background-color: var(--accent);
+  color: white;
+  font-weight: 500;
+  border: none;
+  border-radius: var(--radius-sm);
+  margin-left: auto;
+  outline: none;
+  padding: var(--space-sm) var(--space-lg);
+  cursor: pointer;
+}
+
+.preview-list {
+    margin-top: 1rem;
+}
+
+.preview-item {
+    padding: 0.5rem;
+    background: #f0f0f0;
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+}

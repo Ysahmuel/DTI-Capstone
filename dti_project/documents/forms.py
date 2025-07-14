@@ -28,7 +28,11 @@ class BaseCustomForm(forms.ModelForm):
                     field.label = f"{label_text} <span class='required-label'>*</span>"
                     field.widget.attrs['placeholder'] = f"Enter {label_text}"
                 else:
-                    field.label = label_text                
+                    field.label = label_text
+
+                # Force DateInput for DateFields
+                if isinstance(field, forms.DateField):
+                    field.widget = forms.DateInput(attrs={'type': 'date'})
 
                 # Add 'form-group' class to each widget
                 existing_classes = field.widget.attrs.get('class', '')
