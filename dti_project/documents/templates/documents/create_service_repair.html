@@ -14,44 +14,25 @@
                 {% csrf_token %}
                 
                 {% for group in field_groups %}
-                    <fieldset id="{{ group.2 }}-fieldset">
-                        {% if forloop.counter > 1 %}
-                            <p class="part-count">Part {{ forloop.counter }} of {{ field_groups|length }}</p>
-                        {% endif %}
-                        <legend>{{ group.0 }}</legend>
-                        <div class="stepped-layout">
-                            {% for row in group.1 %}
-                                {% if row.0 == 'image' %}
-                                    <div class="form-group" style="margin-top: 1rem;">
-                                        <label for="{{ form.image_for_label }}">{{ form.image.label|safe }} (Passport Size Photo)</label>
-                                        <div class="upload-image-container">
-
-                                            <button class="upload-file-btn" type="button">
-                                                <i class="fa-solid fa-upload"></i>
-                                            </button>
-
-                                            <h3 id="drag-drop-text">Drag and drop or <span class="highlighted-span">choose file</span> to upload</h3>
-                                            <p id="file-text">No file chosen yet.</p>
-                                            {{ form.image }}
-
-                                        </div>
-                                    </div>
-                                {% else %}
-                                    <div class="step-grid">
-                                        {% for field_name in row %}
-                                            {% with form_field=form|get_form_field:field_name %}
-                                                <div class="form-group">
-                                                    <label for="{{ form_field.id_for_label }}">{{ form_field.label|safe }}</label>
-                                                    {{ form_field }}
-                                                </div>
-                                            {% endwith %}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                    </fieldset>
+                    {% include 'documents/partials/fieldset.html' %}
                 {% endfor %}
+
+                <fieldset>
+                    <p class="part-count"></p>
+                    <legend>Warranty/Undertaking</legend>
+                    <p>___ warrants the quality of workmanship and process undertaken by the shop for a period of
+                        ___ () days counted from the date of actual release and delivery of each and/or job order to the 
+                        respective customer.
+                    </p>
+                    <p>This warranty does not cover damage caused by misuse, accidents, or alteration of workmanship;
+                        in addition, it is expressly understood that the shop management shall not be liable for any patent defect
+                        in the product and which is not included in the job contract.
+                    </p>
+                    <p>We further undertake to abide by the rules and regulations promulgated by DTI and the terms and conditions
+                        of this warranty, In the event of violation on our part, our accreditation certificate may be cancelled
+                        at the discretion of the DTI.
+                    </p>
+                </fieldset>
 
             </form>
 
