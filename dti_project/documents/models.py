@@ -189,9 +189,17 @@ class ServiceRepairAccreditationApplication(models.Model):
         ('COOP', 'Cooperative'),
     ]
 
+    STAR_RATING_CHOICES = [
+        (1, '1'),
+        (2, '2'),
+        (3, '3'),
+        (4, '4'),
+        (5, '5')
+    ]
+
     application_type = models.CharField(max_length=10, choices=APPLICATION_TYPES)
     category = models.CharField(max_length=100, choices=CATEGORIES)
-    star_rating = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    star_rating = models.PositiveSmallIntegerField(choices=STAR_RATING_CHOICES, validators=[MinValueValidator(1), MaxValueValidator(5)])
 
     name_of_business = models.CharField(max_length=255)
 
