@@ -396,15 +396,6 @@
   width: 100%;
 }
 
-.step-grid .form-group:has(textarea) {
-  grid-column: span 2;
-  width: 100%;
-}
-
-.step-grid .form-group textarea {
-  width: 100%;
-}
-/* 
 #current-address-group {
   grid-column: span 2;
   width: 100%;
@@ -413,4 +404,4 @@
 #id_current_address {
   width: 100%;
   box-sizing: border-box;
-} */
+} 
