@@ -1,5 +1,4 @@
 {% extends 'dashboard/layout.html' %}
-{% load custom_filters %}
 
 {% block title %} Create Personal Data Sheet {% endblock %}
 
@@ -19,31 +18,7 @@
 
                 {% for label, formset in formsets.items %}
 
-                    <fieldset id="{{ label }}-formset">
-                        <p class="part-count">Part {{ forloop.counter|add:"1" }} of {{ formsets_count }}</p>
-                        <legend>{{ label|titlecase }}</legend>
-                        {{ formset.management_form }}
-
-                        <div class="stepped-layout">
-
-                            <div class="step-grid">
-                                {% for form in formset %}
-
-                                    {% for field in form.visible_fields %}
-                                        <div class="form-group">
-                                            <label for="{{ field.id_for_label }}">{{ field.label|safe }}</label>
-                                            {{ field }}
-                                            {{ field.errors }}
-                                        </div>
-                                    {% endfor %}
-
-                                {% endfor %}
-                            </div>
-
-                        </div>
-
-
-                    </fieldset>
+                    {% include 'documents/partials/formset.html' %}
 
                 {% endfor %}
 
