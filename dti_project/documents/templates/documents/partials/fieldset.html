@@ -1,0 +1,37 @@
+{% load custom_filters %}
+
+<fieldset id="{{ group.2 }}-fieldset">
+    <p class="part-count">Part {{ forloop.counter }} of {{ field_groups|length }}</p>
+    <legend>{{ group.0 }}</legend>
+    <div class="stepped-layout">
+        {% for row in group.1 %}
+            {% if row.0 == 'image' %}
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label for="{{ form.image_for_label }}">{{ form.image.label|safe }} (Passport Size Photo)</label>
+                    <div class="upload-image-container">
+
+                        <button class="upload-file-btn" type="button">
+                            <i class="fa-solid fa-upload"></i>
+                        </button>
+
+                        <h3 id="drag-drop-text">Drag and drop or <span class="highlighted-span">choose file</span> to upload</h3>
+                        <p id="file-text">No file chosen yet.</p>
+                        {{ form.image }}
+
+                    </div>
+                </div>
+            {% else %}
+                <div class="step-grid">
+                    {% for field_name in row %}
+                        {% with form_field=form|get_form_field:field_name %}
+                            <div class="form-group">
+                                <label for="{{ form_field.id_for_label }}">{{ form_field.label|safe }}</label>
+                                {{ form_field }}
+                            </div>
+                        {% endwith %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</fieldset>
