@@ -12,18 +12,17 @@
 # )
 
 SALES_PROMOTION_FIELD_GROUPS = [
-    ("Promotion Details", ['promo_title'], 'promo-title'),
+    ("Promotion Details", [['promo_title']], 'promo-title'),
     ("Sponsor", [
-        'sponsor_name', 'sponsor_telephone', 'sponsor_email',
-        'sponsor_authorized_rep', 'sponsor_designation',
-        'sponsor_address'
+        ['sponsor_name', 'sponsor_telephone', 'sponsor_email', 'sponsor_authorized_rep', 'sponsor_designation',
+        'sponsor_address']
     ], 'sponsors'),
-    ("Advertising Agency", [
-        'advertising_agency_name', 'advertising_agency_telephone',
-        'advertising_agency_email', 'advertising_agency_authorized_rep',
+    ("Advertising Agency", [[
+        'advertising_agency_name', 
+        'advertising_agency_telephone', 'advertising_agency_email', 'advertising_agency_authorized_rep',
         'advertising_agency_designation', 'advertising_agency_address'
-    ], 'advertising'),
-    ("Promo Period", ['promo_period_start', 'promo_period_end'], 'promo-period'),
+    ]], 'advertising'),
+    ("Promo Period",[['promo_period_start', 'promo_period_end']], 'promo-period'),
 ]
 
 PERSONAL_DATA_SHEET_FIELD_GROUPS = [
