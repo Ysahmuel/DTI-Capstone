@@ -242,5 +242,23 @@ class ServiceRepairAccreditationApplication(models.Model):
         help_text="Number of days warranty is valid", 
         default=0,
     )
+
+    def get_warranty_text(self):
+        """Generate the warranty/undertaking text with the warranty period filled in"""
+        warranty_template = """
+        {name_of_business} WARRANTS THE QUALITY OF WORKMANSHIP AND PROCESS UNDERTAKEN BY THE SHOP FOR A PERIOD OF {warranty_period} ({warranty_period_words}) DAYS COUNTED FROM THE DATE OF ACTUAL RELEASE AND DELIVERY OF EACH AND/OR JOB ORDER TO THE RESPECTIVE CUSTOMER.
+
+        This warranty does not cover damage caused by misuse, accidents, or alteration of workmanship; in addition, it is expressly understood that the shop management shall not be liable for any patent defect in the product and which is not included in the job contract.
+
+        We further undertake to abide by the rules and regulations promulgated by DTI and the terms and conditions of this warranty. In the event of violation on our part, our accreditation certificate may be cancelled at the discretion of the DTI.
+        """
+        
+        # Convert number to words for the parentheses
+        warranty_period_words = self.number_to_words(self.warranty_period)
+        
+        return warranty_template.format(
+            warranty_period=self.warranty_period,
+            warranty_period_words=warranty_period_words
+        )
     def __str__(self):
         return self.name_of_business
