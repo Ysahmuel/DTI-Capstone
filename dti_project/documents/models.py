@@ -238,8 +238,9 @@ class ServiceRepairAccreditationApplication(models.Model):
     date_established = models.DateField(blank=True, null=True)
     total_employees = models.PositiveIntegerField()
 
-    # Warranty/Undertaking Fields
-    warranty_period = models.PositiveIntegerField(help_text="Number of days warranty is valid", default=0)
-
+    warranty_period = models.PositiveIntegerField(
+        help_text="Number of days warranty is valid", 
+        default=0,
+    )
     def __str__(self):
         return self.name_of_business
