@@ -23,15 +23,6 @@ class CreateSalesPromotionView(LoginRequiredMixin, FormStepsMixin, FormsetMixin,
 
     FIELD_GROUPS = SALES_PROMOTION_FIELD_GROUPS
 
-    form_steps = [
-        {'target': 'promo-title-fieldset', 'label': 'Promotion Details'},
-        {'target': 'sponsors-fieldset', 'label': 'Sponsor'},
-        {'target': 'advertising-fieldset', 'label': 'Advertising Agency'},
-        {'target': 'promo-period-fieldset', 'label': 'Promo Period'},
-        {'target': 'products-fieldset', 'label': 'Products Covered'},
-        {'target': 'coverage-fieldset', 'label': 'Coverage'},
-    ]
-
     def get_context_data(self, **kwargs):
         context =  super().get_context_data(**kwargs)
 
@@ -104,7 +95,6 @@ class CreatePersonalDataSheetView(LoginRequiredMixin, FormStepsMixin, FormsetMix
     FIELD_GROUPS = PERSONAL_DATA_SHEET_FIELD_GROUPS
 
     form_steps = [
-        {'target': 'personal-background-fieldset', 'label': 'Personal Background'},
         {'target': 'employee-fieldset', 'label': 'Employee Background'},
         {'target': 'training-fieldset', 'label': 'Trainings Attended'},
         {'target': 'educational-fieldset', 'label': 'Educational Attainment'},
