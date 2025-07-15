@@ -14,24 +14,13 @@
                 {% csrf_token %}
                 
                 {% for group in field_groups %}
-                    {% include 'documents/partials/fieldset.html' %}
+                    {% include 'documents/partials/fieldset.html' with total_parts=field_groups.groups|length|add:"2" %}
                 {% endfor %}
 
                 <fieldset>
                     <p class="part-count"></p>
                     <legend>Warranty/Undertaking</legend>
-                    <p>___ warrants the quality of workmanship and process undertaken by the shop for a period of
-                        ___ () days counted from the date of actual release and delivery of each and/or job order to the 
-                        respective customer.
-                    </p>
-                    <p>This warranty does not cover damage caused by misuse, accidents, or alteration of workmanship;
-                        in addition, it is expressly understood that the shop management shall not be liable for any patent defect
-                        in the product and which is not included in the job contract.
-                    </p>
-                    <p>We further undertake to abide by the rules and regulations promulgated by DTI and the terms and conditions
-                        of this warranty, In the event of violation on our part, our accreditation certificate may be cancelled
-                        at the discretion of the DTI.
-                    </p>
+                    <p>{{ warranty_text }}</p>
                 </fieldset>
 
             </form>

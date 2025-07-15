@@ -121,6 +121,13 @@ class CreateServiceRepairAccreditationApplication(LoginRequiredMixin, FormStepsM
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['field_groups'] = SERVICE_REPAIR_ACCREDITATION_FIELD_GROUPS
+        
+        # Create an unsaved instance with default values
+        application = ServiceRepairAccreditationApplication(
+            name_of_business=self.request.user,
+            warranty_period=30  # Or whatever default
+        )
+        context['warranty_text'] = application.get_warranty_text()
 
         return context
     
