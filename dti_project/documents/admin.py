@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .utils.admin_helpers import get_full_name_from_personal_data
-from .models import EducationalAttainment, EmployeeBackground, InspectionValidationReport, PersonalDataSheet, ProductCovered, SalesPromotionPermitApplication, ServiceCategory, ServiceRepairAccreditationApplication, TrainingsAttended
+from .models import EducationalAttainment, EmployeeBackground, InspectionValidationReport, PersonalDataSheet, ProductCovered, ReportRecommendation, ReportService, SalesPromotionPermitApplication, ServiceCategory, ServiceRepairAccreditationApplication, TrainingsAttended
 
 
 # Register your models here.
@@ -49,9 +49,3 @@ class ServiceRepairAccreditationApplicationAdmin(admin.ModelAdmin):
         return f"{obj.first_name} {obj.middle_name or ''} {obj.last_name}".strip()
     
     full_name.short_description = 'Full Name'
-
-@admin.register(InspectionValidationReport)
-class InspectionValidationReportAdmin(admin.ModelAdmin):
-    list_display = ('business_name', 'application_type')
-    search_fields = ('business_name', )
-    list_filter = ('application_type', )
