@@ -1,6 +1,6 @@
 {% load custom_filters %}
 
-<fieldset id="{{ label }}-formset">
+<fieldset id="{{ label }}-formset" data-label="{{ label }}">
     <p class="part-count">Part {{ forloop.counter|add:"1" }} of {{ formsets_count }}</p>
     <legend>{{ label|titlecase }}</legend>
     {{ formset.management_form }}
@@ -20,6 +20,11 @@
 
             {% endfor %}
         </div>
+
+        <button class="add-btn" type="button">Add</button>
+
+        <ol id="{{ label }}-preview-list" class="preview-list">
+        </ol>
 
     </div>
 

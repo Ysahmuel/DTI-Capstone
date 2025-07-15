@@ -289,4 +289,60 @@ document.addEventListener('DOMContentLoaded', function () {
 
     })
 
+    document.querySelectorAll("fieldset[data-label]").forEach(fieldset => {
+        const addButton = fieldset.querySelector(".add-btn");
+        const formGrid = fieldset.querySelector(".step-grid");
+        const previewList = document.querySelector(`#${fieldset.dataset.label}-preview-list`);
+
+        function addToPreview() {
+            const formData = {};
+            const inputs = formGrid.querySelectorAll("input, select, textarea");
+            inputs.forEach(input => {
+                formData[input.name] = input.value;
+            });
+
+            const previewItem = document.createElement("li");
+            previewItem.classList.add("preview-item");
+
+            const entries = Object.entries(formData);
+
+            // Get first 2 inputs for title
+            const titleText = `${entries[1][1]} - ${entries[0][1]}`;
+            const titleElement = document.createElement("strong");
+            titleElement.textContent = titleText;
+            previewItem.appendChild(titleElement);
+
+            // Get last 2 inputs for period
+            const startDate = entries[2][1];
+            const endDate = entries[3] && entries[3][1] ? entries[3][1] : "Present";
+            const periodElement = document.createElement("p");
+            periodElement.classList.add("period");
+            periodElement.textContent = `(${startDate} - ${endDate})`;
+            previewItem.appendChild(periodElement);
+
+            // Remove button
+            const removeButton = document.createElement("button");
+            removeButton.type = "button";
+            const icon = document.createElement("div");
+            icon.className = "fa-solid fa-xmark";
+            removeButton.appendChild(icon);
+            previewItem.appendChild(removeButton);
+
+            // Append the preview item to the preview list
+            previewList.appendChild(previewItem);
+
+            // Clear form inputs
+            inputs.forEach(input => input.value = "");
+        }
+
+        addButton.addEventListener("click", addToPreview);
+
+        formGrid.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                addToPreview();
+            }
+        });
+    });
+
 });
