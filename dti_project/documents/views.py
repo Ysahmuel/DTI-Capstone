@@ -6,12 +6,16 @@ from django.views.generic import ListView, CreateView, DetailView
 from .constants import PERSONAL_DATA_SHEET_FIELD_GROUPS, SALES_PROMOTION_FIELD_GROUPS, SERVICE_REPAIR_ACCREDITATION_FIELD_GROUPS
 from .mixins import FormStepsMixin, FormsetMixin
 from .forms import PersonalDataSheetForm, SalesPromotionPermitApplicationForm, FORMSET_CLASSES, ServiceRepairAccreditationApplicationForm
-from .models import PersonalDataSheet, ProductCovered, SalesPromotionPermitApplication, ServiceRepairAccreditationApplication
+from .models import PersonalDataSheet, SalesPromotionPermitApplication, ServiceRepairAccreditationApplication
 from django.contrib import messages
 from django.db import transaction
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-# Create your views here.
+# Create your views here.from your_app.models import InspectionValidationReport
+from datetime import date
+from decimal import Decimal
+
+
 class CreateSalesPromotionView(LoginRequiredMixin, FormStepsMixin, FormsetMixin, CreateView):
     template_name = 'documents/create_sales_promotion.html'
     model = SalesPromotionPermitApplication
@@ -108,8 +112,14 @@ class CreatePersonalDataSheetView(LoginRequiredMixin, FormStepsMixin, FormsetMix
 
         return context
     
+    def get_success_url(self):
+        return reverse_lazy('personal-data-sheet', kwargs={'pk': self.object.pk})
+    
 class PersonalDataSheetDetailView(DetailView):
-    pass
+    template_name = 'documents/personal_data_sheet.html'
+    model = PersonalDataSheet
+    context_object_name = 'personal_data_sheet'
+
     
 class CreateServiceRepairAccreditationApplication(LoginRequiredMixin, FormStepsMixin, FormsetMixin, CreateView):
     template_name = 'documents/create_service_repair.html'

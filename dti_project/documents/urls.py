@@ -9,4 +9,5 @@ urlpatterns = [
 
     # DETAIL VIEWS
     path("sales-promotion-application/<int:pk>", views.SalesPromotionDetailView.as_view(), name="sales-promotion-application"),
+    path("personal-data-sheet/<int:pk>", views.PersonalDataSheetDetailView.as_view(), name="personal-data-sheet"),
 ]
