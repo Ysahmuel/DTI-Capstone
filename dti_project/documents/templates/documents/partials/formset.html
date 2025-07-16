@@ -3,30 +3,88 @@
 <fieldset id="{{ label }}-formset" data-label="{{ label }}">
     <p class="part-count">Part {{ forloop.counter|add:"1" }} of {{ formsets_count }}</p>
     <legend>{{ label|titlecase }}</legend>
+    
+    <!-- Management form for Django formset -->
     {{ formset.management_form }}
 
     <div class="stepped-layout">
-
+        <!-- Input form section (visible to user) -->
         <div class="step-grid">
             {% for form in formset %}
-
-                {% for field in form.visible_fields %}
-                    <div class="form-group">
-                        <label for="{{ field.id_for_label }}">{{ field.label|safe }}</label>
-                        {{ field }}
-                        {{ field.errors }}
-                    </div>
-                {% endfor %}
-
+                {% if forloop.first %}
+                    {% for field in form.visible_fields %}
+                        <div class="form-group">
+                            <label for="template_{{ field.name }}">{{ field.label|safe }}</label>
+                            <!-- Create a template input with just the field name -->
+                            {% if field.field.widget.input_type == 'select' %}
+                                <select name="template_{{ field.name }}" 
+                                        id="template_{{ field.name }}" 
+                                        class="{{ field.field.widget.attrs.class|default:'' }}">
+                                    <option value="">---------</option>
+                                    {% for choice in field.field.choices %}
+                                        <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                                    {% endfor %}
+                                </select>
+                            {% elif field.field.widget.input_type == 'textarea' %}
+                                <textarea name="template_{{ field.name }}" 
+                                          id="template_{{ field.name }}" 
+                                          class="{{ field.field.widget.attrs.class|default:'' }}"
+                                          {% if field.field.widget.attrs.rows %}rows="{{ field.field.widget.attrs.rows }}"{% endif %}
+                                          {% if field.field.widget.attrs.cols %}cols="{{ field.field.widget.attrs.cols }}"{% endif %}
+                                          {% if field.field.widget.attrs.placeholder %}placeholder="{{ field.field.widget.attrs.placeholder }}"{% endif %}></textarea>
+                            {% else %}
+                                <input type="{{ field.field.widget.input_type|default:'text' }}" 
+                                       name="template_{{ field.name }}" 
+                                       id="template_{{ field.name }}" 
+                                       class="{{ field.field.widget.attrs.class|default:'' }}"
+                                       {% if field.field.widget.attrs.placeholder %}placeholder="{{ field.field.widget.attrs.placeholder }}"{% endif %}
+                                       {% if field.field.widget.attrs.maxlength %}maxlength="{{ field.field.widget.attrs.maxlength }}"{% endif %}>
+                            {% endif %}
+                            <div class="field-errors"></div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
             {% endfor %}
         </div>
 
         <button class="add-btn" type="button">Add</button>
 
+        <!-- Preview list where added items will be shown -->
         <ol id="{{ label }}-preview-list" class="preview-list">
+            <!-- Existing formset data (for edit mode) -->
+            {% for form in formset %}
+                {% if form.instance.pk %}
+                    <li class="preview-item" data-form-index="{{ forloop.counter0 }}">
+                        <strong>{{ form.instance.name|default:form.instance.title }} - {{ form.instance.brand|default:form.instance.organization }}</strong>
+                        <p class="period">({{ form.instance.start_date|default:form.instance.date_from }} - {{ form.instance.end_date|default:form.instance.date_to|default:"Present" }})</p>
+                        
+                        <!-- Hidden formset inputs for existing data -->
+                        <div class="hidden-formset" style="display: none;">
+                            {% for field in form.hidden_fields %}
+                                {{ field }}
+                            {% endfor %}
+                            {% for field in form.visible_fields %}
+                                <input type="hidden" name="{{ field.html_name }}" value="{{ field.value|default:'' }}">
+                            {% endfor %}
+                        </div>
+                        
+                        <button type="button" class="remove-btn">
+                            <div class="fa-solid fa-xmark"></div>
+                        </button>
+                    </li>
+                {% endif %}
+            {% endfor %}
         </ol>
 
+        <!-- Display formset errors -->
+        {% if formset.errors %}
+            <div class="formset-errors">
+                {% for error in formset.errors %}
+                    {% if error %}
+                        <div class="error">{{ error }}</div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
     </div>
-
-
 </fieldset>
