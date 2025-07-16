@@ -8,7 +8,6 @@
 #         ...
 #     ],
 #     "fieldset-id"                      # str: The HTML id attribute to assign to this fieldset
-#     "stepped"                          # str: The type of fieldset structure whether stepped grid or 5 field fieldset
 # )
 
 SALES_PROMOTION_FIELD_GROUPS = [
