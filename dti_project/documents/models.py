@@ -232,7 +232,7 @@ class ServiceRepairAccreditationApplication(models.Model):
     form_of_organization = models.CharField(max_length=20, choices=FORM_OF_ORGANIZATION_CHOICES)
     industry_classification = models.CharField(max_length=255, blank=True)
 
-    annual_gross_service_revenue = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    annual_gross_service_revenue = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True, help_text="As of 31 December 20__")
     capital_investment = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     tax_identification_number = models.CharField(max_length=20)
     date_established = models.DateField(blank=True, null=True)
@@ -246,17 +246,21 @@ class ServiceRepairAccreditationApplication(models.Model):
     def get_warranty_text(self):
         """Generate the warranty/undertaking text with the warranty period filled in"""
         warranty_template = """
-         WARRANTS THE QUALITY OF WORKMANSHIP AND PROCESS UNDERTAKEN BY THE SHOP FOR A PERIOD OF {warranty_period} ({warranty_period_words}) DAYS COUNTED FROM THE DATE OF ACTUAL RELEASE AND DELIVERY OF EACH AND/OR JOB ORDER TO THE RESPECTIVE CUSTOMER.
+        {name_of_business} Warrants the quality of workmanship and process undertaken by the shop for a period of {warranty_period} ({warranty_period_words}) 
+        days counted from the date of actual release and  delivery of each and/or job order to the respective customer.
 
-        This warranty does not cover damage caused by misuse, accidents, or alteration of workmanship; in addition, it is expressly understood that the shop management shall not be liable for any patent defect in the product and which is not included in the job contract.
+        This warranty does not cover damage caused by misuse, accidents, or alteration of workmanship; in addition, 
+        it is expressly understood that the shop management shall not be liable for any patent defect in the product and which is not included in the job contract.
 
-        We further undertake to abide by the rules and regulations promulgated by DTI and the terms and conditions of this warranty. In the event of violation on our part, our accreditation certificate may be cancelled at the discretion of the DTI.
+        We further undertake to abide by the rules and regulations promulgated by DTI and the terms and conditions of this warranty. 
+        In the event of violation on our part, our accreditation certificate may be cancelled at the discretion of the DTI.
         """
         
         # Convert number to words for the parentheses
         warranty_period_words = self.number_to_words(self.warranty_period)
         
         return warranty_template.format(
+            name_of_business=self.name_of_business,
             warranty_period=self.warranty_period,
             warranty_period_words=warranty_period_words
         )
