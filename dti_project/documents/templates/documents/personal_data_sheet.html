@@ -1,4 +1,5 @@
 {% extends 'dashboard/layout.html' %}
+{% load custom_filters %}
 
 {% block title %} Personal Data Sheet {% endblock %}
 
@@ -7,10 +8,26 @@
     <header>
         <div class="column">
             <h3>Personal Data Sheet</h3>
+            <h1>{{ personal_data_sheet }}</h1>
         </div>
         <div class="actions">
 
         </div>
     </header>
+    <div class="details-grid">
+        {% for group in detail_groups %}
+            <section class="grid-item" id="details-grid-item">
+                <h4>{{ group.0 }}</h4>
+                <ul>
+                    {% for label, value in group.1 %}
+                        <li class="label-value-row">
+                            <strong>{{ label }}: </strong>
+                            <p>{{ personal_data_sheet|get_attr:value }}</p>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% endfor %}
+    </div>
 </div>
 {% endblock %}
