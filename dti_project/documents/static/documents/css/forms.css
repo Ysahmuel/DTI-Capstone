@@ -459,3 +459,10 @@
     outline: none;
     cursor: pointer;
 }
+
+.form-paragraph-text {
+    color: var(--text-secondary);
+    font-size: clamp(1rem, 0.9vw, 2rem);
+    font-weight: 500;
+    line-height: clamp(1rem, 1.4vw, 2rem);
+}
