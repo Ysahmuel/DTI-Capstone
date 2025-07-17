@@ -15,3 +15,10 @@ def get_form_field(form, field_name):
 @register.filter
 def is_textarea(field):
     return isinstance(field.field.widget, Textarea)
+
+@register.filter(name='get_attr')
+def get_attr(obj, attr_name):
+    try:
+        return getattr(obj, attr_name, '-') or '-'
+    except Exception:
+        return '-'
