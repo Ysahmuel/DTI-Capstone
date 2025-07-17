@@ -12,14 +12,14 @@
             <form class="documents-form" action="{% url 'create-personal-data-sheet' %}" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
 
-                {% for group in field_groups %}
-                    {% include 'documents/partials/fieldset.html' %}
-                {% endfor %}
-
-                {% for label, formset in formsets.items %}
-
-                    {% include 'documents/partials/formset.html' %}
-
+                {% for step_info in enumerated_steps %}
+                    {% if step_info.1 == 'fieldset' %}
+                        {% include 'documents/partials/fieldset.html' with counter=step_info.0 group=step_info.2 total_parts=total_parts %}
+                    {% elif step_info.1 == 'formset' %}
+                        {% include 'documents/partials/formset.html' with counter=step_info.0 label=step_info.2 formset=step_info.3 total_parts=total_parts %}
+                    {% elif step_info.1 == 'section' %}
+                        {% include 'documents/partials/coverage-fieldset.html' with counter=step_info.0 total_parts=total_parts %}
+                    {% endif %}
                 {% endfor %}
 
             </form>
