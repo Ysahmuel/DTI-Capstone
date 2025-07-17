@@ -243,7 +243,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const uploadFileContainer = document.querySelector('.upload-image-container');
     
-    uploadFileContainer.addEventListener('click', function() {
+    if (uploadFileContainer) {
+        uploadFileContainer.addEventListener('click', function() {
         const input = uploadFileContainer.querySelector('input[type="file"]');
         const dragDropChooseText = uploadFileContainer.querySelector('#drag-drop-text');
         const fileText = uploadFileContainer.querySelector('#file-text');
@@ -288,5 +289,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
     })
+    }
 
 });
