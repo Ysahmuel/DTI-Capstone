@@ -4,4 +4,25 @@
 
 {% block body %}
     <h1>Welcome {{ user }}</h1>
+    
+    <div>
+        <h2>Sales Promotion Permit Applications (Sample list only)</h2>
+        <ul>
+            {% for promo in sales_promos %}
+                <li>
+                    <a href="{% url 'sales-promotion-application' promo.id %}">{{ promo }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div>
+        <h2>Personal Data Sheet (Sample list only)</h2>
+        <ul>
+            {% for sheet in personal_data_sheets %}
+                <li>
+                    <a href="{% url 'personal-data-sheet' sheet.id %}">{{ sheet }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
 {% endblock %}
