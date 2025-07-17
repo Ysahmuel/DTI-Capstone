@@ -55,3 +55,14 @@ SERVICE_REPAIR_ACCREDITATION_FIELD_GROUPS = [
         ]
     ),
 ]
+
+PERSONAL_DATA_SHEET_DETAIL_GROUPS = [
+    ("Personal Information", [
+        ("First Name", "first_name"),
+        ("Last Name", "last_name"),
+        ("Middle Name", "middle_name"),
+        ("Email", "email"),
+        ("Phone", "phone"),
+        ("Date of Birth", "date_of_birth"),
+    ], "personal-info"),
+]
