@@ -1,0 +1,90 @@
+<fieldset id="coverage-fieldset">
+    <p class="part-count">Part 5 of 5</p>
+    <legend>Coverage</legend>
+
+    <ul class="coverage-choice-list">
+        <li class="coverage-choice">
+            <div class="icon-group">
+                <i class="fa-solid fa-city"></i>
+            </div>
+            <div class="details">
+                <label for="id_coverage_NCR">NCR</label>
+                <p>or several regions including Metro Manila</p>
+                <input type="radio" name="coverage" id="id_coverage_ncr" value="NCR" required>
+            </div>
+            <i class="fa-solid fa-check option-selected-icon"></i>
+        </li>
+
+        <li class="coverage-choice">
+            <div class="icon-group">
+                <i class="fa fa-map"></i>
+                <i class="fa-solid fa-2 number-icon"></i>
+            </div>
+            <div class="details">
+                <label for="id_coverage_2_REGIONS">2+ Regions</label>
+                <p>or more outside of NCR or Metro Manila</p>
+                <input type="radio" name="coverage" id="id_coverage_2_REGIONS" value="2_REGIONS">
+            </div>
+            <i class="fa-solid fa-check option-selected-icon"></i>
+        </li>
+
+        <li class="coverage-choice">
+            <div class="icon-group">
+                <i class="fa fa-map"></i>
+                <i class="fa-solid fa-1 number-icon"></i>
+            </div>
+            <div class="details">
+                <label for="id_coverage_1_REGION_2_PROVINCES">Single Region</label>
+                <p>covering 2 provinces or more</p>
+                <input type="radio" name="coverage" id="id_coverage_1_REGION_2_PROVINCES" value="1_REGION_2_PROVINCES">
+            </div>
+            <i class="fa-solid fa-check option-selected-icon"></i>
+        </li>
+
+        <li class="coverage-choice">
+            <div class="icon-group">
+                <i class="fa fa-map-marker-alt"></i>
+            </div>
+            <div class="details">
+                <label for="id_coverage_1_PROVINCE">Single Province</label>
+                <p>covers only one province plus city/ies or municipality/ies</p>
+                <input type="radio" name="coverage" id="id_coverage_1_PROVINCE" value="1_PROVINCE">
+            </div>
+            <i class="fa-solid fa-check option-selected-icon"></i>
+        </li>
+    </ul>
+
+    <div class="coverage-text-inputs" id="id_2_REGIONS">
+        <div class="form-group">
+            <label for="">Region of Sponsor</label>
+            {{ form.region_location_of_sponsor }}
+        </div>
+        <div class="form-group">
+            <label for="">Regions Covered (separate with commas)</label>
+            {{ form.regions_covered }}
+        </div>
+    </div>
+
+    <div class="coverage-text-inputs" id="id_1_REGION_2_PROVINCES">
+        <div class="form-group">
+            <label for="">Region</label>
+            {{ form.single_region }}
+        </div>
+        <div class="form-group">
+            <label for="">Provinces (separate with commas)</label>
+            {{ form.provinces_covered }}
+        </div>
+    </div>
+
+    <div class="coverage-text-inputs" id="id_1_PROVINCE">
+        <div class="form-group">
+            <label for="">Single Province</label>
+            {{ form.single_province }}
+        </div>
+        <div class="form-group">
+            <label for="">City/ies or Municipality/ies covered (separate with commas)</label>
+            {{ form.cities_or_municipalities_covered }}
+        </div>
+    </div>
+
+</fieldset>
