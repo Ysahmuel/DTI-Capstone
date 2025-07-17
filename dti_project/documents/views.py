@@ -26,12 +26,12 @@ class CreateSalesPromotionView(LoginRequiredMixin, FormStepsMixin, FormsetMixin,
     }
 
     FIELD_GROUPS = SALES_PROMOTION_FIELD_GROUPS
+    additional_sections = ['coverage']
 
     def get_context_data(self, **kwargs):
         context =  super().get_context_data(**kwargs)
 
         context['field_groups'] = self.FIELD_GROUPS
-
 
         return context
     

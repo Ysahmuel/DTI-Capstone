@@ -1,7 +1,7 @@
 {% load custom_filters %}
 
 <fieldset id="{{ group.2 }}-fieldset">
-    <p class="part-count">Part {{ forloop.counter }} of {{ field_groups|length }}</p>
+    <p class="part-count">Part {{ counter }} of {{ total_parts }}</p>
     <legend>{{ group.0 }}</legend>
     <div class="stepped-layout">
         {% for row in group.1 %}

@@ -1,7 +1,7 @@
 {% load custom_filters %}
 
 <fieldset id="{{ label }}-formset" data-label="{{ label }}">
-    <p class="part-count">Part {{ forloop.counter|add:"1" }} of {{ formsets_count }}</p>
+    <p class="part-count">Part {{ counter }} of {{ total_parts }}</p>
     <legend>{{ label|titlecase }}</legend>
     
     <!-- Management form for Django formset -->
