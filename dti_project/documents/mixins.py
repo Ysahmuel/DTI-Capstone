@@ -125,9 +125,56 @@ class FormsetMixin:
 
 
 class FormStepsMixin:
-    form_steps = []
+    form_steps = []  # Default empty list
+    
+    def get_form_steps(self):
+        """
+        Automatically generate form_steps from FIELD_GROUPS and formset_classes
+        """
+        steps = []
+        
+        # Add fieldsets from FIELD_GROUPS
+        if hasattr(self, 'FIELD_GROUPS'):
+            for group in self.FIELD_GROUPS:
+                steps.append(('fieldset', group))
+        
+        # Add formsets from formset_classes
+        if hasattr(self, 'formset_classes'):
+            for formset_key in self.formset_classes.keys():
+                steps.append(('formset', formset_key))
+        
+        # Add any additional sections (like coverage)
+        if hasattr(self, 'additional_sections'):
+            for section in self.additional_sections:
+                steps.append(('section', section))
+        
+        return steps
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_steps'] = self.form_steps
+        
+        # Get form steps (either manually defined or auto-generated)
+        if hasattr(self, 'form_steps') and self.form_steps:
+            form_steps = self.form_steps
+        else:
+            form_steps = self.get_form_steps()
+        
+        if form_steps:
+            # Total parts calculation
+            context['total_parts'] = len(form_steps)
+            
+            # Create enumerated steps with proper counter
+            context['enumerated_steps'] = []
+            for i, step in enumerate(form_steps, 1):
+                step_type, step_data = step[0], step[1]
+                
+                if step_type == 'fieldset':
+                    context['enumerated_steps'].append((i, 'fieldset', step_data))
+                elif step_type == 'formset':
+                    formset_key = step_data
+                    formset = context['formsets'][formset_key]
+                    context['enumerated_steps'].append((i, 'formset', formset_key, formset))
+                elif step_type == 'section':
+                    context['enumerated_steps'].append((i, 'section', step_data))
+        
         return context
