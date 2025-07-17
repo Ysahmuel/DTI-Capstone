@@ -386,14 +386,18 @@
 
 .step-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    row-gap: var(--space-md);
+    grid-template-columns: repeat(3, 1fr);
+    row-gap: var(--space-xl);
     column-gap: var(--space-lg);
     padding: var(--space-2xl);
     border: solid 1px var(--border-color);
     border-left: solid 4px var(--accent);
     border-radius: var(--radius-md);
     width: 100%;
+}
+
+.form-group.full-width {
+    grid-column: span 3;
 }
 
 #current-address-group {

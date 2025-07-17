@@ -24,7 +24,10 @@
                 <div class="step-grid">
                     {% for field_name in row %}
                         {% with form_field=form|get_form_field:field_name %}
-                            <div class="form-group">
+                            <div class="form-group 
+                                    {% if row|length == 1 or form_field|is_textarea %}
+                                        full-width
+                                    {% endif %}">
                                 <label for="{{ form_field.id_for_label }}">{{ form_field.label|safe }}</label>
                                 {{ form_field }}
                             </div>
