@@ -10,6 +10,7 @@ class SalesPromotionDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context =  super().get_context_data(**kwargs)
+        context['detail_groups'] = SALES_PROMOTION_DETAIL_GROUPS
         sales_promo = self.get_object()
 
         def split_locations(value):
