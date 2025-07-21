@@ -291,4 +291,25 @@ document.addEventListener('DOMContentLoaded', function () {
     })
     }
 
+    const tabItems = document.querySelectorAll('.tab-item');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabItems.forEach(tab => {
+        tab.addEventListener('click', function() {
+            const target = tab.getAttribute('data-tab-target');
+
+            // Remove active class from all tabs and contents
+            tabItems.forEach(i => i.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+
+            // Activate clicked tab and corresponding content
+            tab.classList.add('active')
+
+            const targetContent = document.querySelector(`.tab-content[data-tab-content="${target}"]`)
+            if (targetContent) {
+                targetContent.classList.add('active')
+            }
+        })
+    })
+
 });
