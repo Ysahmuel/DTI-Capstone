@@ -83,11 +83,17 @@ SALES_PROMOTION_DETAIL_GROUPS = [
 
 PERSONAL_DATA_SHEET_DETAIL_GROUPS = [
     ("Personal Information", [
+        ("Image", 'image'),
         ("First Name", "first_name"),
-        ("Last Name", "last_name"),
         ("Middle Name", "middle_name"),
-        ("Email", "email"),
-        ("Phone", "phone"),
+        ("Last Name", "last_name"),
+        ("Email Address", "email_address"),
+        ("Position", "position"),
         ("Date of Birth", "date_of_birth"),
+        ("Nationality", "nationality"),
+        ("Sex", "sex"),
+        ("Civil Status", "civil_status"),
+        ("Current Address", "current_address"),
+        ("Contact Number", "contact_number")
     ], "personal-info"),
 ]
