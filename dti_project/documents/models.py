@@ -91,7 +91,7 @@ class PersonalDataSheet(models.Model):
     email_address = models.EmailField()
 
     def __str__(self):
-        return f"{self.last_name} {self.first_name}"
+        return f"{self.first_name} {self.middle_name if self.middle_name else None} {self.last_name}"
 
 class EmployeeBackground(models.Model):
     personal_data_sheet = models.ForeignKey(PersonalDataSheet, related_name='employee_backgrounds', on_delete=models.CASCADE)
