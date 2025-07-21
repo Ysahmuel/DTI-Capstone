@@ -15,19 +15,44 @@
         </div>
     </header>
     <div class="details-grid">
-        {% for group in detail_groups %}
-            <section class="grid-item" id="details-grid-item">
-                <h4>{{ group.0 }}</h4>
-                <ul>
-                    {% for label, value in group.1 %}
-                        <li class="label-value-row">
-                            <strong>{{ label }}: </strong>
-                            <p>{{ personal_data_sheet|get_attr:value }}</p>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </section>
-        {% endfor %}
+        <section class="grid-item" id="details-grid-item">
+            {% with group=detail_groups.0 obj=personal_data_sheet %}
+                {% include 'documents/partials/details_grid_item.html' %}
+            {% endwith %}
+        </section>
+
+        <!-- SHOW GRID SECTION LATER HERE WITH CLICKABLE TABS OF EACH FORMSET (Employee Background, Trainings Attended, etc)-->
+        <section class="grid-item tabs-section">
+            <ul class="tabs-list">
+                {% for section in tab_sections %}
+                    <li class="tab-item {% if section.active %} active {% endif %}" data-tab-target="{{ section.id }}">
+                        <i class="{{ section.icon }}"></i>
+                        <strong>{{ section.title }}</strong>
+                        <span class="object-count">({{ section.data|length }})</span>
+                    </li>
+                {% endfor %}
+            </ul>
+
+            {% for section in tab_sections %}
+                <div class="tab-content {% if section.active %} active {% endif %}" data-tab-content="{{ section.id }}">
+                    <h3>{{ section.title }}</h3>
+                    <dl>
+                        {% for row in section.data %}
+                            <div class="field-pair">
+                                {% for label, value in section.field_labels|zip_lists:row %}
+                                    <div class="column">
+                                        <dt>{{ label }}</dt>
+                                        <dd>{{ value }}</dd>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                    </dl>
+                </div>
+            {% endfor %}
+
+        </section>
+
     </div>
 </div>
 {% endblock %}

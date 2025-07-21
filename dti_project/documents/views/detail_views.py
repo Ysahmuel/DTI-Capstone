@@ -1,5 +1,7 @@
 import re
-from ..constants import PERSONAL_DATA_SHEET_DETAIL_GROUPS
+
+from ..mixins import TabsSectionMixin
+from ..constants import PERSONAL_DATA_SHEET_DETAIL_GROUPS, PERSONAL_DATA_SHEET_TAB_SECTIONS, SALES_PROMOTION_DETAIL_GROUPS
 from ..models import PersonalDataSheet, SalesPromotionPermitApplication
 from django.views.generic import DetailView
 
@@ -52,10 +54,11 @@ class SalesPromotionDetailView(DetailView):
     
 
     
-class PersonalDataSheetDetailView(DetailView):
+class PersonalDataSheetDetailView(TabsSectionMixin, DetailView):
     template_name = 'documents/personal_data_sheet.html'
     model = PersonalDataSheet
     context_object_name = 'personal_data_sheet'
+    tab_sections_config = PERSONAL_DATA_SHEET_TAB_SECTIONS
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
