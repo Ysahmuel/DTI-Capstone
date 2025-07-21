@@ -1,0 +1,17 @@
+{% load custom_filters %}
+
+<section class="details-section" id="{{ group.2 }}">
+    <h4>{{ group.0 }}</h4>
+    <ul>
+        {% for label, value in group.1 %}
+            {% if value == 'image' %}
+                <img src="{{ obj.image.url }}" alt="">
+            {% else %}
+                <li class="label-value-row">
+                    <strong>{{ label }}: </strong>
+                    <p>{{ obj|get_attr:value }}</p>
+                </li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</section>
