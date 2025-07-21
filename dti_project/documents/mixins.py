@@ -1,6 +1,7 @@
 from django.db import transaction
 from django.contrib import messages
 from itertools import chain
+from django.core.exceptions import ImproperlyConfigured
 
 class FormsetMixin:
     formset_classes = {}  # Example: {'employee': EmployeeBackgroundFormset, 'training': TrainingsAttendedFormset}
@@ -177,4 +178,91 @@ class FormStepsMixin:
                 elif step_type == 'section':
                     context['enumerated_steps'].append((i, 'section', step_data))
         
+        return context
+
+class TabsSectionMixin:
+    """
+    Mixin to add tab sections functionality to DetailViews
+    """
+    tab_sections_config = None
+
+    def get_tab_sections_config(self):
+        """
+        Return the tab sections configuration.
+        Can be overridden in subclasses for dynamic configuration.
+        """
+        if self.tab_sections_config is None:
+            raise ImproperlyConfigured(f"{self.__class__.__name__} must define tab_sections_config")
+        
+        return self.tab_sections_config
+    
+    def get_tab_sections(self):
+        sections = []
+        config = self.get_tab_sections_config()
+
+        for section_config in config:
+            section = section_config.copy()
+            data = []
+
+            if 'relation' in section:
+                relation_name = section['relation']
+                if hasattr(self.object, relation_name):
+                    relation = getattr(self.object, relation_name)
+                    try:
+                        data = relation.all()
+                    except AttributeError:
+                        if callable(relation):
+                            data = relation()
+                        else:
+                            data = []
+
+            formatted_data = []
+            field_labels = []
+
+            if data:
+                model_fields = [
+                    field for field in data[0]._meta.fields
+                    if not field.name.startswith('id') and field.name != 'personal_data_sheet'
+                ]
+
+                field_labels = []
+                for field in model_fields:
+                    if field.name == "end_date":
+                        continue
+                    elif field.name == "start_date":
+                        field_labels.append("Period")
+                    else:
+                        field_labels.append(field.verbose_name.capitalize())
+
+                for obj in data:
+                    row = []
+                    for field in model_fields:
+                        if field.name == 'end_date':
+                            continue
+                        elif field.name == 'start_date':
+                            start_date = field.value_from_object(obj)
+                            end_date = getattr(obj, 'end_date', None)
+
+                            formatted_period = (
+                                f"{start_date.strftime('%b %Y')} - {end_date.strftime('%b %Y')}"
+                                if end_date else
+                                f"{start_date.strftime('%b %Y')} - Present"
+                            )
+                            row.append(formatted_period)
+                        else:
+                            row.append(field.value_from_object(obj))
+
+                    formatted_data.append(row)
+
+
+            section['field_labels'] = field_labels    # e.g. ['Employer', 'Position', ...]
+            section['data'] = formatted_data          # e.g. [['ACME', 'Engineer'], ...]
+            section['has_data'] = bool(formatted_data)
+
+            sections.append(section)
+        return sections
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['tab_sections'] = self.get_tab_sections()
         return context
