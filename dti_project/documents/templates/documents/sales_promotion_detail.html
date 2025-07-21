@@ -18,109 +18,11 @@
 
         <section class="grid-item" id="details-grid-item">
 
-            <section class="details-section" id="dates">
-
-                <h4>Base Details</h4>
-
-                <ul>
-                    <li class="label-value-row">
-                        <strong>User: </strong>
-                        <p>{{ sales_promo.user }}</p>
-                    </li>
-
-                    <li class="label-value-row">
-                        <strong>Date Filed: </strong>
-                        <p>{{ sales_promo.date_filed }}</p>
-                    </li>
-
-                    <li class="label-value-row">
-                        <strong>Promo Period Start: </strong>
-                        <p>{{ sales_promo.promo_period_start }}</p>
-                    </li>
-
-                    <li class="label-value-row">
-                        <strong>Promo Period End: </strong>
-                        <p>{{ sales_promo.promo_period_end }}</p>
-                    </li>
-                </ul>
-
-            </section>
-
-            <section class="details-section" id="sponsors">
-
-                <h4>Sponsor Details</h4>
-
-                <ul>
-                    <li class="label-value-row">
-                        <strong>Sponsor Name:</strong>
-                        <p>{{ sales_promo.sponsor_name  }}</p>
-                    </li>
-
-                    <li class="label-value-row">
-                        <strong>Sponsor Address: </strong>
-                        <p>{{ sales_promo.sponsor_address }}</p>
-                    </li>
-
-                    <li class="label-value-row">
-                        <strong>Sponsor Telephone: </strong>
-                        <p>{{ sales_promo.sponsor_telephone }}</p>
-                    </li>
-
-                    <li class="label-value-row">
-                        <strong>Sponsor Email: </strong>
-                        <p>{{ sales_promo.sponsor_email }}</p>
-                    </li>
-
-                    <li class="label-value-row">
-                        <strong>Sponsor Authorized Rep: </strong>
-                        <p>{{ sales_promo.sponsor_authorized_rep }}</p>
-                    </li>
-
-                    <li class="label-value-row">
-                        <strong>Sponsor Designation: </strong>
-                        <p>{{ sales_promo.sponsor_designation }}</p>
-                    </li>
-                </ul>
-
-            </section>
-
-            <section class="details-section" id="advertising">
-
-                <h4>Advertising Details</h4>
-
-                <ul>
-                    <li class="label-value-row">
-                        <strong>Advertising Agency Name:</strong>
-                        <p>{{ sales_promo.advertising_agency_name  }}</p>
-                    </li>
-
-                    <li class="label-value-row">
-                        <strong>Advertising Agency Address: </strong>
-                        <p>{{ sales_promo.advertising_agency_address }}</p>
-                    </li>
-
-                    <li class="label-value-row">
-                        <strong>Advertising Agency Telephone: </strong>
-                        <p>{{ sales_promo.advertising_agency_telephone }}</p>
-                    </li>
-
-                    <li class="label-value-row">
-                        <strong>Advertising Agency Email: </strong>
-                        <p>{{ sales_promo.advertising_agency_email }}</p>
-                    </li>
-
-                    <li class="label-value-row">
-                        <strong>Advertising Agency Authorized Rep: </strong>
-                        <p>{{ sales_promo.advertising_agency_authorized_rep }}</p>
-                    </li>
-
-                    <li class="label-value-row">
-                        <strong>Advertising Agency Designation: </strong>
-                        <p>{{ sales_promo.advertising_agency_designation }}</p>
-                    </li>
-                </ul>
-
-            </section>
+            {% for group in detail_groups %}
+                {% with obj=sales_promo %}
+                    {% include 'documents/partials/details_grid_item.html' %}
+                {% endwith %} 
+            {% endfor %}
 
         </section>
 

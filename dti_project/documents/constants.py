@@ -56,6 +56,31 @@ SERVICE_REPAIR_ACCREDITATION_FIELD_GROUPS = [
     ),
 ]
 
+SALES_PROMOTION_DETAIL_GROUPS = [
+    ("Base Details", [
+        ("User", "user"),
+        ("Date Filed", "date_filed"),
+        ("Promo Period Start", "promo_period_start"),
+        ("Promo Period End", "promo_period_end"),
+    ], "dates"),
+    ("Sponsor Details", [
+        ("Sponsor Name", "sponsor_name"),
+        ("Sponsor Address", "sponsor_address"),
+        ("Sponsor Telephone", "sponsor_telephone"),
+        ("Sponsor Email", "sponsor_email"),
+        ("Sponsor Authorized Rep", "sponsor_authorized_rep"),
+        ("Sponsor Designation", "sponsor_designation"),
+    ], "sponsors"),
+    ("Advertising Details", [
+        ("Advertising Agency Name", "advertising_agency_name"),
+        ("Advertising Agency Address", "advertising_agency_address"),
+        ("Advertising Agency Telephone", "advertising_agency_telephone"),
+        ("Advertising Agency Email", "advertising_agency_email"),
+        ("Advertising Agency Authorized Rep", "advertising_agency_authorized_rep"),
+        ("Advertising Agency Designation", "advertising_agency_designation"),
+    ], "advertising"),
+]
+
 PERSONAL_DATA_SHEET_DETAIL_GROUPS = [
     ("Personal Information", [
         ("First Name", "first_name"),
