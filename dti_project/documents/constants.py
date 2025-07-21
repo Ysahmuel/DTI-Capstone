@@ -97,3 +97,34 @@ PERSONAL_DATA_SHEET_DETAIL_GROUPS = [
         ("Contact Number", "contact_number")
     ], "personal-info"),
 ]
+
+PERSONAL_DATA_SHEET_TAB_SECTIONS = [
+    {
+        'id': 'employee-backgrounds',
+        'title': 'Employee Backgrounds',
+        'relation': 'employee_backgrounds',
+        'icon': 'fas fa-briefcase',  
+        'active': True,
+    },
+    {
+        'id': 'training-courses',
+        'title': 'Training Courses',
+        'relation': 'training_courses',
+        'icon': 'fas fa-chalkboard-teacher',  
+        'active': False,
+    },
+    {
+        'id': 'educational-attainment',
+        'title': 'Educational Attainment',
+        'relation': 'educational_attainment',
+        'icon': 'fas fa-graduation-cap', 
+        'active': False,
+    },
+    {
+        'id': 'character-references',
+        'title': 'Character References',
+        'relation': 'character_references',
+        'icon': 'fas fa-address-book',  
+        'active': False,
+    }
+]
