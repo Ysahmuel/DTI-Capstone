@@ -22,3 +22,7 @@ def get_attr(obj, attr_name):
         return getattr(obj, attr_name, '-') or '-'
     except Exception:
         return '-'
+
+@register.filter
+def zip_lists(a, b):
+    return zip(a, b)
