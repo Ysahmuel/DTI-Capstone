@@ -129,9 +129,6 @@ class CharacterReference(models.Model):
     personal_data_sheet = models.ForeignKey(PersonalDataSheet, related_name='character_references', on_delete=models.CASCADE)
     name = models.CharField(max_length=30)
     company = models.CharField(max_length=50)
-    email = models.EmailField()
-    contact_number = models.CharField(max_length=20)
-
     email = models.EmailField(blank=True, null=True)
     contact_number = models.CharField(max_length=20, blank=True, null=True)
 
