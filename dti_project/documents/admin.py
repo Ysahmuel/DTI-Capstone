@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .utils.admin_helpers import get_full_name_from_personal_data
-from .models import EducationalAttainment, EmployeeBackground, PersonalDataSheet, ProductCovered, SalesPromotionPermitApplication, ServiceRepairAccreditationApplication, TrainingsAttended
+from .models import CharacterReference, EducationalAttainment, EmployeeBackground, PersonalDataSheet, ProductCovered, SalesPromotionPermitApplication, ServiceRepairAccreditationApplication, TrainingsAttended
 
 
 # Register your models here.
@@ -38,6 +38,11 @@ class TrainingsAttendedAdmin(admin.ModelAdmin):
 class EducationalAttainmentAdmin(admin.ModelAdmin):
     list_display = (get_full_name_from_personal_data, 'school', 'course')
     search_fields = ('school', 'course')
+
+@admin.register(CharacterReference)
+class CharacterReferencesAdmin(admin.ModelAdmin):
+    list_display = ('name', 'company', 'email', 'contact_number')
+    search_fields = ('name', 'company')
 
 @admin.register(ServiceRepairAccreditationApplication)
 class ServiceRepairAccreditationApplicationAdmin(admin.ModelAdmin):
