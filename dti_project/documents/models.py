@@ -22,7 +22,6 @@ class PeriodModel(models.Model):
 
 class SalesPromotionPermitApplication(BaseApplication):
     promo_title = models.CharField(max_length=255)
-    date_filed = models.DateField(default=timezone.now)
 
     sponsor_name = models.CharField(max_length=255)
     sponsor_address = models.TextField()
