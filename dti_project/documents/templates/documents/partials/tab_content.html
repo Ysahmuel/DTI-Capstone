@@ -1,0 +1,28 @@
+{% load custom_filters %}
+
+<div class="tab-content {% if section.active %} active {% endif %}" data-tab-content="{{ section.id }}">
+    <h3>{{ section.title }}</h3>
+    
+    {% if section.data and section.field_labels %}
+        <dl>
+            {% for row in section.data %}
+                <div class="field-pair">
+                    {% for label, value in section.field_labels|zip_lists:row %}
+                        <div class="column">
+                            <dt>{{ label }}</dt>
+                            <dd>{{ value|default:"—" }}</dd>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% empty %}
+                <div class="empty-state">
+                    <p>No {{ section.title|lower }} records found.</p>
+                </div>
+            {% endfor %}
+        </dl>
+    {% else %}
+        <div class="empty-state">
+            <p>No items.</p>
+        </div>
+    {% endif %}
+</div>
