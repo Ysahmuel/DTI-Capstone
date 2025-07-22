@@ -1,0 +1,16 @@
+<section class="grid-item tabs-section">
+    <ul class="tabs-list">
+        {% for section in tab_sections %}
+            <li class="tab-item {% if section.active %} active {% endif %}" data-tab-target="{{ section.id }}">
+                <i class="{{ section.icon }}"></i>
+                <strong>{{ section.title }}</strong>
+                <span class="object-count">({{ section.data|length }})</span>
+            </li>
+        {% endfor %}
+    </ul>
+
+    {% for section in tab_sections %}
+        {% include 'documents/partials/tab_content.html' %}
+    {% endfor %}
+
+</section>
