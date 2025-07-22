@@ -12,6 +12,14 @@ class BaseApplication(models.Model):
     class Meta:
         abstract = True
 
+class PeriodModel(models.Model):
+    start_date = models.DateField()
+    end_date = models.DateField(null=True, blank=True)
+
+    class Meta:
+        abstract = True
+        ordering = ['start_date']
+
 class SalesPromotionPermitApplication(BaseApplication):
     promo_title = models.CharField(max_length=255)
     date_filed = models.DateField(default=timezone.now)
@@ -93,38 +101,26 @@ class PersonalDataSheet(models.Model):
     def __str__(self):
         return f"{self.first_name} {self.middle_name if self.middle_name else None} {self.last_name}"
 
-class EmployeeBackground(models.Model):
+class EmployeeBackground(PeriodModel):
     personal_data_sheet = models.ForeignKey(PersonalDataSheet, related_name='employee_backgrounds', on_delete=models.CASCADE)
     employer = models.CharField(max_length=255)
     position = models.CharField(max_length=255)
 
-    # Period Covered 
-    start_date = models.DateField()
-    end_date = models.DateField(null=True, blank=True)  # in case it’s current/ongoing
-
     def __str__(self):
         return f"{self.position} - {self.employer}"
     
-class TrainingsAttended(models.Model):
+class TrainingsAttended(PeriodModel):
     personal_data_sheet = models.ForeignKey(PersonalDataSheet, related_name='trainings_attended', on_delete=models.CASCADE)
     training_course = models.CharField(max_length=255)
     conducted_by = models.CharField(max_length=255)
 
-    # Training Period
-    start_date = models.DateField()
-    end_date = models.DateField(null=True, blank=True)
-
     def __str__(self):
         return self.training_course
     
-class EducationalAttainment(models.Model):
+class EducationalAttainment(PeriodModel):
     personal_data_sheet = models.ForeignKey(PersonalDataSheet, related_name='educational_attainment', on_delete=models.CASCADE)
     school = models.CharField(max_length=255)
     course = models.CharField(max_length=255)
-
-    # Period
-    start_date = models.DateField()
-    end_date = models.DateField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.school} - {self.course}"
