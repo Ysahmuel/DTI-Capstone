@@ -237,6 +237,7 @@
     grid-row: span 11;
     height: 100%;
     padding: 0;
+    overflow-y: hidden;
 }
 
 .grid-item.tabs-section .tabs-list {
@@ -291,8 +292,11 @@
 }
 
 .tab-content dl {
-  list-style-type: none;
-  margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    list-style-type: none;
+    margin-top: 2rem;
 }
 
 .tab-content .field-pair {
@@ -312,4 +316,9 @@
 
 .tab-content dd {
     font-weight: 600;
+}
+
+.tab-content .empty-state {
+    color: var(--text-light);
+    margin-top: 1rem;
 }

@@ -1,5 +1,4 @@
 {% extends 'dashboard/layout.html' %}
-{% load custom_filters %}
 
 {% block title %} Personal Data Sheet {% endblock %}
 
@@ -21,37 +20,7 @@
             {% endwith %}
         </section>
 
-        <!-- SHOW GRID SECTION LATER HERE WITH CLICKABLE TABS OF EACH FORMSET (Employee Background, Trainings Attended, etc)-->
-        <section class="grid-item tabs-section">
-            <ul class="tabs-list">
-                {% for section in tab_sections %}
-                    <li class="tab-item {% if section.active %} active {% endif %}" data-tab-target="{{ section.id }}">
-                        <i class="{{ section.icon }}"></i>
-                        <strong>{{ section.title }}</strong>
-                        <span class="object-count">({{ section.data|length }})</span>
-                    </li>
-                {% endfor %}
-            </ul>
-
-            {% for section in tab_sections %}
-                <div class="tab-content {% if section.active %} active {% endif %}" data-tab-content="{{ section.id }}">
-                    <h3>{{ section.title }}</h3>
-                    <dl>
-                        {% for row in section.data %}
-                            <div class="field-pair">
-                                {% for label, value in section.field_labels|zip_lists:row %}
-                                    <div class="column">
-                                        <dt>{{ label }}</dt>
-                                        <dd>{{ value }}</dd>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        {% endfor %}
-                    </dl>
-                </div>
-            {% endfor %}
-
-        </section>
+        {% include 'documents/components/tabs_section.html' %}
 
     </div>
 </div>
