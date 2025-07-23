@@ -1,6 +1,8 @@
 {% load custom_filters %}
 
-<div class="tab-content {% if section.active %} active {% endif %}" data-tab-content="{{ section.id }}">
+<div class="tab-content {% if section.active %} active {% endif %}" 
+        data-tab-content="{{ section.id }}"
+        data-loaded="{{ section.lazy_load|yesno:'false,true' }}">
     <h3>{{ section.title }}</h3>
     
     {% if section.data and section.field_labels %}
