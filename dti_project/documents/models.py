@@ -276,3 +276,53 @@ class ServiceRepairAccreditationApplication(models.Model):
             return ones[number // 100] + ' hundred' + ('' if number % 100 == 0 else ' ' + self.number_to_words(number % 100))
         else:
             return str(number)  # For larger numbers, just return the digit
+        
+class OrderOfPayment(models.Model):
+    name = models.CharField(max_length=55)
+    date = models.DateField(default=timezone.now)
+    address = models.TextField(max_length=255)
+
+    account_officer_date = models.DateField(null=True, blank=True)
+    account_officer_signature = models.ImageField(upload_to='signatures/', null=True, blank=True)
+
+    special_collecting_officer_date = models.DateField(null=True, blank=True)
+    special_collecting_officer_or_number = models.CharField(max_length=50, blank=True)
+    special_collecting_officer_signature = models.ImageField(upload_to='signatures/', null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.name} {self.address}"
+    
+class PermitFee(models.Model):
+    PERMIT_CHOICES = [
+        ('discount', 'Discount'),
+        ('premium', 'Premium'),
+        ('raffle', 'Raffle'),
+        ('contest', 'Contest'),
+        ('redemption', 'Redemption'),
+        ('games', 'Games'),
+        ('beauty_contest', 'Beauty Contest'),
+        ('home_solicitation', 'Home Solicitation'),
+        ('amendments', 'Amendments'),
+        ('doc_stamp', 'DocStamp'),
+    ]
+
+    REMARK_CHOICES = [
+        ('R', 'Several provinces/cities within a region'),
+        ('P', 'Single province/city/municipality'),
+        ('X', '2 or more regions excluding Metro Manila'),
+        ('A', 'Additional fees due to reassessment of premium and prizes')
+    ]
+
+    permit = models.ForeignKey(SalesPromotionPermitApplication, related_name='fees', on_delete=models.CASCADE)
+    fee_type = models.CharField(max_length=20, choices=PERMIT_CHOICES)
+    remarks = models.CharField(max_length=64, choices=REMARK_CHOICES)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+
+    def save(self, *args, **kwargs):
+        # Automatically set amount to ₱30 if fee_type is doc_stamp and amount wasn't set
+        if self.fee_type == 'doc_stamp' and self.amount != 30:
+            self.amount == 30
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.permit} ({self.fee_type}): ₱{self.amount}"
