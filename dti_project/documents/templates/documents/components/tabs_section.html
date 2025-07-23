@@ -1,16 +1,32 @@
-<section class="grid-item tabs-section">
+<section class="grid-item tabs-section" data-lazy-loading="{% if enable_lazy_loading %}true{% else %}false{% endif %}">
     <ul class="tabs-list">
         {% for section in tab_sections %}
-            <li class="tab-item {% if section.active %} active {% endif %}" data-tab-target="{{ section.id }}">
+            <li class="tab-item {% if section.active %} active {% endif %}" 
+                data-tab-target="{{ section.id }}"
+                data-lazy-load="{{ section.lazy_load|yesno:'true,false' }}">
                 <i class="{{ section.icon }}"></i>
                 <strong>{{ section.title }}</strong>
-                <span class="object-count">({{ section.data|length }})</span>
+                <span class="object-count">
+                    {% if section.count is not None %}
+                        ({{ section.count }})
+                    {% elif section.data %}
+                        ({{ section.data|length }})
+                    {% else %}
+                        (0)
+                    {% endif %}
+                </span>
+                {% if section.lazy_load %}
+                    <span class="loading-indicator" style="display: none;">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </span>
+                {% endif %}
             </li>
         {% endfor %}
     </ul>
 
     {% for section in tab_sections %}
-        {% include 'documents/partials/tab_content.html' %}
+        {% if section.active %}
+            {% include 'documents/partials/tab_content.html' %}
+        {% endif %}
     {% endfor %}
-
 </section>
