@@ -58,6 +58,9 @@ class PersonalDataSheetDetailView(TabsSectionMixin, DetailView):
     template_name = 'documents/personal_data_sheet.html'
     model = PersonalDataSheet
     context_object_name = 'personal_data_sheet'
+    
+    # Enable lazy loading
+    enable_lazy_loading = True
     tab_sections_config = PERSONAL_DATA_SHEET_TAB_SECTIONS
 
     def get_context_data(self, **kwargs):
