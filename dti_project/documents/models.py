@@ -1,6 +1,7 @@
 from django.db import models
 from django.forms import ValidationError
 from django.utils import timezone
+from .model_choices import APPLICATION_OR_ACTIVITY_CHOICES, SERVICE_CATEGORY_CHOICES, YES_NO_CHOICES
 from users.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 
@@ -326,3 +327,150 @@ class PermitFee(models.Model):
 
     def __str__(self):
         return f"{self.permit} ({self.fee_type}): ₱{self.amount}"
+    
+class InspectionValidationReport(models.Model):
+    YES_NO_CHOICES = [
+        ('Yes', 'Yes'),
+        ('No', 'No'),
+    ]
+    
+    APPLICATION_OR_ACTIVITY_CHOICES = [
+        ('new', 'New Application'),
+        ('renewal', 'Renewal Application'),
+        ('monitoring', 'Monitoring/Issuance of SCO'),
+        ('continuing', 'Continuing Accreditation'),
+    ]
+
+    # Basic Information
+    name_of_business = models.CharField(max_length=255)
+    address = models.TextField()
+    date = models.DateField(default=timezone.now)
+    type_of_application_activity = models.CharField(max_length=50, choices=APPLICATION_OR_ACTIVITY_CHOICES)
+
+    # Basic Info Section
+    years_in_service = models.PositiveIntegerField(null=True, blank=True)
+    is_main_office = models.BooleanField(default=False)
+    is_branch = models.BooleanField(default=False)
+
+    business_name_cert = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
+    business_name_cert_remarks = models.CharField(max_length=255, blank=True)
+
+    accreditation_cert = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
+    accreditation_cert_remarks = models.CharField(max_length=255, blank=True)
+
+    service_rates = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
+    service_rates_remarks = models.CharField(max_length=255, blank=True)
+
+    # C. Tools and Equipment
+    tools_equipment_complete = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
+    tools_equipment_serial_no = models.CharField(max_length=255, blank=True)
+    racmac_sres_recovery_machine = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
+    proof_acquisition_recovery_machine = models.CharField(max_length=255, blank=True)
+
+    # D. Competence of Technicians
+    employed_technicians_count = models.PositiveIntegerField(null=True, blank=True)
+    average_technician_experience = models.PositiveIntegerField(null=True, blank=True, help_text="Experience in years")
+    tesda_certification_nc = models.CharField(max_length=255, blank=True)
+    continuous_training_program = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
+    list_employees_past_2_years = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
+    refrigerant_storage_disposal_system = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
+
+    # E. Facilities
+    office_work_area_sqm = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    working_stalls_count = models.PositiveIntegerField(null=True, blank=True)
+    tool_equipment_storage_existing = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
+    tool_equipment_storage_adequate = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
+    existing_record_keeping_system = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
+    record_keeping_suitable = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
+    customers_reception_waiting_area_existing = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
+    customers_reception_waiting_area_adequate = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
+
+    # Safety Measures
+    fire_extinguishers_count = models.PositiveIntegerField(null=True, blank=True)
+    available_personal_protective_equipment = models.CharField(max_length=255, blank=True)
+    security_personnel_count = models.PositiveIntegerField(null=True, blank=True)
+    medical_kit_available = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
+    inflammable_areas = models.CharField(max_length=255, blank=True, help_text="Areas for inflammables such as gasoline, oil, paint, etc.")
+
+    # F. Type of Insurance Coverage
+    insurance_expiry_date = models.DateField(null=True, blank=True)
+    insurance_coverage_amount = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True, help_text="Amount in PHP")
+
+    # G. Customer Satisfaction Feedback (CSF) and Complaint Handling
+    complaints_handling_process_yes = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
+    complaints_handling_process_no = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
+    complaints_handling_documented = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
+    customer_satisfaction_feedback_form_yes = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
+    customer_satisfaction_feedback_form_no = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
+
+    # H. Findings/Remarks
+    findings_remarks = models.TextField(blank=True)
+
+    # I. Recommendation
+    recommendation_approval = models.BooleanField(default=False)
+    recommendation_disapproval = models.BooleanField(default=False)
+    recommendation_monitoring_issuance_sco = models.BooleanField(default=False)
+    recommendation_new_application = models.BooleanField(default=False)
+    recommendation_renewal_application = models.BooleanField(default=False)
+    recommendation_continuing_accreditation = models.BooleanField(default=False)
+
+    # Inspection Details
+    inspected_by_accreditation_officer = models.CharField(max_length=255, blank=True)
+    inspected_by_member = models.CharField(max_length=255, blank=True)
+
+    # Certification
+    certification_text = models.TextField(
+        default="This is to certify that the Accreditation Officer/s conducted the inspection in our premises today, and the information/data in this Inspection and Validation Report, gathered during the inspection are true and correct.",
+        blank=True
+    )
+    authorized_signatory_name = models.CharField(max_length=255, blank=True)
+    authorized_signatory_date = models.DateField(null=True, blank=True)
+
+    # Add M2M if using services
+    services_offered = models.ManyToManyField('Service', blank=True, related_name="inspection_reports")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Inspection and Validation Report"
+        verbose_name_plural = "Inspection and Validation Reports"
+        ordering = ['-date', '-created_at']
+
+    def __str__(self):
+        return f"{self.name_of_business} - {self.date}"
+
+    def get_recommendation_display(self):
+        """Return a human-readable list of selected recommendations"""
+        recommendations = []
+        if self.recommendation_approval:
+            recommendations.append("Approval")
+        if self.recommendation_disapproval:
+            recommendations.append("Disapproval")
+        if self.recommendation_monitoring_issuance_sco:
+            recommendations.append("Monitoring/Issuance of SCO")
+        if self.recommendation_new_application:
+            recommendations.append("New Application")
+        if self.recommendation_renewal_application:
+            recommendations.append("Renewal Application")
+        if self.recommendation_continuing_accreditation:
+            recommendations.append("Continuing Accreditation")
+        return ", ".join(recommendations) if recommendations else "No recommendations selected"
+
+class ServiceCategory(models.Model):
+    key = models.CharField(max_length=50, choices=SERVICE_CATEGORY_CHOICES, unique=True)
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+class Service(models.Model):
+    category = models.ForeignKey(ServiceCategory, on_delete=models.CASCADE, related_name="services")
+    name = models.CharField(max_length=255)
+
+    class Meta:
+        unique_together = ('category', 'name')
+        ordering = ['category__name', 'name']
+
+    def __str__(self):
+        return f"{self.category.name} - {self.name}"
