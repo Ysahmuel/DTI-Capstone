@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .utils.admin_helpers import get_full_name_from_personal_data
-from .models import CharacterReference, EducationalAttainment, EmployeeBackground, OrderOfPayment, PermitFee, PersonalDataSheet, ProductCovered, SalesPromotionPermitApplication, ServiceRepairAccreditationApplication, TrainingsAttended
+from .models import CharacterReference, EducationalAttainment, EmployeeBackground, InspectionValidationReport, OrderOfPayment, PermitFee, PersonalDataSheet, ProductCovered, SalesPromotionPermitApplication, Service, ServiceCategory, ServiceRepairAccreditationApplication, TrainingsAttended
 
 
 # Register your models here.
@@ -65,3 +65,26 @@ class PermitFeeAdmin(admin.ModelAdmin):
     list_display = ('permit', 'fee_type', 'remarks')
     search_fields = ('permit', '')
     list_filter = ('fee_type', 'remarks')
+
+@admin.register(InspectionValidationReport)
+class InspectionValidationReportAdmin(admin.ModelAdmin):
+    list_display = ('name_of_business', 'type_of_application_activity', 'date', 'created_at')
+    search_fields = ('name_of_business', 'address')
+    list_filter = ('type_of_application_activity', 'date')
+    date_hierarchy = 'date'
+    ordering = ['-date']
+
+
+@admin.register(ServiceCategory)
+class ServiceCategoryAdmin(admin.ModelAdmin):
+    list_display = ('key', 'name')
+    search_fields = ('key', 'name')
+    ordering = ['key']
+
+
+@admin.register(Service)
+class ServiceAdmin(admin.ModelAdmin):
+    list_display = ('name', 'category')
+    list_filter = ('category',)
+    search_fields = ('name',)
+    ordering = ['category', 'name']
