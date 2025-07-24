@@ -114,6 +114,9 @@ class TrainingsAttended(PeriodModel):
     training_course = models.CharField(max_length=255)
     conducted_by = models.CharField(max_length=255)
 
+    class Meta:
+        verbose_name_plural = 'Trainings Attended'
+
     def __str__(self):
         return self.training_course
     
@@ -290,6 +293,9 @@ class OrderOfPayment(models.Model):
     special_collecting_officer_or_number = models.CharField(max_length=50, blank=True)
     special_collecting_officer_signature = models.ImageField(upload_to='signatures/', null=True, blank=True)
 
+    class Meta:
+        verbose_name_plural = 'Orders of Payment'
+
     def __str__(self):
         return f"{self.name} {self.address}"
     
@@ -460,6 +466,9 @@ class InspectionValidationReport(models.Model):
 class ServiceCategory(models.Model):
     key = models.CharField(max_length=50, choices=SERVICE_CATEGORY_CHOICES, unique=True)
     name = models.CharField(max_length=100)
+
+    class Meta:
+        verbose_name_plural = 'Service Categories'
 
     def __str__(self):
         return self.name
