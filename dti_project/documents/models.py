@@ -1,7 +1,7 @@
 from django.db import models
 from django.forms import ValidationError
 from django.utils import timezone
-from .model_choices import APPLICATION_OR_ACTIVITY_CHOICES, SERVICE_CATEGORY_CHOICES, YES_NO_CHOICES
+from .model_choices import APPLICATION_OR_ACTIVITY_CHOICES, OFFICE_SHOP_CHOICES, SERVICE_CATEGORY_CHOICES, YES_NO_CHOICES
 from users.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 
@@ -355,8 +355,7 @@ class InspectionValidationReport(models.Model):
 
     # Basic Info Section
     years_in_service = models.PositiveIntegerField(null=True, blank=True)
-    is_main_office = models.BooleanField(default=False)
-    is_branch = models.BooleanField(default=False)
+    types_of_office_shop = models.CharField(max_length=30, choices=OFFICE_SHOP_CHOICES, default='Main')
 
     business_name_cert = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
     business_name_cert_remarks = models.CharField(max_length=255, blank=True)

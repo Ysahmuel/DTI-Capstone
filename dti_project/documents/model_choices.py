@@ -1,3 +1,8 @@
+OFFICE_SHOP_CHOICES = [
+    ('Main', 'Main'),
+    ('Branch', 'Branch'),
+]
+
 APPLICATION_OR_ACTIVITY_CHOICES = [
     ('new', 'New'),
     ('renewal', 'Renewal'),
