@@ -1,7 +1,7 @@
 from django import forms
 from .utils.form_helpers import create_inline_formset
 from .validators import validate_period
-from .models import CharacterReference, EducationalAttainment, EmployeeBackground, ProductCovered, SalesPromotionPermitApplication, PersonalDataSheet, ServiceRepairAccreditationApplication, TrainingsAttended
+from .models import CharacterReference, EducationalAttainment, EmployeeBackground, InspectionValidationReport, ProductCovered, SalesPromotionPermitApplication, PersonalDataSheet, ServiceRepairAccreditationApplication, TrainingsAttended
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, LayoutObject, TEMPLATE_PACK, Fieldset, HTML, Div, Row, Column, Submit
 from django.template.loader import render_to_string
@@ -33,6 +33,10 @@ class BaseCustomForm(forms.ModelForm):
                 # Force DateInput for DateFields
                 if isinstance(field, forms.DateField):
                     field.widget = forms.DateInput(attrs={'type': 'date'})
+
+                # Decrease height for textareas
+                if isinstance(field.widget, forms.Textarea):
+                    field.widget.attrs['rows'] = 4
 
                 # Add 'form-group' class to each widget
                 existing_classes = field.widget.attrs.get('class', '')
@@ -102,6 +106,12 @@ class ServiceRepairAccreditationApplicationForm(BaseCustomForm):
     class Meta:
         model = ServiceRepairAccreditationApplication
         fields = '__all__'
+
+class InspectionValidationRerportForm(BaseCustomForm):
+    class Meta:
+        model = InspectionValidationReport
+        fields = '__all__'
+        exclude = ['date']
 
 # Formset configurations
 FORMSET_CONFIGS = {
