@@ -21,6 +21,14 @@ class PeriodModel(models.Model):
         abstract = True
         ordering = ['start_date']
 
+class YesNoField(models.CharField):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('max_length', 3)
+        kwargs.setdefault('choices', [('Yes', 'Yes'), ('No', 'No')])
+        kwargs.setdefault('default', 'No')
+        kwargs.setdefault('blank', True)
+        super().__init__(*args, **kwargs)
+
 class SalesPromotionPermitApplication(BaseApplication):
     promo_title = models.CharField(max_length=255)
 
@@ -335,18 +343,6 @@ class PermitFee(models.Model):
         return f"{self.permit} ({self.fee_type}): ₱{self.amount}"
     
 class InspectionValidationReport(models.Model):
-    YES_NO_CHOICES = [
-        ('Yes', 'Yes'),
-        ('No', 'No'),
-    ]
-    
-    APPLICATION_OR_ACTIVITY_CHOICES = [
-        ('new', 'New Application'),
-        ('renewal', 'Renewal Application'),
-        ('monitoring', 'Monitoring/Issuance of SCO'),
-        ('continuing', 'Continuing Accreditation'),
-    ]
-
     # Basic Information
     name_of_business = models.CharField(max_length=255)
     address = models.TextField()
@@ -355,46 +351,46 @@ class InspectionValidationReport(models.Model):
 
     # Basic Info Section
     years_in_service = models.PositiveIntegerField(null=True, blank=True)
-    types_of_office_shop = models.CharField(max_length=30, choices=OFFICE_SHOP_CHOICES, default='Main')
+    types_of_office_shop = models.CharField(max_length=30, choices=OFFICE_SHOP_CHOICES, default='Main', help_text='Type of Office/Shop')
 
-    business_name_cert = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
-    business_name_cert_remarks = models.CharField(max_length=255, blank=True)
+    business_name_cert = YesNoField(help_text='Business Name Certificates')
+    business_name_cert_remarks = models.TextField(blank=True)
 
-    accreditation_cert = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
-    accreditation_cert_remarks = models.CharField(max_length=255, blank=True)
+    accreditation_cert = YesNoField(help_text='Accreditation Certificate')
+    accreditation_cert_remarks = models.TextField(blank=True)
 
-    service_rates = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
-    service_rates_remarks = models.CharField(max_length=255, blank=True)
+    service_rates = YesNoField()
+    service_rates_remarks = models.TextField(blank=True)
 
     # C. Tools and Equipment
-    tools_equipment_complete = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
+    tools_equipment_complete = YesNoField()
     tools_equipment_serial_no = models.CharField(max_length=255, blank=True)
-    racmac_sres_recovery_machine = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
+    racmac_sres_recovery_machine = YesNoField()
     proof_acquisition_recovery_machine = models.CharField(max_length=255, blank=True)
 
     # D. Competence of Technicians
     employed_technicians_count = models.PositiveIntegerField(null=True, blank=True)
     average_technician_experience = models.PositiveIntegerField(null=True, blank=True, help_text="Experience in years")
     tesda_certification_nc = models.CharField(max_length=255, blank=True)
-    continuous_training_program = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
-    list_employees_past_2_years = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
-    refrigerant_storage_disposal_system = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
+    continuous_training_program = YesNoField()
+    list_employees_past_2_years = YesNoField()
+    refrigerant_storage_disposal_system = YesNoField()
 
     # E. Facilities
     office_work_area_sqm = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     working_stalls_count = models.PositiveIntegerField(null=True, blank=True)
-    tool_equipment_storage_existing = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
-    tool_equipment_storage_adequate = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
-    existing_record_keeping_system = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
-    record_keeping_suitable = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
-    customers_reception_waiting_area_existing = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
-    customers_reception_waiting_area_adequate = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
+    tool_equipment_storage_existing = YesNoField()
+    tool_equipment_storage_adequate = YesNoField()
+    existing_record_keeping_system = YesNoField()
+    record_keeping_suitable = YesNoField()
+    customers_reception_waiting_area_existing = YesNoField()
+    customers_reception_waiting_area_adequate = YesNoField()
 
     # Safety Measures
     fire_extinguishers_count = models.PositiveIntegerField(null=True, blank=True)
     available_personal_protective_equipment = models.CharField(max_length=255, blank=True)
     security_personnel_count = models.PositiveIntegerField(null=True, blank=True)
-    medical_kit_available = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
+    medical_kit_available = YesNoField()
     inflammable_areas = models.CharField(max_length=255, blank=True, help_text="Areas for inflammables such as gasoline, oil, paint, etc.")
 
     # F. Type of Insurance Coverage
@@ -402,11 +398,11 @@ class InspectionValidationReport(models.Model):
     insurance_coverage_amount = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True, help_text="Amount in PHP")
 
     # G. Customer Satisfaction Feedback (CSF) and Complaint Handling
-    complaints_handling_process_yes = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
-    complaints_handling_process_no = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
-    complaints_handling_documented = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
-    customer_satisfaction_feedback_form_yes = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
-    customer_satisfaction_feedback_form_no = models.CharField(max_length=3, choices=YES_NO_CHOICES, blank=True)
+    complaints_handling_process_yes = YesNoField()
+    complaints_handling_process_no = YesNoField()
+    complaints_handling_documented = YesNoField()
+    customer_satisfaction_feedback_form_yes = YesNoField()
+    customer_satisfaction_feedback_form_no = YesNoField()
 
     # H. Findings/Remarks
     findings_remarks = models.TextField(blank=True)
@@ -434,17 +430,14 @@ class InspectionValidationReport(models.Model):
     # Add M2M if using services
     services_offered = models.ManyToManyField('Service', blank=True, related_name="inspection_reports")
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
     class Meta:
         verbose_name = "Inspection and Validation Report"
         verbose_name_plural = "Inspection and Validation Reports"
-        ordering = ['-date', '-created_at']
+        ordering = ['-date']
 
     def __str__(self):
         return f"{self.name_of_business} - {self.date}"
-
+        
     def get_recommendation_display(self):
         """Return a human-readable list of selected recommendations"""
         recommendations = []

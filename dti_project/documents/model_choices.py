@@ -1,3 +1,15 @@
+YES_NO_CHOICES = [
+    ('Yes', 'Yes'),
+    ('No', 'No'),
+]
+
+APPLICATION_OR_ACTIVITY_CHOICES = [
+    ('new', 'New Application'),
+    ('renewal', 'Renewal Application'),
+    ('monitoring', 'Monitoring/Issuance of SCO'),
+    ('continuing', 'Continuing Accreditation'),
+]
+
 OFFICE_SHOP_CHOICES = [
     ('Main', 'Main'),
     ('Branch', 'Branch'),
