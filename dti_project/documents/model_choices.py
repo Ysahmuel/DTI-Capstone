@@ -29,7 +29,6 @@ SERVICE_CATEGORY_CHOICES = [
     ("wheel_services", "Complete Wheel Services"),
     ("engineering_works", "Engines and Engineering Works (Machine Shops)"),
     ("welding", "Welding Services"),
-    ("other_services", "Other Services"),
 ]
 
 SERVICES_BY_CATEGORY = {
