@@ -25,4 +25,14 @@
             {% endfor %}
         </ul>
     </div>
+    <div>
+        <h2>Inspection Validation Report (Sample list only)</h2>
+        <ul>
+            {% for report in inspection_reports %}
+                <li>
+                    <a href="{% url 'inspection-validation-report' report.id %}">{{ report }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
 {% endblock %}

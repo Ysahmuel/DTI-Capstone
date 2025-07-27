@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from documents.models import PersonalDataSheet, SalesPromotionPermitApplication
+from documents.models import InspectionValidationReport, PersonalDataSheet, SalesPromotionPermitApplication
 
 # Create your views here.
 class DashboardView(LoginRequiredMixin, TemplateView):
@@ -12,7 +12,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         context.update({
             'sales_promos': SalesPromotionPermitApplication.objects.all(),
-            'personal_data_sheets': PersonalDataSheet.objects.all()
+            'personal_data_sheets': PersonalDataSheet.objects.all(),
+            'inspection_reports': InspectionValidationReport.objects.all(),
         })
 
         return context
