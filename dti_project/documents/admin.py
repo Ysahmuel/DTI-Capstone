@@ -68,7 +68,7 @@ class PermitFeeAdmin(admin.ModelAdmin):
 
 @admin.register(InspectionValidationReport)
 class InspectionValidationReportAdmin(admin.ModelAdmin):
-    list_display = ('name_of_business', 'type_of_application_activity', 'date', 'created_at')
+    list_display = ('name_of_business', 'type_of_application_activity', 'date')
     search_fields = ('name_of_business', 'address')
     list_filter = ('type_of_application_activity', 'date')
     date_hierarchy = 'date'
