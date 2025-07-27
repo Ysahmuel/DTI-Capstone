@@ -85,3 +85,6 @@ class CreateInspectionValidationReport(LoginRequiredMixin, FormStepsMixin, Forms
         context['field_groups'] = self.FIELD_GROUPS
         context['service_categories'] = self.get_service_categories_with_services()
         return context
+
+    def get_success_url(self):
+        return reverse_lazy('inspection-validation-report', kwargs={'pk': self.object.pk})
