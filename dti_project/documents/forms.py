@@ -1,10 +1,11 @@
 from django import forms
 from .utils.form_helpers import create_inline_formset
 from .validators import validate_period
-from .models import CharacterReference, EducationalAttainment, EmployeeBackground, InspectionValidationReport, ProductCovered, SalesPromotionPermitApplication, PersonalDataSheet, ServiceRepairAccreditationApplication, TrainingsAttended
+from .models import CharacterReference, EducationalAttainment, EmployeeBackground, InspectionValidationReport, ProductCovered, SalesPromotionPermitApplication, PersonalDataSheet, Service, ServiceCategory, ServiceRepairAccreditationApplication, TrainingsAttended
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, LayoutObject, TEMPLATE_PACK, Fieldset, HTML, Div, Row, Column, Submit
 from django.template.loader import render_to_string
+from django.forms.widgets import SelectMultiple
 
 class SortForm(forms.Form):
     SORT_CHOICES = [
