@@ -112,7 +112,20 @@ class InspectionValidationRerportForm(BaseCustomForm):
         model = InspectionValidationReport
         fields = '__all__'
         exclude = ['date']
+        widgets = {
+            'services_offered': forms.CheckboxSelectMultiple()
+        }
 
+class ServiceCategoryForm(BaseCustomForm):
+    class Meta:
+        model = ServiceCategory
+        fields = '__all__'
+
+class ServiceForm(BaseCustomForm):
+    class Meta:
+        model = Service
+        fields = '__all__'
+    
 # Formset configurations
 FORMSET_CONFIGS = {
     # Sales Application Formsets
