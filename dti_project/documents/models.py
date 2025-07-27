@@ -466,6 +466,7 @@ class ServiceCategory(models.Model):
         return self.name
 
 class Service(models.Model):
+    inspection_validation_report = models.ForeignKey(InspectionValidationReport, on_delete=models.CASCADE, related_name='service_categories', null=True, blank=True)
     category = models.ForeignKey(ServiceCategory, on_delete=models.CASCADE, related_name="services")
     name = models.CharField(max_length=255)
 
