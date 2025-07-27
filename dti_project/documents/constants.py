@@ -10,6 +10,8 @@
 #     "fieldset-id"                      # str: The HTML id attribute to assign to this fieldset
 # )
 
+# ---------- CREATE VIEW GROUPS ---------------- #
+
 SALES_PROMOTION_FIELD_GROUPS = [
     ("Promotion Details", [['promo_title']], 'promo-title'),
     ("Sponsor", [
@@ -55,6 +57,18 @@ SERVICE_REPAIR_ACCREDITATION_FIELD_GROUPS = [
         ]
     ),
 ]
+
+INSPECTION_VALIDATION_REPORT_FIELD_GROUPS = [
+    ("Business Name and Address", [['name_of_business', 'address']], 'business'),
+    ("Basic Information", [
+        ['type_of_application_activity', 'years_in_service', 'types_of_office_shop'],
+        ['business_name_cert', 'business_name_cert_remarks'],
+        ['accreditation_cert', 'accreditation_cert_remarks'],
+        ['service_rates', 'service_rates_remarks'],
+    ], 'basic-information'),
+]
+
+# ---------- DETAIL VIEW GROUPS ---------------- #
 
 SALES_PROMOTION_DETAIL_GROUPS = [
     ("Base Details", [
@@ -107,9 +121,9 @@ PERSONAL_DATA_SHEET_TAB_SECTIONS = [
         'active': True,
     },
     {
-        'id': 'training-courses',
-        'title': 'Training Courses',
-        'relation': 'training_courses',
+        'id': 'trainings-attended',
+        'title': 'Trainings Attended',
+        'relation': 'trainings_attended',
         'icon': 'fas fa-chalkboard-teacher',  
         'active': False,
     },

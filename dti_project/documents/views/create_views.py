@@ -1,8 +1,8 @@
 from django.urls import reverse_lazy
-from ..constants import PERSONAL_DATA_SHEET_FIELD_GROUPS, SALES_PROMOTION_FIELD_GROUPS, SERVICE_REPAIR_ACCREDITATION_FIELD_GROUPS
-from ..forms import FORMSET_CLASSES, PersonalDataSheetForm, SalesPromotionPermitApplicationForm, ServiceRepairAccreditationApplicationForm
-from ..models import PersonalDataSheet, SalesPromotionPermitApplication, ServiceRepairAccreditationApplication
-from ..mixins import FormStepsMixin, FormsetMixin
+from ..constants import INSPECTION_VALIDATION_REPORT_FIELD_GROUPS, PERSONAL_DATA_SHEET_FIELD_GROUPS, SALES_PROMOTION_FIELD_GROUPS, SERVICE_REPAIR_ACCREDITATION_FIELD_GROUPS
+from ..forms import FORMSET_CLASSES, InspectionValidationRerportForm, PersonalDataSheetForm, SalesPromotionPermitApplicationForm, ServiceRepairAccreditationApplicationForm
+from ..models import InspectionValidationReport, PersonalDataSheet, SalesPromotionPermitApplication, ServiceRepairAccreditationApplication
+from ..mixins import FormStepsMixin, FormsetMixin, ServiceCategoryMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import CreateView
 
@@ -71,3 +71,17 @@ class CreateServiceRepairAccreditationApplication(LoginRequiredMixin, FormStepsM
 
         return context
     
+
+class CreateInspectionValidationReport(LoginRequiredMixin, FormStepsMixin, FormsetMixin, ServiceCategoryMixin, CreateView):
+    model = InspectionValidationReport
+    template_name = 'documents/create_inspection_validation_report.html'
+    form_class = InspectionValidationRerportForm
+
+    FIELD_GROUPS = INSPECTION_VALIDATION_REPORT_FIELD_GROUPS
+    additional_sections = ['service_categories']
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['field_groups'] = self.FIELD_GROUPS
+        context['service_categories'] = self.get_service_categories_with_services()
+        return context
