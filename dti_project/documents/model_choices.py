@@ -105,9 +105,6 @@ SERVICES_BY_CATEGORY = {
         "Fabrication/Duplication",
         "Parts Duplication/Manufacturing",
     ],
-    "other_services": [
-        # Leave empty; user-defined
-    ],
 }
 
 YES_NO_CHOICES = [('yes', 'Yes'), ('no', 'No')]

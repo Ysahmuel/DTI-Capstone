@@ -1,0 +1,21 @@
+<fieldset id="{{ group.2 }}-fieldset">
+    <p class="part-count">Part {{ counter }} of {{ total_parts }}</p>
+    <legend>Service Categories</legend>
+    <div class="stepped-layout">
+        {% for group in service_categories %}
+            <div class="service-group">
+                <h4>{{ group.category.name }}</h4>
+                <div class="service-checklist-group">
+                    {% for service in group.services %}
+                        <label>
+                        <input type="checkbox" name="services_offered" value="{{ service.pk }}"
+                            {% if service.pk in form.initial.services_offered %}checked{% endif %}>
+                        {{ service.name }}
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+        <h4>Other Services Offered</h4>
+    </div>
+</fieldset>
