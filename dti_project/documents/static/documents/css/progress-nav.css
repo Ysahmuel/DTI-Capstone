@@ -15,6 +15,7 @@
   background-color: var(--background-white);
   border: solid 1px var(--border-color);
   border-radius: var(--radius-lg);
+  overflow-x: hidden;
 }
 
 .step-item {
