@@ -29,6 +29,7 @@ These instructions will help you set up and run the project locally.
     ```
 2. Install dependencies:
     ```bash
+    pip freeze > requirements.txt
     pip install -r requirements.txt
     ```
 3. Run migrations:
