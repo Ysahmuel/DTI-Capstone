@@ -145,20 +145,28 @@ class FormStepsMixin:
         # Add fieldsets from FIELD_GROUPS
         if hasattr(self, 'FIELD_GROUPS'):
             for group in self.FIELD_GROUPS:
-                steps.append(('fieldset', group))
-
-        # Add formsets from formset_classes
-        if hasattr(self, 'formset_classes'):
-            for formset_key in self.formset_classes.keys():
-                steps.append(('formset', formset_key))
-
-        # Add any additional sections (like coverage or service categories)
-        if hasattr(self, 'additional_sections'):
-            for section in self.additional_sections:
-                if section == 'service_categories':
-                    steps.append(('multiple_choice', section))
+                if isinstance(group, str):
+                    if hasattr(self, 'additional_sections') and group in self.additional_sections:
+                        # Insert at this position
+                        if group == 'service_categories':
+                            steps.append(('multiple_choice', group))
+                        else:
+                            steps.append(('section', group))
                 else:
-                    steps.append(('section', section))
+                    # Valid 3-tuple fieldset
+                    steps.append(('fieldset', group))
+
+
+        # Handle leftover additional_sections not placed manually
+        if hasattr(self, 'additional_sections'):
+            already_included = [s[1] for s in steps]
+            for section in self.additional_sections:
+                if section not in already_included:
+                    if section == 'service_categories':
+                        steps.append(('multiple_choice', section))
+                    else:
+                        steps.append(('section', section))
+
 
         return steps
 

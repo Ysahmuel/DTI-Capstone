@@ -68,6 +68,8 @@ INSPECTION_VALIDATION_REPORT_FIELD_GROUPS = [
         ['service_rates', 'service_rates_remarks'],
     ], 'basic-information'),
 
+    'service_categories', # Already added custom fieldset
+
     ("Tools and Equipment", [
         ['tools_equipment_complete', 'tools_equipment_serial_no'],
         ['racmac_sres_recovery_machine', 'proof_acquisition_recovery_machine'],
