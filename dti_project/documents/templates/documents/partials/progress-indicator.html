@@ -2,12 +2,27 @@
 
 <aside class="form-progress-nav">
     <ol>
-        {% for group in field_groups %}
-            <li data-target="{{ group.2 }}-fieldset" class="step-item">
-                <span class="step-circle"></span>
-                <strong>{{ group.0 }}</strong>
-                <i class="fa-solid fa-angle-right"></i>
-            </li>
+        {% for step in enumerated_steps %}
+            {% if step.1 == 'fieldset' %}
+                <li data-target="{{ step.2.2 }}-fieldset" class="step-item">
+                    <span class="step-circle"></span>
+                    <strong>{{ step.2.0 }}</strong>
+                    <i class="fa-solid fa-angle-right"></i>
+                </li>
+
+            {% elif step.1 == 'formset' %}
+                <li data-target="{{ step.2 }}-formset" class="step-item">
+                    <span class="step-circle"></span>
+                    <strong>{{ step.2|titlecase }}</strong>
+                    <i class="fa-solid fa-angle-right"></i>
+                </li>
+            {% else %}
+                <li data-target="{{ step.2 }}-fieldset" class="step-item">
+                    <span class="step-circle"></span>
+                    <strong>{{ step.2|titlecase }}</strong>
+                    <i class="fa-solid fa-angle-right"></i>
+                </li>
+            {% endif %}
         {% endfor %}
     </ol>
     <div class="completion-percentage">
