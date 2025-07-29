@@ -373,9 +373,10 @@ class InspectionValidationReport(models.Model):
     employed_technicians_count = models.PositiveIntegerField(null=True, blank=True)
     average_technician_experience = models.PositiveIntegerField(null=True, blank=True, help_text="Experience in years")
     tesda_certification_nc = models.CharField(max_length=255, blank=True)
-    continuous_training_program = YesNoField()
-    list_employees_past_2_years = YesNoField()
-    refrigerant_storage_disposal_system = YesNoField()
+    tesda_certification_coc = models.CharField(max_length=255, blank=True)
+    continuous_training_program = YesNoField(help_text="For RAC/MAC, with continuous training program for mechanics/technicians?")
+    list_employees_past_2_years = YesNoField(help_text="Has submitted trainings of employees for the past 2 years?")
+    refrigerant_storage_disposal_system = models.CharField(max_length=255, null=True, blank=True, help_text="For RAC/MAC, with refrigerant recovery storage and disposal system consistent with existing enivronmental laws and regulations")
 
     # E. Facilities
     office_work_area_sqm = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
