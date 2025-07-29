@@ -72,7 +72,8 @@ INSPECTION_VALIDATION_REPORT_FIELD_GROUPS = [
 
     ("Tools and Equipment", [
         ['tools_equipment_complete', 'tools_equipment_serial_no'],
-        ['racmac_sres_recovery_machine', 'proof_acquisition_recovery_machine'],
+        ['racmac_sres_recovery_machine', 'racmac_serial_no'],
+        ['proof_acquisition_recovery_machine'],
     ], 'tools-equipment'),
 
     ("Competence of Technicians", [
@@ -81,38 +82,38 @@ INSPECTION_VALIDATION_REPORT_FIELD_GROUPS = [
         ['list_employees_past_2_years', 'refrigerant_storage_disposal_system'],
     ], 'competence-technicians'),
 
-    ("Facilities", [
-        ['office_work_area_sqm', 'working_stalls_count'],
-        ['tool_equipment_storage_existing', 'tool_equipment_storage_adequate'],
-        ['existing_record_keeping_system', 'record_keeping_suitable'],
-        ['customers_reception_waiting_area_existing', 'customers_reception_waiting_area_adequate'],
-        ['fire_extinguishers_count', 'available_personal_protective_equipment'],
-        ['security_personnel_count', 'medical_kit_available'],
-        ['inflammable_areas']
-    ], 'facilities'),
+    # ("Facilities", [
+    #     ['office_work_area_sqm', 'working_stalls_count'],
+    #     ['tool_equipment_storage_existing', 'tool_equipment_storage_adequate'],
+    #     ['existing_record_keeping_system', 'record_keeping_suitable'],
+    #     ['customers_reception_waiting_area_existing', 'customers_reception_waiting_area_adequate'],
+    #     ['fire_extinguishers_count', 'available_personal_protective_equipment'],
+    #     ['security_personnel_count', 'medical_kit_available'],
+    #     ['inflammable_areas']
+    # ], 'facilities'),
 
-    ("Insurance Coverage", [
-        ['insurance_expiry_date', 'insurance_coverage_amount'],
-    ], 'insurance'),
+    # ("Insurance Coverage", [
+    #     ['insurance_expiry_date', 'insurance_coverage_amount'],
+    # ], 'insurance'),
 
-    ("Customer Satisfaction & Complaints", [
-        ['complaints_handling_process_yes', 'complaints_handling_process_no'],
-        ['complaints_handling_documented'],
-        ['customer_satisfaction_feedback_form_yes', 'customer_satisfaction_feedback_form_no'],
-    ], 'csf-complaints'),
+    # ("Customer Satisfaction & Complaints", [
+    #     ['complaints_handling_process_yes', 'complaints_handling_process_no'],
+    #     ['complaints_handling_documented'],
+    #     ['customer_satisfaction_feedback_form_yes', 'customer_satisfaction_feedback_form_no'],
+    # ], 'csf-complaints'),
 
-    ("Findings and Remarks", [
-        ['findings_remarks'],
-    ], 'findings-remarks'),
+    # ("Findings and Remarks", [
+    #     ['findings_remarks'],
+    # ], 'findings-remarks'),
 
-    ("Recommendation", [
-        ['recommendation_approval', 'recommendation_disapproval'],
-        ['recommendation_monitoring_issuance_sco'],
-        ['recommendation_new_application', 'recommendation_renewal_application', 'recommendation_continuing_accreditation'],
-        ['inspected_by_accreditation_officer', 'inspected_by_member'],
-        ['certification_text'],
-        ['authorized_signatory_name', 'authorized_signatory_date']
-    ], 'recommendation'),
+    # ("Recommendation", [
+    #     ['recommendation_approval', 'recommendation_disapproval'],
+    #     ['recommendation_monitoring_issuance_sco'],
+    #     ['recommendation_new_application', 'recommendation_renewal_application', 'recommendation_continuing_accreditation'],
+    #     ['inspected_by_accreditation_officer', 'inspected_by_member'],
+    #     ['certification_text'],
+    #     ['authorized_signatory_name', 'authorized_signatory_date']
+    # ], 'recommendation'),
 ]
 
 # ---------- DETAIL VIEW GROUPS ---------------- #
