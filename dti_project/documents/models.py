@@ -379,20 +379,18 @@ class InspectionValidationReport(models.Model):
     refrigerant_storage_disposal_system = models.CharField(max_length=255, null=True, blank=True, help_text="For RAC/MAC, with refrigerant recovery storage and disposal system consistent with existing enivronmental laws and regulations")
 
     # E. Facilities
-    office_work_area_sqm = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    working_stalls_count = models.PositiveIntegerField(null=True, blank=True)
-    tool_equipment_storage_existing = YesNoField()
-    tool_equipment_storage_adequate = YesNoField()
-    existing_record_keeping_system = YesNoField()
-    record_keeping_suitable = YesNoField()
-    customers_reception_waiting_area_existing = YesNoField()
-    customers_reception_waiting_area_adequate = YesNoField()
-
-    # Safety Measures
-    fire_extinguishers_count = models.PositiveIntegerField(null=True, blank=True)
-    available_personal_protective_equipment = models.CharField(max_length=255, blank=True)
-    security_personnel_count = models.PositiveIntegerField(null=True, blank=True)
-    medical_kit_available = YesNoField()
+    office_work_area_sqm = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Size of shop/work area? (sq.m)")
+    working_stalls_count = models.PositiveIntegerField(null=True, blank=True, help_text="No. of working stalls/bays")
+    tool_equipment_storage_existing = YesNoField(help_text="Tool and equipment storage existing?")
+    tool_equipment_storage_adequate = YesNoField(help_text="Adequate")
+    existing_record_keeping_system = YesNoField(help_text="Existing Record keeping system")
+    customers_reception_waiting_area_existing = YesNoField(help_text="Customers reception and waiting area exists?")
+    customers_reception_waiting_area_adequate = YesNoField("Adequate?")
+    customers_reception_waiting_area_suitable = YesNoField(help_text="Suitable?")
+    fire_extinguishers_count = models.PositiveIntegerField(null=True, blank=True, help_text="No. of applicable and unexpired fire extinguishers?")
+    available_personal_protective_equipment = models.CharField(max_length=255, blank=True, help_text="Available person protective equipment")
+    available_medical_kit= YesNoField(max_length=255, blank=True, help_text="Medical Kit")
+    security_personnel_count = models.PositiveIntegerField(null=True, blank=True, help_text="No. of security Personnel")
     inflammable_areas = models.CharField(max_length=255, blank=True, help_text="Areas for inflammables such as gasoline, oil, paint, etc.")
 
     # F. Type of Insurance Coverage
