@@ -93,9 +93,10 @@ INSPECTION_VALIDATION_REPORT_FIELD_GROUPS = [
         ['inflammable_areas']
     ], 'facilities'),
 
-    # ("Insurance Coverage", [
-    #     ['insurance_expiry_date', 'insurance_coverage_amount'],
-    # ], 'insurance'),
+    ("Insurance Coverage", [
+        ['type_of_insurance_coverage'],
+        ['insurance_expiry_date', 'insurance_coverage_amount'],
+    ], 'insurance'),
 
     # ("Customer Satisfaction & Complaints", [
     #     ['complaints_handling_process_yes', 'complaints_handling_process_no'],
