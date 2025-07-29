@@ -399,11 +399,9 @@ class InspectionValidationReport(models.Model):
     insurance_coverage_amount = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True, help_text="Amount in PHP")
 
     # G. Customer Satisfaction Feedback (CSF) and Complaint Handling
-    complaints_handling_process_yes = YesNoField()
-    complaints_handling_process_no = YesNoField()
-    complaints_handling_documented = YesNoField()
-    customer_satisfaction_feedback_form_yes = YesNoField()
-    customer_satisfaction_feedback_form_no = YesNoField()
+    complaints_handling_process_exists = YesNoField(help_text="With complaints handling process?")
+    complaints_handling_process_documented = YesNoField(help_text="Documented?")
+    customer_satisfaction_feedback_form_exists = YesNoField(help_text="With customer satisfaction feedback? (CSF)")
 
     # H. Findings/Remarks
     findings_remarks = models.TextField(blank=True)
