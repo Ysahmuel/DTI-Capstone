@@ -107,14 +107,10 @@ INSPECTION_VALIDATION_REPORT_FIELD_GROUPS = [
         ['findings_remarks'],
     ], 'findings-remarks'),
 
-    # ("Recommendation", [
-    #     ['recommendation_approval', 'recommendation_disapproval'],
-    #     ['recommendation_monitoring_issuance_sco'],
-    #     ['recommendation_new_application', 'recommendation_renewal_application', 'recommendation_continuing_accreditation'],
-    #     ['inspected_by_accreditation_officer', 'inspected_by_member'],
-    #     ['certification_text'],
-    #     ['authorized_signatory_name', 'authorized_signatory_date']
-    # ], 'recommendation'),
+    ("Recommendation", [
+        ['recommendation', 'inspected_by_accreditation_officer', 'inspected_by_member'], 
+        ['authorized_signatory_name', 'authorized_signatory_date']
+    ], 'recommendation'),
 ]
 
 # ---------- DETAIL VIEW GROUPS ---------------- #
