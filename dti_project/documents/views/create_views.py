@@ -1,6 +1,6 @@
 from django.urls import reverse_lazy
 from ..constants import INSPECTION_VALIDATION_REPORT_FIELD_GROUPS, PERSONAL_DATA_SHEET_FIELD_GROUPS, SALES_PROMOTION_FIELD_GROUPS, SERVICE_REPAIR_ACCREDITATION_FIELD_GROUPS
-from ..forms import FORMSET_CLASSES, InspectionValidationRerportForm, PersonalDataSheetForm, SalesPromotionPermitApplicationForm, ServiceRepairAccreditationApplicationForm
+from ..forms import FORMSET_CLASSES, InspectionValidationReportForm, PersonalDataSheetForm, SalesPromotionPermitApplicationForm, ServiceRepairAccreditationApplicationForm
 from ..models import InspectionValidationReport, PersonalDataSheet, SalesPromotionPermitApplication, ServiceRepairAccreditationApplication
 from ..mixins import FormStepsMixin, FormsetMixin, ServiceCategoryMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -75,7 +75,7 @@ class CreateServiceRepairAccreditationApplication(LoginRequiredMixin, FormStepsM
 class CreateInspectionValidationReport(LoginRequiredMixin, FormStepsMixin, FormsetMixin, ServiceCategoryMixin, CreateView):
     model = InspectionValidationReport
     template_name = 'documents/create_inspection_validation_report.html'
-    form_class = InspectionValidationRerportForm
+    form_class = InspectionValidationReportForm
 
     FIELD_GROUPS = INSPECTION_VALIDATION_REPORT_FIELD_GROUPS
     additional_sections = ['service_categories']

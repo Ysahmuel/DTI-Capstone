@@ -108,7 +108,7 @@ class ServiceRepairAccreditationApplicationForm(BaseCustomForm):
         model = ServiceRepairAccreditationApplication
         fields = '__all__'
 
-class InspectionValidationRerportForm(BaseCustomForm):
+class InspectionValidationReportForm(BaseCustomForm):
     class Meta:
         model = InspectionValidationReport
         fields = '__all__'
