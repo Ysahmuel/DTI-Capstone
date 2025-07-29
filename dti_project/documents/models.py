@@ -394,6 +394,7 @@ class InspectionValidationReport(models.Model):
     inflammable_areas = models.CharField(max_length=255, blank=True, help_text="Areas for inflammables such as gasoline, oil, paint, etc.")
 
     # F. Type of Insurance Coverage
+    type_of_insurance_coverage = models.CharField(max_length=255, blank=True, help_text="Type of Insurance Coverage?")
     insurance_expiry_date = models.DateField(null=True, blank=True)
     insurance_coverage_amount = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True, help_text="Amount in PHP")
 
