@@ -167,6 +167,10 @@ class FormStepsMixin:
                     else:
                         steps.append(('section', section))
 
+        # Add formsets from formset_classes
+        if hasattr(self, 'formset_classes'):
+            for formset_key in self.formset_classes.keys():
+                steps.append(('formset', formset_key))
 
         return steps
 
