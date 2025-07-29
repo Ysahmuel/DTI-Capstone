@@ -1,7 +1,7 @@
 from django.db import models
 from django.forms import ValidationError
 from django.utils import timezone
-from .model_choices import APPLICATION_OR_ACTIVITY_CHOICES, OFFICE_SHOP_CHOICES, SERVICE_CATEGORY_CHOICES, YES_NO_CHOICES
+from .model_choices import APPLICATION_OR_ACTIVITY_CHOICES, OFFICE_SHOP_CHOICES, RECOMMENDATION_CHOICES, SERVICE_CATEGORY_CHOICES, YES_NO_CHOICES
 from users.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 
@@ -404,25 +404,13 @@ class InspectionValidationReport(models.Model):
     customer_satisfaction_feedback_form_exists = YesNoField(help_text="With customer satisfaction feedback? (CSF)")
 
     # H. Findings/Remarks
-    findings_remarks = models.TextField(blank=True)
+    findings_remarks = models.TextField(blank=True, help_text='Findings/Remarks')
 
     # I. Recommendation
-    recommendation_approval = models.BooleanField(default=False)
-    recommendation_disapproval = models.BooleanField(default=False)
-    recommendation_monitoring_issuance_sco = models.BooleanField(default=False)
-    recommendation_new_application = models.BooleanField(default=False)
-    recommendation_renewal_application = models.BooleanField(default=False)
-    recommendation_continuing_accreditation = models.BooleanField(default=False)
+    recommendation = models.CharField(max_length=50, choices=RECOMMENDATION_CHOICES, blank=True, null=True)
+    inspected_by_accreditation_officer = models.CharField(max_length=255, blank=True, help_text='Inspected by: (Accreditation Officer/Leader)')
+    inspected_by_member = models.CharField(max_length=255, blank=True, help_text='Inspected by: (Member)')
 
-    # Inspection Details
-    inspected_by_accreditation_officer = models.CharField(max_length=255, blank=True)
-    inspected_by_member = models.CharField(max_length=255, blank=True)
-
-    # Certification
-    certification_text = models.TextField(
-        default="This is to certify that the Accreditation Officer/s conducted the inspection in our premises today, and the information/data in this Inspection and Validation Report, gathered during the inspection are true and correct.",
-        blank=True
-    )
     authorized_signatory_name = models.CharField(max_length=255, blank=True)
     authorized_signatory_date = models.DateField(null=True, blank=True)
 
@@ -436,6 +424,10 @@ class InspectionValidationReport(models.Model):
 
     def __str__(self):
         return f"{self.name_of_business} - {self.date}"
+    
+    def get_certification_text():
+        return "This is to certify that the Accreditation Officer/s conducted the inspection in our premises today, " \
+        "and the information/data in this Inspection and Validation Report, gathered during the inspection are true and correct."
         
     def get_recommendation_display(self):
         """Return a human-readable list of selected recommendations"""
