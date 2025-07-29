@@ -98,15 +98,14 @@ INSPECTION_VALIDATION_REPORT_FIELD_GROUPS = [
         ['insurance_expiry_date', 'insurance_coverage_amount'],
     ], 'insurance'),
 
-    # ("Customer Satisfaction & Complaints", [
-    #     ['complaints_handling_process_yes', 'complaints_handling_process_no'],
-    #     ['complaints_handling_documented'],
-    #     ['customer_satisfaction_feedback_form_yes', 'customer_satisfaction_feedback_form_no'],
-    # ], 'csf-complaints'),
+    ("Customer Satisfaction & Complaints", [
+        ['complaints_handling_process_exists', 'complaints_handling_process_documented'],
+        ['customer_satisfaction_feedback_form_exists'],
+    ], 'csf-complaints'),
 
-    # ("Findings and Remarks", [
-    #     ['findings_remarks'],
-    # ], 'findings-remarks'),
+    ("Findings and Remarks", [
+        ['findings_remarks'],
+    ], 'findings-remarks'),
 
     # ("Recommendation", [
     #     ['recommendation_approval', 'recommendation_disapproval'],
