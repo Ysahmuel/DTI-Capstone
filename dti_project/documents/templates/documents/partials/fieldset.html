@@ -28,7 +28,13 @@
                                     {% if row|length == 1 or form_field|is_textarea %}
                                         full-width
                                     {% endif %}">
-                                <label for="{{ form_field.id_for_label }}">{{ form_field.label|safe }}</label>
+                                <label for="{{ form_field.id_for_label }}">
+                                    {% if form_field.help_text %}
+                                        {{ form_field.help_text }}
+                                    {% else %}
+                                        {{ form_field.label|safe }}
+                                    {% endif %}
+                                </label>
                                 {{ form_field }}
                             </div>
                         {% endwith %}
