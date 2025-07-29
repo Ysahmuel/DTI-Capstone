@@ -367,6 +367,7 @@ class InspectionValidationReport(models.Model):
     tools_equipment_serial_no = models.CharField(max_length=255, blank=True)
     racmac_sres_recovery_machine = YesNoField(help_text="For RAC/MAC SREs, with recovery machine")
     racmac_serial_no = models.CharField(max_length=255, blank=True)
+    proof_acquisition_recovery_machine = models.CharField(max_length=255, blank=True, help_text="Proof of acquisition of recovery machine")
 
     # D. Competence of Technicians
     employed_technicians_count = models.PositiveIntegerField(null=True, blank=True)
