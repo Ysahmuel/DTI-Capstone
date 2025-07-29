@@ -107,3 +107,12 @@ SERVICES_BY_CATEGORY = {
 }
 
 YES_NO_CHOICES = [('yes', 'Yes'), ('no', 'No')]
+
+RECOMMENDATION_CHOICES = [
+    ('approval', 'Approval'),
+    ('disapproval', 'Disapproval'),
+    ('monitoring', 'Monitoring/Issuance of SCO'),
+    ('new_application', 'New Application'),
+    ('renewal', 'Renewal Application'),
+    ('continuing_accreditation', 'Continuing Accreditation'),
+]
