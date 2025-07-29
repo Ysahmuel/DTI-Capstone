@@ -82,15 +82,16 @@ INSPECTION_VALIDATION_REPORT_FIELD_GROUPS = [
         ['refrigerant_storage_disposal_system'],
     ], 'competence-technicians'),
 
-    # ("Facilities", [
-    #     ['office_work_area_sqm', 'working_stalls_count'],
-    #     ['tool_equipment_storage_existing', 'tool_equipment_storage_adequate'],
-    #     ['existing_record_keeping_system', 'record_keeping_suitable'],
-    #     ['customers_reception_waiting_area_existing', 'customers_reception_waiting_area_adequate'],
-    #     ['fire_extinguishers_count', 'available_personal_protective_equipment'],
-    #     ['security_personnel_count', 'medical_kit_available'],
-    #     ['inflammable_areas']
-    # ], 'facilities'),
+    ("Facilities", [
+        ['office_work_area_sqm', 'working_stalls_count'],
+        ['tool_equipment_storage_existing', 'tool_equipment_storage_adequate'],
+        ['existing_record_keeping_system'],
+        ['customers_reception_waiting_area_existing', 'customers_reception_waiting_area_adequate', 'customers_reception_waiting_area_suitable'],
+        ['fire_extinguishers_count', ],
+        ['available_personal_protective_equipment'],
+        ['security_personnel_count', 'available_medical_kit'],
+        ['inflammable_areas']
+    ], 'facilities'),
 
     # ("Insurance Coverage", [
     #     ['insurance_expiry_date', 'insurance_coverage_amount'],
