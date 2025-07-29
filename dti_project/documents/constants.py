@@ -77,9 +77,9 @@ INSPECTION_VALIDATION_REPORT_FIELD_GROUPS = [
     ], 'tools-equipment'),
 
     ("Competence of Technicians", [
-        ['employed_technicians_count', 'average_technician_experience'],
-        ['tesda_certification_nc', 'continuous_training_program'],
-        ['list_employees_past_2_years', 'refrigerant_storage_disposal_system'],
+        ['employed_technicians_count', 'average_technician_experience', 'tesda_certification_nc', 'tesda_certification_coc'],
+        ['continuous_training_program', 'list_employees_past_2_years'],
+        ['refrigerant_storage_disposal_system'],
     ], 'competence-technicians'),
 
     # ("Facilities", [
