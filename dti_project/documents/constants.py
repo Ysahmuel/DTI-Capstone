@@ -109,8 +109,11 @@ INSPECTION_VALIDATION_REPORT_FIELD_GROUPS = [
 
     ("Recommendation", [
         ['recommendation', 'inspected_by_accreditation_officer', 'inspected_by_member'], 
-        ['authorized_signatory_name', 'authorized_signatory_date']
     ], 'recommendation'),
+
+    ("Certification", [
+        ['authorized_signatory_name', 'authorized_signatory_date']
+    ], 'certification')
 ]
 
 # ---------- DETAIL VIEW GROUPS ---------------- #
