@@ -1,7 +1,8 @@
 from django.urls import reverse_lazy
+from ..utils.form_helpers import get_certification_text
 from ..constants import INSPECTION_VALIDATION_REPORT_FIELD_GROUPS, PERSONAL_DATA_SHEET_FIELD_GROUPS, SALES_PROMOTION_FIELD_GROUPS, SERVICE_REPAIR_ACCREDITATION_FIELD_GROUPS
-from ..forms import FORMSET_CLASSES, InspectionValidationReportForm, PersonalDataSheetForm, SalesPromotionPermitApplicationForm, ServiceRepairAccreditationApplicationForm
-from ..models import InspectionValidationReport, PersonalDataSheet, SalesPromotionPermitApplication, ServiceRepairAccreditationApplication
+from ..forms import FORMSET_CLASSES, InspectionValidationReportForm, OrderOfPaymentForm, PersonalDataSheetForm, SalesPromotionPermitApplicationForm, ServiceRepairAccreditationApplicationForm
+from ..models import InspectionValidationReport, OrderOfPayment, PersonalDataSheet, SalesPromotionPermitApplication, ServiceRepairAccreditationApplication
 from ..mixins import FormStepsMixin, FormsetMixin, ServiceCategoryMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import CreateView
@@ -51,7 +52,7 @@ class CreatePersonalDataSheetView(LoginRequiredMixin, FormStepsMixin, FormsetMix
     def get_success_url(self):
         return reverse_lazy('personal-data-sheet', kwargs={'pk': self.object.pk})
     
-class CreateServiceRepairAccreditationApplication(LoginRequiredMixin, FormStepsMixin, FormsetMixin, CreateView):
+class CreateServiceRepairAccreditationApplicationView(LoginRequiredMixin, FormStepsMixin, FormsetMixin, CreateView):
     template_name = 'documents/create_service_repair.html'
     model = ServiceRepairAccreditationApplication
     form_class = ServiceRepairAccreditationApplicationForm
@@ -72,7 +73,7 @@ class CreateServiceRepairAccreditationApplication(LoginRequiredMixin, FormStepsM
         return context
     
 
-class CreateInspectionValidationReport(LoginRequiredMixin, FormStepsMixin, FormsetMixin, ServiceCategoryMixin, CreateView):
+class CreateInspectionValidationReportView(LoginRequiredMixin, FormStepsMixin, FormsetMixin, ServiceCategoryMixin, CreateView):
     model = InspectionValidationReport
     template_name = 'documents/create_inspection_validation_report.html'
     form_class = InspectionValidationReportForm
@@ -83,8 +84,14 @@ class CreateInspectionValidationReport(LoginRequiredMixin, FormStepsMixin, Forms
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['field_groups'] = self.FIELD_GROUPS
+        context['certification_text'] = get_certification_text()
         context['service_categories'] = self.get_service_categories_with_services()
         return context
 
     def get_success_url(self):
         return reverse_lazy('inspection-validation-report', kwargs={'pk': self.object.pk})
+    
+class CreateOrderOfPaymentView(LoginRequiredMixin, FormStepsMixin, FormsetMixin, CreateView):
+    model = OrderOfPayment
+    template_name = 'documents/create_order_of_payment.html'
+    form_class = OrderOfPaymentForm

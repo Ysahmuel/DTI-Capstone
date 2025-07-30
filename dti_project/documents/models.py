@@ -424,10 +424,6 @@ class InspectionValidationReport(models.Model):
 
     def __str__(self):
         return f"{self.name_of_business} - {self.date}"
-    
-    def get_certification_text():
-        return "This is to certify that the Accreditation Officer/s conducted the inspection in our premises today, " \
-        "and the information/data in this Inspection and Validation Report, gathered during the inspection are true and correct."
         
     def get_recommendation_display(self):
         """Return a human-readable list of selected recommendations"""

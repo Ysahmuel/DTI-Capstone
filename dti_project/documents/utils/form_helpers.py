@@ -26,3 +26,7 @@ def create_inline_formset(parent_model, child_model, form_class, fields='__all__
         can_delete=can_delete,
         **kwargs
     )
+
+def get_certification_text():
+    return "This is to certify that the Accreditation Officer/s conducted the inspection in our premises today, " \
+    "and the information/data in this Inspection and Validation Report, gathered during the inspection are true and correct."

@@ -1,8 +1,9 @@
 from .create_views import (
     CreateSalesPromotionView,
     CreatePersonalDataSheetView,
-    CreateServiceRepairAccreditationApplication,
-    CreateInspectionValidationReport,
+    CreateServiceRepairAccreditationApplicationView,
+    CreateInspectionValidationReportView,
+    CreateOrderOfPaymentView
 )
 from .detail_views import (
     SalesPromotionDetailView,
