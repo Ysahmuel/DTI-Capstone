@@ -3,6 +3,9 @@
 <fieldset id="{{ group.2 }}-fieldset">
     <p class="part-count">Part {{ counter }} of {{ total_parts }}</p>
     <legend>{{ group.0 }}</legend>
+
+    {% if group.0 == 'Certification' %} <p class="form-paragraph-text">{{ certification_text }}</p> {% endif %}
+
     <div class="stepped-layout">
         {% for row in group.1 %}
             {% if row.0 == 'image' %}
@@ -28,6 +31,7 @@
                                     {% if row|length == 1 or form_field|is_textarea %}
                                         full-width
                                     {% endif %}">
+
                                 <label for="{{ form_field.id_for_label }}">
                                     {% if form_field.help_text %}
                                         {{ form_field.help_text }}
