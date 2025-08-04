@@ -1,7 +1,7 @@
 from django.db import models
 from django.forms import ValidationError
 from django.utils import timezone
-from .model_choices import APPLICATION_OR_ACTIVITY_CHOICES, OFFICE_SHOP_CHOICES, RECOMMENDATION_CHOICES, SERVICE_CATEGORY_CHOICES, YES_NO_CHOICES
+from .model_choices import APPLICATION_OR_ACTIVITY_CHOICES, OFFICE_SHOP_CHOICES, RECOMMENDATION_CHOICES, REQUIREMENT_CHOICES, SERVICE_CATEGORY_CHOICES, STAR_RATING_CHOICES, YES_NO_CHOICES
 from users.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 
@@ -191,14 +191,6 @@ class ServiceRepairAccreditationApplication(models.Model):
         ('CORP', 'Corporation'),
         ('PARTNERSHIP', 'Partnership'),
         ('COOP', 'Cooperative'),
-    ]
-
-    STAR_RATING_CHOICES = [
-        (1, '1'),
-        (2, '2'),
-        (3, '3'),
-        (4, '4'),
-        (5, '5')
     ]
 
     application_type = models.CharField(max_length=10, choices=APPLICATION_TYPES)
@@ -462,3 +454,20 @@ class Service(models.Model):
 
     def __str__(self):
         return f"{self.category.name} - {self.name}"
+
+class ChecklistEvaluationSheet(models.Model):
+    name_of_business = models.CharField(max_length=255)
+    type_of_application = models.CharField(max_length=50, choices=[('New', 'New'), ('Renewal', 'Renewal')])
+    renewal_due_date = models.DateField(null=True, blank=True, help_text='Date Expired: Dec 31')
+    star_rating = models.CharField(max_length=3, choices=STAR_RATING_CHOICES)
+
+    def __str__(self):
+        return
+
+class RequirementChecklisItem(models.Model):
+    sheet = models.ForeignKey(ChecklistEvaluationSheet, on_delete=models.CASCADE, related_name='checklist_item')
+    name = models.CharField(max_length=255, choices=REQUIREMENT_CHOICES)
+    remarks = models.TextField()
+
+    def __str__(self):
+        return

@@ -116,3 +116,39 @@ RECOMMENDATION_CHOICES = [
     ('renewal', 'Renewal Application'),
     ('continuing_accreditation', 'Continuing Accreditation'),
 ]
+
+STAR_RATING_CHOICES = [
+    (1, '1'),
+    (2, '2'),
+    (3, '3'),
+    (4, '4'),
+    (5, '5')
+]
+
+REQUIREMENT_CHOICES = [
+    ("req_1", "Original/e-copy notarized completely filled out application form with Undertaking/Warranty (Minimum of 90 days) signed by the owner or authorized agent (signed by the proprietor for SPP, if other than the Proprietor, attach SPA/Authorization: President/Managing Partner for Corporation/Partnership, otherwise, copy of Board Resolution/Secretary's Certificate with authorized signatory)"),
+    ("req_2", "Copy of Valid Business Name Certificate of Registration for Single Proprietorship or Certified true copy of company Partnership and Articles of Incorporation/Partnership for Corporation/Partnership, GDA certificate of registration and Articles of Cooperation for Cooperatives, SEC Registration Certificate only, if no amendments made in Albay Ps"),
+    ("req_3", "Copy of Latest Accreditation Certificate"),
+    ("req_4", "Original-copy Certified List of Mechanics/Technicians and Position with Personnel/no Data Sheet"), 
+    ("req_5", "Copy of valid and relevant TESDA Certificate (National Certificate or Certificate of Competency for Technical Employees)"),
+    ("req_6", "Original/e-copy Certified List of Trainings Attended by the Employees/Technicians within the past 2 years"),
+    ("req_7", "Original/e-copy List of Shop Tools and Equipment"),
+    ("req_8", "Original/e-copy Shop Floor Plan/Layout/Size/No. of Stalls/Working Bays and interior pictures of the Shop/Office – showing front (with signages) and interior/working area"),
+    ("req_9", "Originally issued Certification (in lieu of items 6 and 8) that there are no changes on the said items for renewals, provided that said requirements have been previously submitted"),
+    ("req_10", "Copy of Comprehensive Insurance Policy covering the customer's motor vehicle while in custody and use against theft, pilferage, fire, flood and loss. Insurance coverage must be P100,000.00 year and its expiry date must be on or after December 31st 20__, and copy of official receipt (proof of payment of insurance premiums)"),
+    ("req_11", "Original Affidavit stating that all services and repairs are done in the clients presence and that they conduct all services and repairs in their client's premises. (In lieu of insurance policy)"),
+    ("req_12", "In places where there are no insurance companies willing to undertake the risk due to the peace and order situation in the area the Director may grant exemption upon sufficient proof of such circumstances"),
+    ("req_13", "Copy of valid dealership agreement (five star only) Motor Vehicle, Ref and Aircon, Office Machine/Data Processing Equipment)"),
+    ("req_14", "Copy of Valid Contract of Service, (if any)"),
+    ("req_15", "Original copy of Performance Bond policy and official receipt with minimum coverage of P50,000. (in favor of the DTI valid up to December 31, 20__ for 3 to 5 STAR, New or Renewal)")
+]
+
+REMARKS_CHOICES = [
+    ("applicable_only", "applicable only for ref/aircon shops"),
+    ("not_applicable_if_no_changes", "not applicable, if no changes"),
+    ("not_applicable_if_not_charges", "not applicable, if not charges"),
+    ("not_applicable", "not applicable"),
+    ("see_attached_sample_form", "see attached sample form"),
+    ("applicable_only_for_5_star", "applicable only for 5 star application"),
+    ("not_applicable_for_one_and_two_star", "not applicable for one & two star application")
+]
