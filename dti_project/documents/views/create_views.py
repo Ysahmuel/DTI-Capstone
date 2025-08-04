@@ -95,3 +95,14 @@ class CreateOrderOfPaymentView(LoginRequiredMixin, FormStepsMixin, FormsetMixin,
     model = OrderOfPayment
     template_name = 'documents/create_order_of_payment.html'
     form_class = OrderOfPaymentForm
+    
+    FIELD_GROUPS = ORDER_OF_PAYMENT_FIELD_GROUPS
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['field_groups'] = self.FIELD_GROUPS
+        return context
+
+    def get_success_url(self):
+        return super().get_success_url()
+
