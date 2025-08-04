@@ -1,7 +1,8 @@
+import datetime
 from django import forms
 from .utils.form_helpers import create_inline_formset
 from .validators import validate_period
-from .models import CharacterReference, EducationalAttainment, EmployeeBackground, InspectionValidationReport, OrderOfPayment, ProductCovered, SalesPromotionPermitApplication, PersonalDataSheet, Service, ServiceCategory, ServiceRepairAccreditationApplication, TrainingsAttended
+from .models import CharacterReference, ChecklistEvaluationSheet, EducationalAttainment, EmployeeBackground, InspectionValidationReport, OrderOfPayment, PermitFee, ProductCovered, RequirementChecklisItem, SalesPromotionPermitApplication, PersonalDataSheet, Service, ServiceCategory, ServiceRepairAccreditationApplication, TrainingsAttended
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, LayoutObject, TEMPLATE_PACK, Fieldset, HTML, Div, Row, Column, Submit
 from django.template.loader import render_to_string
@@ -137,6 +138,38 @@ class PermitFeeForm(BaseCustomForm):
     class Meta:
         model = PermitFee
         fields = '__all__'
+
+class ChecklistEvaluationSheetForm(BaseCustomForm):
+    renewal_year = forms.IntegerField(label="Date Expired: Dec 31, ____", min_value=1900)
+
+    class Meta:
+        model = ChecklistEvaluationSheet
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        current_year = datetime.date.today().year
+        self.fields['renewal_year'].max_value = current_year
+        self.fields['renewal_year'].initial = current_year - 1
+
+    def clean_renewal_year(self):
+        year = self.cleaned_data.get('renewal_year')
+        if year > self.current_year:
+            raise forms.ValidationError(f"Year cannot exceed {self.current_year}")
+        return year
+
+    def clean(self):
+        cleaned_data = super().clean()
+        year = cleaned_data.get('year')
+        if year:
+            cleaned_data['renewal_year'] = datetime.date(year, 12, 31)
+
+        return cleaned_data
+
+class RequirementChecklisItemForm(BaseCustomForm):
+    class Meta:
+        model = RequirementChecklisItem
+        fields = '__all__'
     
 # Formset configurations
 FORMSET_CONFIGS = {
@@ -169,6 +202,13 @@ FORMSET_CONFIGS = {
         'child_model': CharacterReference,
         'form_class': CharacterReferenceForm
     },
+
+    # Permit Fee Formsets
+    # 'permit_fees': {
+    #     'parent_model': OrderOfPayment,
+    #     'child_model': PermitFee,
+    #     'form_class': PermitFeeForm
+    # }
 }
 
 FORMSET_CLASSES = {}
