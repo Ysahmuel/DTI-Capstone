@@ -126,6 +126,11 @@ ORDER_OF_PAYMENT_FIELD_GROUPS = [
     ], 'account-special-collecting-officer')
 ]
 
+CHECKLIST_EVALUATION_FIELD_GROUPS = [
+    ("Business Details", [
+        ['name_of_business', 'type_of_application', 'renewal_year', 'star_rating']
+    ], 'business-details')
+]
 
 # ---------- DETAIL VIEW GROUPS ---------------- #
 
