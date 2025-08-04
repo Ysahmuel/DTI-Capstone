@@ -131,6 +131,12 @@ class OrderOfPaymentForm(BaseCustomForm):
     class Meta:
         model = OrderOfPayment
         fields = '__all__'
+        exclude = ['date']
+
+class PermitFeeForm(BaseCustomForm):
+    class Meta:
+        model = PermitFee
+        fields = '__all__'
     
 # Formset configurations
 FORMSET_CONFIGS = {
