@@ -62,8 +62,8 @@ class OrderOfPaymentAdmin(admin.ModelAdmin):
 
 @admin.register(PermitFee)
 class PermitFeeAdmin(admin.ModelAdmin):
-    list_display = ('permit', 'fee_type', 'remarks')
-    search_fields = ('permit', '')
+    list_display = ('order', 'fee_type', 'remarks')
+    search_fields = ('order', '')
     list_filter = ('fee_type', 'remarks')
 
 @admin.register(InspectionValidationReport)

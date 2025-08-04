@@ -320,7 +320,7 @@ class PermitFee(models.Model):
         ('A', 'Additional fees due to reassessment of premium and prizes')
     ]
 
-    permit = models.ForeignKey(SalesPromotionPermitApplication, related_name='fees', on_delete=models.CASCADE)
+    order = models.ForeignKey(OrderOfPayment, related_name='fees', on_delete=models.CASCADE, blank=True, null=True)
     fee_type = models.CharField(max_length=20, choices=PERMIT_CHOICES)
     remarks = models.CharField(max_length=64, choices=REMARK_CHOICES)
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
