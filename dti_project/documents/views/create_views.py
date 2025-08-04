@@ -1,8 +1,8 @@
 from django.urls import reverse_lazy
 from ..utils.form_helpers import get_certification_text
-from ..constants import INSPECTION_VALIDATION_REPORT_FIELD_GROUPS, PERSONAL_DATA_SHEET_FIELD_GROUPS, SALES_PROMOTION_FIELD_GROUPS, SERVICE_REPAIR_ACCREDITATION_FIELD_GROUPS
-from ..forms import FORMSET_CLASSES, InspectionValidationReportForm, OrderOfPaymentForm, PersonalDataSheetForm, SalesPromotionPermitApplicationForm, ServiceRepairAccreditationApplicationForm
-from ..models import InspectionValidationReport, OrderOfPayment, PersonalDataSheet, SalesPromotionPermitApplication, ServiceRepairAccreditationApplication
+from ..constants import CHECKLIST_EVALUATION_FIELD_GROUPS, INSPECTION_VALIDATION_REPORT_FIELD_GROUPS, ORDER_OF_PAYMENT_FIELD_GROUPS, PERSONAL_DATA_SHEET_FIELD_GROUPS, SALES_PROMOTION_FIELD_GROUPS, SERVICE_REPAIR_ACCREDITATION_FIELD_GROUPS
+from ..forms import FORMSET_CLASSES, ChecklistEvaluationSheetForm, InspectionValidationReportForm, OrderOfPaymentForm, PersonalDataSheetForm, SalesPromotionPermitApplicationForm, ServiceRepairAccreditationApplicationForm
+from ..models import ChecklistEvaluationSheet, InspectionValidationReport, OrderOfPayment, PersonalDataSheet, SalesPromotionPermitApplication, ServiceRepairAccreditationApplication
 from ..mixins import FormStepsMixin, FormsetMixin, ServiceCategoryMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import CreateView
@@ -106,3 +106,17 @@ class CreateOrderOfPaymentView(LoginRequiredMixin, FormStepsMixin, FormsetMixin,
     def get_success_url(self):
         return super().get_success_url()
 
+class CreateChecklistEvaluationSheetView(LoginRequiredMixin, FormStepsMixin, FormsetMixin, CreateView):
+    model = ChecklistEvaluationSheet
+    template_name = 'documents/create_checklist_evaluation_sheet.html'
+    form_class = ChecklistEvaluationSheetForm
+    
+    FIELD_GROUPS = CHECKLIST_EVALUATION_FIELD_GROUPS
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['field_groups'] = self.FIELD_GROUPS
+        return context
+
+    def get_success_url(self):
+        return super().get_success_url()

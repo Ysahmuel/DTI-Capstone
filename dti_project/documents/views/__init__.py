@@ -3,7 +3,8 @@ from .create_views import (
     CreatePersonalDataSheetView,
     CreateServiceRepairAccreditationApplicationView,
     CreateInspectionValidationReportView,
-    CreateOrderOfPaymentView
+    CreateOrderOfPaymentView,
+    CreateChecklistEvaluationSheetView
 )
 from .detail_views import (
     SalesPromotionDetailView,

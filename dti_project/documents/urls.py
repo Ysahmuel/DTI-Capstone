@@ -8,6 +8,7 @@ urlpatterns = [
     path("create/service-repair-accreditation", views.CreateServiceRepairAccreditationApplicationView.as_view(), name="create-service-repair-accreditation"),
     path("create/inspection-validation-report", views.CreateInspectionValidationReportView.as_view(), name="create-inspection-validation-report"),
     path('create/order-of-payment', views.CreateOrderOfPaymentView.as_view(), name="create-order-of-payment"),
+    path('create/checklist-evaluation', views.CreateChecklistEvaluationSheetView.as_view(), name='create-checklist-evaluation-sheet'),
 
     # DETAIL VIEWS
     path("sales-promotion-application/<int:pk>", views.SalesPromotionDetailView.as_view(), name="sales-promotion-application"),
