@@ -116,6 +116,17 @@ INSPECTION_VALIDATION_REPORT_FIELD_GROUPS = [
     ], 'certification')
 ]
 
+ORDER_OF_PAYMENT_FIELD_GROUPS = [
+    ("Name and Address", [
+        ['name', 'address']
+    ], 'name-and-address'),
+    ('Account/Special Collecting Officer', [
+        ['account_officer_date', 'account_officer_signature'],
+        ['special_collecting_officer_date', 'special_collecting_officer_or_number', 'special_collecting_officer_signature']
+    ], 'account-special-collecting-officer')
+]
+
+
 # ---------- DETAIL VIEW GROUPS ---------------- #
 
 SALES_PROMOTION_DETAIL_GROUPS = [
