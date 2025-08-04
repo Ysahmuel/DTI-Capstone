@@ -207,7 +207,7 @@
 .nav-item.dropdown.active .nav-dropdown-list {
     display: flex;
     opacity: 1;
-    max-height: 10rem;
+    max-height: 50vh;
 }
 
 .nav-item.dropdown.active .nav-dropdown-btn .fa-angle-down {
