@@ -152,3 +152,10 @@ REMARKS_CHOICES = [
     ("applicable_only_for_5_star", "applicable only for 5 star application"),
     ("not_applicable_for_one_and_two_star", "not applicable for one & two star application")
 ]
+
+PERMIT_FEE_REMARK_CHOICES = [
+    ('R', 'R - Several provinces / cities / municipalities within a single region'),
+    ('P', 'P - Single province / city / municipality'),
+    ('X', 'X - 2 or more regions excluding Metro Manila'),
+    ('A', 'A - Additional fees due to reassessment of premium and prizes'),
+]
