@@ -289,6 +289,36 @@ class OrderOfPayment(models.Model):
     account_officer_date = models.DateField(null=True, blank=True)
     account_officer_signature = models.ImageField(upload_to='signatures/', null=True, blank=True)
 
+    discount_remark = models.TextField(blank=True, null=True)
+    discount_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+
+    premium_remark = models.TextField(blank=True, null=True)
+    premium_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+
+    raffle_remark = models.TextField(blank=True, null=True)
+    raffle_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+
+    contest_remark = models.TextField(blank=True, null=True)
+    contest_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+
+    redemption_remark = models.TextField(blank=True, null=True)
+    redemption_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+
+    games_remark = models.TextField(blank=True, null=True)
+    games_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+
+    beauty_contest_remark = models.TextField(blank=True, null=True)
+    beauty_contest_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+
+    home_solicitation_remark = models.TextField(blank=True, null=True)
+    home_solicitation_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+
+    amendments_remark = models.TextField(blank=True, null=True)
+    amendments_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+
+    doc_stamp_remark = models.TextField(blank=True, null=True)
+    doc_stamp_amount = models.DecimalField(max_digits=10, decimal_places=2, default=30.00, editable=False)
+
     special_collecting_officer_date = models.DateField(null=True, blank=True)
     special_collecting_officer_or_number = models.CharField(max_length=50, blank=True)
     special_collecting_officer_signature = models.ImageField(upload_to='signatures/', null=True, blank=True)
@@ -298,41 +328,6 @@ class OrderOfPayment(models.Model):
 
     def __str__(self):
         return f"{self.name} {self.address}"
-    
-class PermitFee(models.Model):
-    PERMIT_CHOICES = [
-        ('discount', 'Discount'),
-        ('premium', 'Premium'),
-        ('raffle', 'Raffle'),
-        ('contest', 'Contest'),
-        ('redemption', 'Redemption'),
-        ('games', 'Games'),
-        ('beauty_contest', 'Beauty Contest'),
-        ('home_solicitation', 'Home Solicitation'),
-        ('amendments', 'Amendments'),
-        ('doc_stamp', 'DocStamp'),
-    ]
-
-    REMARK_CHOICES = [
-        ('R', 'Several provinces/cities within a region'),
-        ('P', 'Single province/city/municipality'),
-        ('X', '2 or more regions excluding Metro Manila'),
-        ('A', 'Additional fees due to reassessment of premium and prizes')
-    ]
-
-    order = models.ForeignKey(OrderOfPayment, related_name='fees', on_delete=models.CASCADE, blank=True, null=True)
-    fee_type = models.CharField(max_length=20, choices=PERMIT_CHOICES)
-    remarks = models.CharField(max_length=64, choices=REMARK_CHOICES)
-    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-
-    def save(self, *args, **kwargs):
-        # Automatically set amount to ₱30 if fee_type is doc_stamp and amount wasn't set
-        if self.fee_type == 'doc_stamp' and self.amount != 30:
-            self.amount == 30
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"{self.permit} ({self.fee_type}): ₱{self.amount}"
     
 class InspectionValidationReport(models.Model):
     # Basic Information
