@@ -2,7 +2,7 @@ import datetime
 from django import forms
 from .utils.form_helpers import create_inline_formset
 from .validators import validate_period
-from .models import CharacterReference, ChecklistEvaluationSheet, EducationalAttainment, EmployeeBackground, InspectionValidationReport, OrderOfPayment, PermitFee, ProductCovered, RequirementChecklisItem, SalesPromotionPermitApplication, PersonalDataSheet, Service, ServiceCategory, ServiceRepairAccreditationApplication, TrainingsAttended
+from .models import CharacterReference, ChecklistEvaluationSheet, EducationalAttainment, EmployeeBackground, InspectionValidationReport, OrderOfPayment, ProductCovered, RequirementChecklisItem, SalesPromotionPermitApplication, PersonalDataSheet, Service, ServiceCategory, ServiceRepairAccreditationApplication, TrainingsAttended
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, LayoutObject, TEMPLATE_PACK, Fieldset, HTML, Div, Row, Column, Submit
 from django.template.loader import render_to_string
@@ -134,11 +134,6 @@ class OrderOfPaymentForm(BaseCustomForm):
         fields = '__all__'
         exclude = ['date']
 
-class PermitFeeForm(BaseCustomForm):
-    class Meta:
-        model = PermitFee
-        fields = '__all__'
-
 class ChecklistEvaluationSheetForm(BaseCustomForm):
     renewal_year = forms.IntegerField(label="Date Expired: Dec 31, ____", min_value=1900)
 
@@ -202,13 +197,6 @@ FORMSET_CONFIGS = {
         'child_model': CharacterReference,
         'form_class': CharacterReferenceForm
     },
-
-    # Permit Fee Formsets
-    # 'permit_fees': {
-    #     'parent_model': OrderOfPayment,
-    #     'child_model': PermitFee,
-    #     'form_class': PermitFeeForm
-    # }
 }
 
 FORMSET_CLASSES = {}

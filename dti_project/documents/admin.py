@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .utils.admin_helpers import get_full_name_from_personal_data
-from .models import CharacterReference, EducationalAttainment, EmployeeBackground, InspectionValidationReport, OrderOfPayment, PermitFee, PersonalDataSheet, ProductCovered, SalesPromotionPermitApplication, Service, ServiceCategory, ServiceRepairAccreditationApplication, TrainingsAttended
+from .models import CharacterReference, EducationalAttainment, EmployeeBackground, InspectionValidationReport, OrderOfPayment, PersonalDataSheet, ProductCovered, SalesPromotionPermitApplication, Service, ServiceCategory, ServiceRepairAccreditationApplication, TrainingsAttended
 
 
 # Register your models here.
@@ -59,12 +59,6 @@ class ServiceRepairAccreditationApplicationAdmin(admin.ModelAdmin):
 class OrderOfPaymentAdmin(admin.ModelAdmin):
     list_display = ('name', 'date')
     search_fields = ('name', )
-
-@admin.register(PermitFee)
-class PermitFeeAdmin(admin.ModelAdmin):
-    list_display = ('order', 'fee_type', 'remarks')
-    search_fields = ('order', '')
-    list_filter = ('fee_type', 'remarks')
 
 @admin.register(InspectionValidationReport)
 class InspectionValidationReportAdmin(admin.ModelAdmin):
