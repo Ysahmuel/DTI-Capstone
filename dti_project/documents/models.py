@@ -1,7 +1,8 @@
 from django.db import models
 from django.forms import ValidationError
 from django.utils import timezone
-from .model_choices import APPLICATION_OR_ACTIVITY_CHOICES, OFFICE_SHOP_CHOICES, RECOMMENDATION_CHOICES, REQUIREMENT_CHOICES, SERVICE_CATEGORY_CHOICES, STAR_RATING_CHOICES, YES_NO_CHOICES
+from .utils.model_helpers import remark_amount_fields
+from .model_choices import APPLICATION_OR_ACTIVITY_CHOICES, OFFICE_SHOP_CHOICES, RECOMMENDATION_CHOICES, REMARKS_CHOICES, REQUIREMENT_CHOICES, SERVICE_CATEGORY_CHOICES, STAR_RATING_CHOICES, YES_NO_CHOICES
 from users.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 
@@ -289,35 +290,19 @@ class OrderOfPayment(models.Model):
     account_officer_date = models.DateField(null=True, blank=True)
     account_officer_signature = models.ImageField(upload_to='signatures/', null=True, blank=True)
 
-    discount_remark = models.TextField(blank=True, null=True)
-    discount_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    # Dynamically include remark-amount fields
+    locals().update(remark_amount_fields('discount'))
+    locals().update(remark_amount_fields('premium'))
+    locals().update(remark_amount_fields('raffle'))
+    locals().update(remark_amount_fields('contest'))
+    locals().update(remark_amount_fields('redemption'))
+    locals().update(remark_amount_fields('games'))
+    locals().update(remark_amount_fields('beauty_contest'))
+    locals().update(remark_amount_fields('home_solicitation'))
+    locals().update(remark_amount_fields('amendments'))
 
-    premium_remark = models.TextField(blank=True, null=True)
-    premium_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-
-    raffle_remark = models.TextField(blank=True, null=True)
-    raffle_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-
-    contest_remark = models.TextField(blank=True, null=True)
-    contest_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-
-    redemption_remark = models.TextField(blank=True, null=True)
-    redemption_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-
-    games_remark = models.TextField(blank=True, null=True)
-    games_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-
-    beauty_contest_remark = models.TextField(blank=True, null=True)
-    beauty_contest_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-
-    home_solicitation_remark = models.TextField(blank=True, null=True)
-    home_solicitation_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-
-    amendments_remark = models.TextField(blank=True, null=True)
-    amendments_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-
-    doc_stamp_remark = models.TextField(blank=True, null=True)
-    doc_stamp_amount = models.DecimalField(max_digits=10, decimal_places=2, default=30.00, editable=False)
+    doc_stamp_remark = models.CharField(max_length=255, blank=True, null=True, choices=REMARKS_CHOICES)
+    doc_stamp_amount = models.DecimalField(max_digits=10, decimal_places=2, default=30.00)
 
     special_collecting_officer_date = models.DateField(null=True, blank=True)
     special_collecting_officer_or_number = models.CharField(max_length=50, blank=True)
