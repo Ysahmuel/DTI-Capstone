@@ -120,6 +120,18 @@ ORDER_OF_PAYMENT_FIELD_GROUPS = [
     ("Name and Address", [
         ['name', 'address']
     ], 'name-and-address'),
+    ('Permit Fee', [
+        ['discount_amount', 'discount_remark'],
+        ['premium_amount', 'premium_remark'],
+        ['raffle_amount', 'raffle_remark'],
+        ['contest_amount', 'contest_remark'],
+        ['redemption_amount', 'redemption_remark'],
+        ['games_amount', 'games_remark'],
+        ['beauty_contest_amount', 'beauty_contest_remark'],
+        ['home_solicitation_amount', 'home_solicitation_remark'],
+        ['amendments_amount', 'amendments_remark'],
+        ['doc_stamp_amount', 'doc_stamp_remark'],
+    ], 'permit-fees'),
     ('Account/Special Collecting Officer', [
         ['account_officer_date', 'account_officer_signature'],
         ['special_collecting_officer_date', 'special_collecting_officer_or_number', 'special_collecting_officer_signature']
