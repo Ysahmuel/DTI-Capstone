@@ -35,4 +35,14 @@
             {% endfor %}
         </ul>
     </div>
+    <div>
+        <h2>Orders of Payment (Sample list only)</h2>
+        <ul>
+            {% for order in orders_of_payment %}
+                <li>
+                    <a href="{% url 'order-of-payment' order.id %}">{{ order }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
 {% endblock %}
