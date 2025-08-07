@@ -1,0 +1,30 @@
+{% load custom_filters %}
+
+<fieldset id="{{ group.2 }}-fieldset">
+    <p class="part-count">Part {{ counter }} of {{ total_parts }}</p>
+    <legend>{{ group.0 }}</legend>
+    <ol class="fieldset-checklist">
+        {% for row in group.1 %}
+            <li class="fieldset-checklist-item">
+                {% for field_name in row %}
+                    {% with form_field=form|get_form_field:field_name %}
+
+                        <label for="">
+                            <span>
+                                {% if form_field.help_text %}
+                                    {{ form_field.help_text }}
+                                {% else %}
+                                    {{ form_field.label|safe }}
+                                {% endif %}
+                            </span>
+
+                            {{ form_field }}
+                        </label>
+                        
+
+                    {% endwith %}
+                {% endfor %}
+            </li>
+        {% endfor %}
+    </ol>
+</fieldset>

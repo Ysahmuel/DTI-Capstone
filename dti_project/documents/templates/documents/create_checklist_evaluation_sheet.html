@@ -12,13 +12,23 @@
             {% csrf_token %}
 
             {% for step_info in enumerated_steps %}
-                {% if step_info.1 == 'fieldset' %}
-                    {% include 'documents/partials/fieldset.html' with counter=step_info.0 group=step_info.2 total_parts=total_parts %}
-                {% elif step_info.1 == 'formset' %}
-                    {% include 'documents/partials/formset.html' with counter=step_info.0 label=step_info.2 formset=step_info.3 total_parts=total_parts %}
-                {% elif step_info.1 == 'section' %}
-                    {% include 'documents/partials/coverage-fieldset.html' with counter=step_info.0 total_parts=total_parts %}
+
+                {% if step_info.2.0 == 'Requirements' %}
+
+                    {% include 'documents/partials/requirements_checklist_fieldset.html' with counter=step_info.0 group=step_info.2 total_parts=total_parts %}
+
+                {% else %} 
+
+                    {% if step_info.1 == 'fieldset' %}
+                        {% include 'documents/partials/fieldset.html' with counter=step_info.0 group=step_info.2 total_parts=total_parts %}
+                    {% elif step_info.1 == 'formset' %}
+                        {% include 'documents/partials/formset.html' with counter=step_info.0 label=step_info.2 formset=step_info.3 total_parts=total_parts %}
+                    {% elif step_info.1 == 'section' %}
+                        {% include 'documents/partials/coverage-fieldset.html' with counter=step_info.0 total_parts=total_parts %}
+                    {% endif %}
+
                 {% endif %}
+
             {% endfor %}
 
         </form>
