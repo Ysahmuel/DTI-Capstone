@@ -104,7 +104,7 @@ class CreateOrderOfPaymentView(LoginRequiredMixin, FormStepsMixin, FormsetMixin,
         return context
 
     def get_success_url(self):
-        return super().get_success_url()
+        return reverse_lazy('order-of-payment', kwargs={'pk': self.object.pk})
 
 class CreateChecklistEvaluationSheetView(LoginRequiredMixin, FormStepsMixin, FormsetMixin, CreateView):
     model = ChecklistEvaluationSheet

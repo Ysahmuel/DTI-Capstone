@@ -2,7 +2,7 @@ import re
 
 from ..mixins import TabsSectionMixin
 from ..constants import PERSONAL_DATA_SHEET_DETAIL_GROUPS, PERSONAL_DATA_SHEET_TAB_SECTIONS, SALES_PROMOTION_DETAIL_GROUPS
-from ..models import InspectionValidationReport, PersonalDataSheet, SalesPromotionPermitApplication
+from ..models import InspectionValidationReport, OrderOfPayment, PersonalDataSheet, SalesPromotionPermitApplication
 from django.views.generic import DetailView
 
 class SalesPromotionDetailView(DetailView):
@@ -71,3 +71,8 @@ class InspectionValidationReportDetailView(DetailView):
     template_name = 'documents/inspection_validation_report.html'
     model = InspectionValidationReport
     context_object_name = 'report'
+
+class OrderOfPaymentDetailView(DetailView):
+    template_name = 'documents/order_of_payment.html'
+    model = OrderOfPayment
+    context_object_name = 'order'
