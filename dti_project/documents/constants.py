@@ -141,7 +141,25 @@ ORDER_OF_PAYMENT_FIELD_GROUPS = [
 CHECKLIST_EVALUATION_FIELD_GROUPS = [
     ("Business Details", [
         ['name_of_business', 'type_of_application', 'renewal_year', 'star_rating']
-    ], 'business-details')
+    ], 'business-details'),
+
+    ("Requirements", [
+        ['req_application_form', 'req_application_form_remark'],
+        ['req_business_name_certificate', 'req_business_name_certificate_remark'],
+        ['req_latest_accreditation_certificate', 'req_latest_accreditation_certificate_remark'],
+        ['req_mechanics_list', 'req_mechanics_list_remark'],
+        ['req_tesda_certificate', 'req_tesda_certificate_remark'],
+        ['req_training_list', 'req_training_list_remark'],
+        ['req_tools_equipment_list', 'req_tools_equipment_list_remark'],
+        ['req_shop_layout_photos', 'req_shop_layout_photos_remark'],
+        ['req_certification_no_changes', 'req_certification_no_changes_remark'],
+        ['req_comprehensive_insurance', 'req_comprehensive_insurance_remark'],
+        ['req_affidavit_on_site_repairs', 'req_affidavit_on_site_repairs_remark'],
+        ['req_insurance_exemption_proof', 'req_insurance_exemption_proof_remark'],
+        ['req_dealership_agreement', 'req_dealership_agreement_remark'],
+        ['req_service_contract', 'req_service_contract_remark'],
+        ['req_performance_bond', 'req_performance_bond_remark']
+    ], 'requirements'),
 ]
 
 # ---------- DETAIL VIEW GROUPS ---------------- #
