@@ -147,18 +147,11 @@ class ChecklistEvaluationSheetForm(BaseCustomForm):
         self.fields['renewal_year'].max_value = current_year
         self.fields['renewal_year'].initial = current_year - 1
 
-    def clean_renewal_year(self):
-        year = self.cleaned_data.get('renewal_year')
-        if year > self.current_year:
-            raise forms.ValidationError(f"Year cannot exceed {self.current_year}")
-        return year
-
     def clean(self):
         cleaned_data = super().clean()
-        year = cleaned_data.get('year')
+        year = cleaned_data.get('renewal_year')
         if year:
-            cleaned_data['renewal_year'] = datetime.date(year, 12, 31)
-
+            cleaned_data['renewal_due_date'] = datetime.date(year, 12, 31)
         return cleaned_data
 
 # Formset configurations
