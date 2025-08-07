@@ -2,7 +2,7 @@ import datetime
 from django import forms
 from .utils.form_helpers import create_inline_formset
 from .validators import validate_period
-from .models import CharacterReference, ChecklistEvaluationSheet, EducationalAttainment, EmployeeBackground, InspectionValidationReport, OrderOfPayment, ProductCovered, RequirementChecklisItem, SalesPromotionPermitApplication, PersonalDataSheet, Service, ServiceCategory, ServiceRepairAccreditationApplication, TrainingsAttended
+from .models import CharacterReference, ChecklistEvaluationSheet, EducationalAttainment, EmployeeBackground, InspectionValidationReport, OrderOfPayment, ProductCovered, SalesPromotionPermitApplication, PersonalDataSheet, Service, ServiceCategory, ServiceRepairAccreditationApplication, TrainingsAttended
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, LayoutObject, TEMPLATE_PACK, Fieldset, HTML, Div, Row, Column, Submit
 from django.template.loader import render_to_string
@@ -161,11 +161,6 @@ class ChecklistEvaluationSheetForm(BaseCustomForm):
 
         return cleaned_data
 
-class RequirementChecklisItemForm(BaseCustomForm):
-    class Meta:
-        model = RequirementChecklisItem
-        fields = '__all__'
-    
 # Formset configurations
 FORMSET_CONFIGS = {
     # Sales Application Formsets
