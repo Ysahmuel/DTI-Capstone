@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .utils.admin_helpers import get_full_name_from_personal_data
-from .models import CharacterReference, EducationalAttainment, EmployeeBackground, InspectionValidationReport, OrderOfPayment, PersonalDataSheet, ProductCovered, SalesPromotionPermitApplication, Service, ServiceCategory, ServiceRepairAccreditationApplication, TrainingsAttended
+from .models import CharacterReference, ChecklistEvaluationSheet, EducationalAttainment, EmployeeBackground, InspectionValidationReport, OrderOfPayment, PersonalDataSheet, ProductCovered, SalesPromotionPermitApplication, Service, ServiceCategory, ServiceRepairAccreditationApplication, TrainingsAttended
 
 
 # Register your models here.
@@ -82,3 +82,9 @@ class ServiceAdmin(admin.ModelAdmin):
     list_filter = ('category',)
     search_fields = ('name',)
     ordering = ['category', 'name']
+
+@admin.register(ChecklistEvaluationSheet)
+class ChecklistEvaluationSheetAdmin(admin.ModelAdmin):
+    list_display = ('name_of_business', 'type_of_application', 'renewal_due_date', 'star_rating')
+    list_filter = ('type_of_application', 'star_rating')
+    search_fields = ('name_of_business', )
