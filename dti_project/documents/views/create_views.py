@@ -119,4 +119,4 @@ class CreateChecklistEvaluationSheetView(LoginRequiredMixin, FormStepsMixin, For
         return context
 
     def get_success_url(self):
-        return super().get_success_url()
+        return reverse_lazy('checklist-evaluation-sheet', kwargs={'pk': self.object.pk})
