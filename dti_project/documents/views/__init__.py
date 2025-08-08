@@ -9,5 +9,7 @@ from .create_views import (
 from .detail_views import (
     SalesPromotionDetailView,
     PersonalDataSheetDetailView,
-    InspectionValidationReportDetailView
+    InspectionValidationReportDetailView,
+    OrderOfPaymentDetailView,
+    ChecklistEvaluationSheetDetailView
 )
