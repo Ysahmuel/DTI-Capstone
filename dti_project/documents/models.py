@@ -395,7 +395,7 @@ class InspectionValidationReport(models.Model):
         ordering = ['-date']
 
     def __str__(self):
-        return f"{self.name_of_business} - {self.date}"
+        return f"{self.name_of_business} - {self.date} - {self.type_of_application_activity}"
         
     def get_recommendation_display(self):
         """Return a human-readable list of selected recommendations"""
@@ -413,6 +413,14 @@ class InspectionValidationReport(models.Model):
         if self.recommendation_continuing_accreditation:
             recommendations.append("Continuing Accreditation")
         return ", ".join(recommendations) if recommendations else "No recommendations selected"
+    
+    def group_services_by_category(self):
+        grouped = {}
+        for service in self.services_offered.prefetch_related('category').all():
+            category_name = service.category.name
+            grouped.setdefault(category_name, []).append(service)
+
+        return grouped
 
 class ServiceCategory(models.Model):
     key = models.CharField(max_length=50, choices=SERVICE_CATEGORY_CHOICES, unique=True)
