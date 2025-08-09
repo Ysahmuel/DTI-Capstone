@@ -1,7 +1,7 @@
 import re
 
 from ..mixins import TabsSectionMixin
-from ..constants import PERSONAL_DATA_SHEET_DETAIL_GROUPS, PERSONAL_DATA_SHEET_TAB_SECTIONS, SALES_PROMOTION_DETAIL_GROUPS
+from ..constants import INSPECTION_VALIDATION_DETAIL_GROUPS, PERSONAL_DATA_SHEET_DETAIL_GROUPS, PERSONAL_DATA_SHEET_TAB_SECTIONS, SALES_PROMOTION_DETAIL_GROUPS
 from ..models import ChecklistEvaluationSheet, InspectionValidationReport, OrderOfPayment, PersonalDataSheet, SalesPromotionPermitApplication
 from django.views.generic import DetailView
 
@@ -71,6 +71,16 @@ class InspectionValidationReportDetailView(DetailView):
     template_name = 'documents/inspection_validation_report.html'
     model = InspectionValidationReport
     context_object_name = 'report'
+
+    # Enable lazy loading
+    enable_lazy_loading = True
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['detail_groups'] = INSPECTION_VALIDATION_DETAIL_GROUPS
+        context['services_by_category'] = self.object.group_services_by_category()
+
+        return context
 
 class OrderOfPaymentDetailView(DetailView):
     template_name = 'documents/order_of_payment.html'
