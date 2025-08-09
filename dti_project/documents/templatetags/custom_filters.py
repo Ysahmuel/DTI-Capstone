@@ -26,3 +26,10 @@ def get_attr(obj, attr_name):
 @register.filter
 def zip_lists(a, b):
     return zip(a, b)
+
+@register.filter
+def dash_if_empty(value):
+    """Return '-' if value is None, empty, or only whitespace."""
+    if value is None or str(value).strip() == "":
+        return "-"
+    return value
