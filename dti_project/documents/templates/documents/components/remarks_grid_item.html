@@ -1,0 +1,23 @@
+{% load custom_filters %}
+
+<section class="grid-item" id="remarks-grid-item">
+    <h4>Findings and Remarks</h4>
+    <ul>
+        <li class="label-value-column">
+            <strong>Business Name Certificate Remarks: </strong>
+            <p>{{ report.business_name_cert_remarks|default:"-" }}</p>
+        </li>
+        <li class="label-value-column">
+            <strong>Accreditation Certificate Remarks: </strong>
+            <p>{{ report.accreditation_cert_remarks|default:"-" }}</p>
+        </li>
+        <li class="label-value-column">
+            <strong>Service Rates Remarks: </strong>
+            <p>{{ report.service_rates_remarks|default:"-" }}</p>
+        </li>
+        <li class="label-value-column">
+            <strong>Findings/Remarks: </strong>
+            <p>{{ report.findings_remarks|default:"-" }}</p>
+        </li>
+    </ul>
+</section>
