@@ -3,4 +3,42 @@
 {% block title %} Inspection Validation Report {% endblock %}
 
 {% block body %}
+<div class="document-details-container">
+    <header>
+        <div class="column">
+            <h3>Inspection Validation Report</h3>
+            <h1>{{ report }}</h1>
+        </div>
+        <div class="actions">
+
+        </div>
+    </header>
+    <div class="details-grid">
+        <section class="grid-item" id="details-grid-item">
+            {% for group in detail_groups %}
+                {% include 'documents/partials/details_grid_item.html' with group=group obj=report %}
+            {% endfor %}
+        </section>
+
+        <section class="grid-item" id="services-offered-grid-item">
+            <h4>Services Offered</h4>
+            <ul id="service-categories-list">
+                {% for category, services in services_by_category.items %}
+                    <li>
+                        <strong>{{ category }}</strong>
+                        <ul id="services-offered-list">
+                            {% for service in services %}
+                                <li class="service-offered-item"> -  {{ service.name }}</li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        {% include 'documents/components/remarks_grid_item.html' with obj=report %}
+
+        
+    </div>
+</div>
 {% endblock %}
