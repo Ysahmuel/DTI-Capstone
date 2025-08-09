@@ -206,6 +206,70 @@ PERSONAL_DATA_SHEET_DETAIL_GROUPS = [
     ], "personal-info"),
 ]
 
+INSPECTION_VALIDATION_DETAIL_GROUPS = [
+    ("Basic Information", [
+        ('Name of Business', 'name_of_business'),
+        ('Address', 'address'),
+        ('Date', 'date'),
+        ('Type of Application/Activity', 'type_of_application_activity'),
+        ('No. of Years in Service', 'years_in_service'),
+        ('Type of Office/Shop', 'types_of_office_shop'),
+        ('Business Name Certificates', 'business_name_certificates'),
+        ('Accreditation Certificate', 'accreditation_cert'),
+        ('Service Rates', 'service_rates')
+    ]),
+    ('Tools and Equipment', [
+        ('Tools and equipment complete as listed in the submitted list of tools and equipment', 'tools_equipment_complete'),
+        ('For RAC/MAC SREs, with Recovery Machine', 'racmac_sres_recovery_machine'),
+        ('Serial No', 'racmac_serial_no'),
+        ('Proof of Acquisition', 'proof_acquisition_recovery_machine')
+    ]),
+    ('Competence of Technicians', [
+        ('No. of employed technicians', 'employed_technicians_count'),
+        ('Average technician experience (in years)', 'average_technician_experience'),
+        ('TESDA Certification NC', 'tesda_certification_nc'),
+        ('TESDA Certification COC', 'tesda_certification_coc'),
+        ('For RAC/MAC, with continuous training program for mechanics/technicians?', 'continuous_training_program'),
+        ('Has submitted list or trainings of employees for the past 2 years?', 'list_employees_past_2_years'),
+        ('For RAC/MAC, with refrigerant recovery storage and disposal system consistent with existing environmental laws and regulations', 'refrigerant_storage_disposal_system')
+    ]),
+    ('Facilities', [
+        ('Size of shop/work area (sq. m.)', 'office_work_area_sqm'),
+        ('No. of working stalls/bays', 'working_stalls_count'),
+        ('Tool and equipment storage existing?', 'tool_equipment_storage_existing'),
+        ('Adequate', 'tool_equipment_storage_adequate'),
+        ('Existing Record keeping system', 'existing_record_keeping_system'),
+        ('Customers reception and waiting area exists?', 'customers_reception_waiting_area_existing'),
+        ('Adequate?', 'customers_reception_waiting_area_adequate'),
+        ('Suitable?', 'customers_reception_waiting_area_suitable'),
+        ('No. of applicable and unexpired fire extinguishers?', 'fire_extinguishers_count'),
+        ('Available personal protective equipment', 'available_personal_protective_equipment'),
+        ('Medical Kit', 'available_medical_kit'),
+        ('No. of security Personnel', 'security_personnel_count'),
+        ('Areas for inflammables such as gasoline, oil, paint, etc.', 'inflammable_areas')
+    ]),
+    ('Type of Insurance Coverage', [
+        ('Type of Insurance Coverage', 'type_of_insurance_coverage'),
+        ('Expiry Date', 'insurance_expiry_date'),
+        ('Amount of Coverage (PHP)', 'insurance_coverage_amount')
+    ]),
+    ('Customer Satisfaction Feedback (CSF) and Complaint Handling', [
+        ('With complaints handling process?', 'complaints_handling_process_exists'),
+        ('Documented?', 'complaints_handling_process_documented'),
+        ('With Customer Satisfaction Feedback (CSF) form?', 'customer_satisfaction_feedback_form_exists')
+    ]),
+    ('Findings/Remarks', [
+        ('Findings/Remarks', 'findings_remarks'),
+    ]),
+    ('Recommendation', [
+        ('Recommendation', 'recommendation'),
+        ('Inspected by (Accreditation Officer/Leader)', 'inspected_by_accreditation_officer'),
+        ('Inspected by (Member)', 'inspected_by_member'),
+        ('Authorized Signatory Name', 'authorized_signatory_name'),
+        ('Authorized Signatory Date', 'authorized_signatory_date')
+    ])
+]
+
 PERSONAL_DATA_SHEET_TAB_SECTIONS = [
     {
         'id': 'employee-backgrounds',
