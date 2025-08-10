@@ -270,6 +270,27 @@ INSPECTION_VALIDATION_DETAIL_GROUPS = [
     ])
 ]
 
+ORDER_OF_PAYMENT_DETAIL_GROUPS = [
+    ('Name and Business', [
+        ('Name', 'name'),
+        ('Date', 'date'),
+        ('Address', 'address')
+    ]),
+    ('Account Officer', [
+        ('Account Officer Date', 'account_officer_date'),
+        ('Account Officer Signature', 'account_officer_signature'),
+    ]),
+    ('Special Collecting Officer', [
+        ('Special Collecting Officer Date', 'special_collecting_officer_date'),
+        ('Special Collecting Officer Number', 'special_collecting_officer_or_number'),
+        ('Special Collecting Officer Signature', 'special_collecting_officer_signature')
+    ])
+]
+
+ORDER_OF_PAYMENT_PERMIT_FEE_GROUPS = [
+    
+]
+
 PERSONAL_DATA_SHEET_TAB_SECTIONS = [
     {
         'id': 'employee-backgrounds',

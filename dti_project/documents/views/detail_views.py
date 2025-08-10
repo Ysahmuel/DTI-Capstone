@@ -1,7 +1,7 @@
 import re
 
 from ..mixins import TabsSectionMixin
-from ..constants import INSPECTION_VALIDATION_DETAIL_GROUPS, PERSONAL_DATA_SHEET_DETAIL_GROUPS, PERSONAL_DATA_SHEET_TAB_SECTIONS, SALES_PROMOTION_DETAIL_GROUPS
+from ..constants import INSPECTION_VALIDATION_DETAIL_GROUPS, ORDER_OF_PAYMENT_DETAIL_GROUPS, PERSONAL_DATA_SHEET_DETAIL_GROUPS, PERSONAL_DATA_SHEET_TAB_SECTIONS, SALES_PROMOTION_DETAIL_GROUPS
 from ..models import ChecklistEvaluationSheet, InspectionValidationReport, OrderOfPayment, PersonalDataSheet, SalesPromotionPermitApplication
 from django.views.generic import DetailView
 
@@ -81,11 +81,35 @@ class InspectionValidationReportDetailView(DetailView):
         context['services_by_category'] = self.object.group_services_by_category()
 
         return context
-
+    
 class OrderOfPaymentDetailView(DetailView):
     template_name = 'documents/order_of_payment.html'
     model = OrderOfPayment
     context_object_name = 'order'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        order = self.object  # Get the current OrderOfPayment instance
+
+        remark_prefixes = [
+            "discount", "premium", "raffle", "contest",
+            "redemption", "games", "beauty_contest",
+            "home_solicitation", "amendments"
+        ]
+
+        permit_fees = []
+        for prefix in remark_prefixes:
+            permit_fees.append({
+                "label": prefix.replace("_", " ").title(),
+                "amount": getattr(order, f"{prefix}_amount") or 0,
+                "remark": getattr(order, f"get_{prefix}_remark_display")(),
+            })
+
+        context['detail_groups'] = ORDER_OF_PAYMENT_DETAIL_GROUPS
+        context['remark_prefixes'] = remark_prefixes
+        context['permit_fees'] = permit_fees
+
+        return context
 
 class ChecklistEvaluationSheetDetailView(DetailView):
     template_name = 'documents/checklist_evaluation_sheet.html'

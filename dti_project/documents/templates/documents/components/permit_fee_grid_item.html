@@ -1,0 +1,27 @@
+{% load custom_filters %}
+
+<section class="grid-item" id="table-grid-item" style="grid-row: span 11;">
+    <div class="row">
+        <h4>Permit Fees</h4>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Permit Fee For</th>
+                <th>Amount</th>
+                <th>Remarks</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tbody>
+                {% for fee in permit_fees %}
+                    <tr class="value-tr">
+                        <td>{{ fee.label }}</td>
+                        <td>₱{{ fee.amount }}</td>
+                        <td>{{ fee.remark }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </tbody>
+    </table>
+</section>

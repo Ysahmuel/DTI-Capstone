@@ -3,5 +3,25 @@
 {% block title %} Order of Payment {% endblock %}
 
 {% block body %}
-    {{ order }}
+<div class="document-details-container">
+    <header>
+        <div class="column">
+            <h3>Order of Payment</h3>
+            <h1>{{ order }}</h1>
+        </div>
+        <div class="actions">
+
+        </div>
+    </header>
+    <div class="details-grid">
+        <section class="grid-item" id="details-grid-item">
+            {% for group in detail_groups %}
+                {% include 'documents/partials/details_grid_item.html' with group=group obj=order %}
+            {% endfor %}
+        </section>
+
+        {% include 'documents/components/permit_fee_grid_item.html' %}
+
+    </div>
+</div>
 {% endblock %}
