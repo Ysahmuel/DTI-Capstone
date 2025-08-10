@@ -206,6 +206,43 @@ PERSONAL_DATA_SHEET_DETAIL_GROUPS = [
     ], "personal-info"),
 ]
 
+SERVICE_REPAIR_ACCREDITATION_DETAIL_GROUPS = [
+    ("Business Details", [
+        ('Name of Business', 'name_of_business'),
+        ('Application Type', 'application_type'),
+        ('Category', 'category'),
+        ('Star Rating', 'star_rating'),
+        ('Building Name or #', 'building_name_or_number'),
+        ('Street Name', 'street_name'),
+        ('Barangay', 'barangay'),
+        ('City/Municipality', 'city_or_municipality'),
+        ('Province', 'province'),
+        ('Region', 'region'),
+        ('ZIP Code', 'zip_code'),
+        ('Telephone Number', 'telephone_number'),
+        ('Mobile Number', 'mobile_number'),
+        ('Fax Number', 'fax_number'),
+        ('Email Address', 'email_address'),
+        ('Title', 'title'),
+        ('First Name', 'first_name'),
+        ('Middle Name', 'middle_name'),
+        ('Last Name', 'last_name'),
+        ('Suffix', 'suffix'),
+        ('Designation', 'designation'),
+        ('Sex', 'sex'),
+        ('Social Classification', 'social_classification'),
+        ('Asset Size', 'asset_size'),
+        ('Form of Organization', 'form_of_organization'),
+        ('Industry Classification', 'industry_classification'),
+        ('Annual Gross Service Revenue', 'annual_gross_service_revenue'),
+        ('Capital Investment', 'capital_investment'),
+        ('Tax Identification Number', 'tax_identification_number'),
+        ('Date Established', 'date_established'),
+        ('Total Employees', 'total_employees'),
+    ], 'business-details')
+]
+
+
 INSPECTION_VALIDATION_DETAIL_GROUPS = [
     ("Basic Information", [
         ('Name of Business', 'name_of_business'),
@@ -285,10 +322,6 @@ ORDER_OF_PAYMENT_DETAIL_GROUPS = [
         ('Special Collecting Officer Number', 'special_collecting_officer_or_number'),
         ('Special Collecting Officer Signature', 'special_collecting_officer_signature')
     ])
-]
-
-ORDER_OF_PAYMENT_PERMIT_FEE_GROUPS = [
-    
 ]
 
 PERSONAL_DATA_SHEET_TAB_SECTIONS = [

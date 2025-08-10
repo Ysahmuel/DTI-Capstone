@@ -1,0 +1,30 @@
+{% extends 'dashboard/layout.html' %}
+
+{% block title %} Sales Promotion Application {% endblock %}
+
+{% block body %}
+<div class="document-details-container">
+
+    <header>
+        <div class="column">
+            <h3>Accreditation of Service and Repair Enterprises</h3>
+            <h1>{{ accreditation }}</h1>
+        </div>
+        <div class="actions">
+
+        </div>
+    </header>
+
+    <div class="details-grid">
+
+        <section class="grid-item" id="details-grid-item">
+            {% for group in detail_groups %}
+                {% with obj=accreditation %}
+                    {% include 'documents/partials/details_grid_item.html' %}
+                {% endwith %} 
+            {% endfor %}
+        </section>
+    </div>
+
+</div>
+{% endblock %}
