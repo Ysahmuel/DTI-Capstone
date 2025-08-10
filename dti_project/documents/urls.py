@@ -13,6 +13,7 @@ urlpatterns = [
     # DETAIL VIEWS
     path("sales-promotion-application/<int:pk>", views.SalesPromotionDetailView.as_view(), name="sales-promotion-application"),
     path("personal-data-sheet/<int:pk>", views.PersonalDataSheetDetailView.as_view(), name="personal-data-sheet"),
+    path('service-repair-accreditation/<int:pk>', views.ServiceRepairAccreditationApplicationDetailView.as_view(), name='service-repair-accreditation'),
     path("inspection-validation-report/<int:pk>", views.InspectionValidationReportDetailView.as_view(), name="inspection-validation-report"),
     path("order-of-payment/<int:pk>", views.OrderOfPaymentDetailView.as_view(), name="order-of-payment"),
     path("checklist-evaluation-sheet/<int:pk>", views.ChecklistEvaluationSheetDetailView.as_view(), name='checklist-evaluation-sheet')

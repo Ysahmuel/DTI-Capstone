@@ -1,8 +1,8 @@
 import re
 
 from ..mixins import TabsSectionMixin
-from ..constants import INSPECTION_VALIDATION_DETAIL_GROUPS, ORDER_OF_PAYMENT_DETAIL_GROUPS, PERSONAL_DATA_SHEET_DETAIL_GROUPS, PERSONAL_DATA_SHEET_TAB_SECTIONS, SALES_PROMOTION_DETAIL_GROUPS
-from ..models import ChecklistEvaluationSheet, InspectionValidationReport, OrderOfPayment, PersonalDataSheet, SalesPromotionPermitApplication
+from ..constants import INSPECTION_VALIDATION_DETAIL_GROUPS, ORDER_OF_PAYMENT_DETAIL_GROUPS, PERSONAL_DATA_SHEET_DETAIL_GROUPS, PERSONAL_DATA_SHEET_TAB_SECTIONS, SALES_PROMOTION_DETAIL_GROUPS, SERVICE_REPAIR_ACCREDITATION_DETAIL_GROUPS
+from ..models import ChecklistEvaluationSheet, InspectionValidationReport, OrderOfPayment, PersonalDataSheet, SalesPromotionPermitApplication, ServiceRepairAccreditationApplication
 from django.views.generic import DetailView
 
 class SalesPromotionDetailView(DetailView):
@@ -64,6 +64,17 @@ class PersonalDataSheetDetailView(TabsSectionMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['detail_groups'] = PERSONAL_DATA_SHEET_DETAIL_GROUPS
+
+        return context
+
+class ServiceRepairAccreditationApplicationDetailView(DetailView):
+    template_name = 'documents/service_repair_accreditation.html'
+    model = ServiceRepairAccreditationApplication
+    context_object_name = 'accreditation'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['detail_groups'] = SERVICE_REPAIR_ACCREDITATION_DETAIL_GROUPS
 
         return context
     

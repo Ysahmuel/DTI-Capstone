@@ -26,6 +26,16 @@
         </ul>
     </div>
     <div>
+        <h2>Service and Repair Accreditation (Sample list only)</h2>
+        <ul>
+            {% for accreditation in service_accreditations %}
+                <li>
+                    <a href="{% url 'service-repair-accreditation' accreditation.id %}">{{ accreditation }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div>
         <h2>Inspection Validation Report (Sample list only)</h2>
         <ul>
             {% for report in inspection_reports %}
@@ -46,7 +56,7 @@
         </ul>
     </div>
     <div>
-        <h2>Orders of Payment (Sample list only)</h2>
+        <h2>Checklist Evaluation Sheets (Sample list only)</h2>
         <ul>
             {% for sheet in checklist_evaluation_sheets %}
                 <li>
