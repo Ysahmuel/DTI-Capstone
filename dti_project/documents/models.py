@@ -240,6 +240,9 @@ class ServiceRepairAccreditationApplication(models.Model):
         default=0,
     )
 
+    def __str__(self):
+        return f"{self.name_of_business} - {self.application_type} - {self.category}"
+
     def get_warranty_text(self):
         """Generate the warranty/undertaking text with the warranty period filled in"""
         warranty_template = """
