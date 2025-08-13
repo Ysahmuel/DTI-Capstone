@@ -47,6 +47,10 @@
   padding: var(--space-xl);
 }
 
+.details-grid .grid-item .fa-square-check {
+    color: var(--accent);
+}
+
 #details-grid-item {
   display: flex;
   flex-direction: column;
@@ -365,4 +369,11 @@
     grid-row: span 6;
     height: 100%;
     overflow-y: auto;
+}
+
+#requirements-grid-item {
+    grid-column: span 7;
+    grid-row: span 11;
+    height: 100%;
+    overflow: auto;
 }
