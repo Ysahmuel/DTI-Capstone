@@ -1,0 +1,13 @@
+{% load custom_filters %}
+
+<section class="grid-item" id="requirements-grid-item">
+    <h4>{{ group.0 }}</h4>
+    <ul class="requirements-checklist">
+        {% for label, value in group.1 %}
+            <li class="label-value-row">
+                <strong>{{ label }}: </strong>
+                <p>{{ obj|get_attr:value }}</p>
+            </li>
+        {% endfor %}
+    </ul>
+</section>

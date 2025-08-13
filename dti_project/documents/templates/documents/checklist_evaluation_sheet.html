@@ -3,5 +3,33 @@
 {% block title %} Checklist Evaluation Sheet {% endblock %}
 
 {% block body %}
-    {{ order }}
+<div class="document-details-container">
+
+    <header>
+        <div class="column">
+            <h3>Checklist of Requirements and Evaluation Sheet</h3>
+            <h1>{{ checklist_sheet }}</h1>
+        </div>
+        <div class="actions">
+
+        </div>
+    </header>
+
+    <div class="details-grid">
+
+        <section class="grid-item" id="details-grid-item">
+            {% for group in detail_groups %}
+                {% with obj=checklist_sheet %}
+                    {% include 'documents/partials/details_grid_item.html' %}
+                {% endwith %} 
+            {% endfor %}
+        </section>
+
+        {% for group in requirement_groups %}
+            {% include 'documents/components/requirements_grid_item.html' with group=group obj=checklist_sheet %}
+        {% endfor %}
+
+    </div>
+
+</div>
 {% endblock %}

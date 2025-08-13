@@ -212,6 +212,8 @@ SERVICE_REPAIR_ACCREDITATION_DETAIL_GROUPS = [
         ('Application Type', 'application_type'),
         ('Category', 'category'),
         ('Star Rating', 'star_rating'),
+    ]),
+    ("Address", [
         ('Building Name or #', 'building_name_or_number'),
         ('Street Name', 'street_name'),
         ('Barangay', 'barangay'),
@@ -219,27 +221,35 @@ SERVICE_REPAIR_ACCREDITATION_DETAIL_GROUPS = [
         ('Province', 'province'),
         ('Region', 'region'),
         ('ZIP Code', 'zip_code'),
+    ]),
+    ("Contact Information", [
         ('Telephone Number', 'telephone_number'),
         ('Mobile Number', 'mobile_number'),
         ('Fax Number', 'fax_number'),
         ('Email Address', 'email_address'),
+    ]),
+    ("Authorized Signatory", [
         ('Title', 'title'),
         ('First Name', 'first_name'),
         ('Middle Name', 'middle_name'),
         ('Last Name', 'last_name'),
         ('Suffix', 'suffix'),
         ('Designation', 'designation'),
+    ]),
+    ("Business Profile", [
         ('Sex', 'sex'),
         ('Social Classification', 'social_classification'),
         ('Asset Size', 'asset_size'),
         ('Form of Organization', 'form_of_organization'),
         ('Industry Classification', 'industry_classification'),
+    ]),
+    ("Financial & Operational Details", [
         ('Annual Gross Service Revenue', 'annual_gross_service_revenue'),
         ('Capital Investment', 'capital_investment'),
         ('Tax Identification Number', 'tax_identification_number'),
         ('Date Established', 'date_established'),
         ('Total Employees', 'total_employees'),
-    ], 'business-details')
+    ]),
 ]
 
 
@@ -321,6 +331,63 @@ ORDER_OF_PAYMENT_DETAIL_GROUPS = [
         ('Special Collecting Officer Date', 'special_collecting_officer_date'),
         ('Special Collecting Officer Number', 'special_collecting_officer_or_number'),
         ('Special Collecting Officer Signature', 'special_collecting_officer_signature')
+    ])
+]
+
+CHECKLIST_EVALUATION_DETAIL_GROUPS = [
+    ('Business Details', [
+        ('Name of Buisiness', 'name_of_business'),
+        ('Type of Application', 'type_of_application'),
+        ('Star Rating', 'star_rating')
+    ])
+]
+
+CHECKLIST_REQUIREMENT_GROUPS = [
+    ('Requirements', [
+        ('Application Form', 'req_application_form'),
+        ('Application Form Remark', 'req_application_form_remark'),
+
+        ('Business Name Certificate', 'req_business_name_certificate'),
+        ('Business Name Certificate Remark', 'req_business_name_certificate_remark'),
+
+        ('Latest Accreditation Certificate', 'req_latest_accreditation_certificate'),
+        ('Latest Accreditation Certificate Remark', 'req_latest_accreditation_certificate_remark'),
+
+        ('Mechanics List', 'req_mechanics_list'),
+        ('Mechanics List Remark', 'req_mechanics_list_remark'),
+
+        ('TESDA Certificate', 'req_tesda_certificate'),
+        ('TESDA Certificate Remark', 'req_tesda_certificate_remark'),
+
+        ('Training List', 'req_training_list'),
+        ('Training List Remark', 'req_training_list_remark'),
+
+        ('Tools and Equipment List', 'req_tools_equipment_list'),
+        ('Tools and Equipment List Remark', 'req_tools_equipment_list_remark'),
+
+        ('Shop Layout and Photos', 'req_shop_layout_photos'),
+        ('Shop Layout and Photos Remark', 'req_shop_layout_photos_remark'),
+
+        ('Certification of No Changes', 'req_certification_no_changes'),
+        ('Certification of No Changes Remark', 'req_certification_no_changes_remark'),
+
+        ('Comprehensive Insurance', 'req_comprehensive_insurance'),
+        ('Comprehensive Insurance Remark', 'req_comprehensive_insurance_remark'),
+
+        ('Affidavit on Site Repairs', 'req_affidavit_on_site_repairs'),
+        ('Affidavit on Site Repairs Remark', 'req_affidavit_on_site_repairs_remark'),
+
+        ('Insurance Exemption Proof', 'req_insurance_exemption_proof'),
+        ('Insurance Exemption Proof Remark', 'req_insurance_exemption_proof_remark'),
+
+        ('Dealership Agreement', 'req_dealership_agreement'),
+        ('Dealership Agreement Remark', 'req_dealership_agreement_remark'),
+
+        ('Service Contract', 'req_service_contract'),
+        ('Service Contract Remark', 'req_service_contract_remark'),
+
+        ('Performance Bond', 'req_performance_bond'),
+        ('Performance Bond Remark', 'req_performance_bond_remark'),
     ])
 ]
 
