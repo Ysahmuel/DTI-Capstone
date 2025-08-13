@@ -573,4 +573,4 @@ class ChecklistEvaluationSheet(models.Model):
     )
 
     def __str__(self):
-        return f"{self.pk} - Checklist"
+        return f"{self.name_of_business} - {self.type_of_application}"
