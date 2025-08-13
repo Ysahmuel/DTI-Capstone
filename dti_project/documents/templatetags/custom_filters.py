@@ -1,6 +1,7 @@
 from django import template
 from django.forms.widgets import Textarea
 from decimal import Decimal
+from django.utils.safestring import mark_safe
 
 register = template.Library()
 
@@ -20,21 +21,31 @@ def is_textarea(field):
 @register.filter()
 def get_attr(obj, attr_name):
     try:
+        display_method = getattr(obj, f"get_{attr_name}_display", None)
+        if callable(display_method):
+            display_value = display_method()
+            return display_value if display_value not in [None, ""] else "-"
+
         value = getattr(obj, attr_name, None)
 
-        # If callable (e.g., get_<field>_display), call it
+        # If callable
         if callable(value):
             return value()
 
-        # If it's an int and None/falsy, return 0
+        # Boolean field icons
+        if isinstance(value, bool):
+            icon_html = '<i class="fa-solid fa-square-check"></i>' if value else '<i class="fa-solid fa-square-xmark"></i>'
+            return mark_safe(icon_html)
+
+        # Integers
         if isinstance(value, int):
             return value or 0
 
-        # If it's a Decimal or float, same logic
+        # Decimals / floats
         if isinstance(value, (Decimal, float)):
             return value or 0
 
-        # Default: return value or '-'
+        # Default
         return value if value not in [None, ""] else "-"
     except Exception:
         return "-"
