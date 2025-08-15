@@ -57,10 +57,18 @@ def check_password_strength(request):
     password = request.POST.get('password1', "")
     try:
         validate_password(password)
-        return HttpResponse('<span style="color: green;">Strong password</span>')
+        html = '<span id="message-success" style="color: green;">Strong password</span>'
+        response = HttpResponse(html)
+        response['HX-Trigger'] = 'passwordValid'
+        return response
     except ValidationError as e:
         error_spans = "".join(
-            f'<span style="color:red; display:block;">{msg}</span>'
+            f'<span id="message-error" style="color:red; display:block;">{msg}</span>'
             for msg in e.messages
         )
-        return HttpResponse(error_spans)
+        response = HttpResponse(error_spans)
+        response['HX-Trigger'] = 'passwordInvalid'
+        return response
+    
+def check_passwords_match(request):
+    pass

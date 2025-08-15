@@ -104,6 +104,11 @@
     transition: 0.3s;
 }
 
+.authentication-form input.input-error {
+    background-color: rgb(238, 224, 224) !important;
+    border: solid 1px rgb(189, 49, 49) !important;
+}
+
 .authentication-form input:user-valid {
     background-color: rgb(235, 245, 235);
     border: solid 1px rgb(28, 168, 28);
@@ -241,4 +246,17 @@
 .bar-graph-preview li:nth-of-type(n+3) {
     grid-column: span 6;
     grid-row: span 4;
+}
+
+.message-feedback-container {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 0.5rem;
+}
+
+#password-strength-result {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
