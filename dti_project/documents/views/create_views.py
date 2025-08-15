@@ -72,6 +72,8 @@ class CreateServiceRepairAccreditationApplicationView(LoginRequiredMixin, FormSt
 
         return context
     
+    def get_success_url(self):
+        return reverse_lazy('service-repair-accreditation', kwargs={'pk': self.object.pk})
 
 class CreateInspectionValidationReportView(LoginRequiredMixin, FormStepsMixin, FormsetMixin, ServiceCategoryMixin, CreateView):
     model = InspectionValidationReport
