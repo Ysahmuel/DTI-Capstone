@@ -5,6 +5,8 @@ from django.views.generic import CreateView
 from django.contrib.auth.views import LoginView, LogoutView
 from .forms import CustomLoginForm, CustomUserCreationForm
 from django.contrib.auth import login, logout as auth_logout, get_user_model
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 
 # Create your views here.
 class CustomLoginView(LoginView):
@@ -50,3 +52,15 @@ def check_email_exists(request):
             else:
                 return HttpResponse('<span style="color: green;">Email is available</span>')
     return HttpResponse("")
+
+def check_password_strength(request):
+    password = request.POST.get('password1', "")
+    try:
+        validate_password(password)
+        return HttpResponse('<span style="color: green;">Strong password</span>')
+    except ValidationError as e:
+        error_spans = "".join(
+            f'<span style="color:red; display:block;">{msg}</span>'
+            for msg in e.messages
+        )
+        return HttpResponse(error_spans)
