@@ -2,7 +2,7 @@ from django.db import models
 from django.forms import ValidationError
 from django.utils import timezone
 from .utils.model_helpers import remark_amount_fields
-from .model_choices import APPLICATION_OR_ACTIVITY_CHOICES, OFFICE_SHOP_CHOICES, RECOMMENDATION_CHOICES, REMARKS_CHOICES, REQUIREMENT_CHOICES, SERVICE_CATEGORY_CHOICES, STAR_RATING_CHOICES, YES_NO_CHOICES
+from .model_choices import APPLICATION_OR_ACTIVITY_CHOICES, OFFICE_SHOP_CHOICES, RECOMMENDATION_CHOICES, REGION_CHOICES, REMARKS_CHOICES, REQUIREMENT_CHOICES, SERVICE_CATEGORY_CHOICES, STAR_RATING_CHOICES, YES_NO_CHOICES
 from users.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 
@@ -206,7 +206,7 @@ class ServiceRepairAccreditationApplication(models.Model):
     barangay = models.CharField(max_length=50)
     city_or_municipality = models.CharField(max_length=50)
     province = models.CharField(max_length=50)
-    region = models.CharField(max_length=50)
+    region = models.CharField(max_length=255, choices=REGION_CHOICES)
     zip_code = models.CharField(max_length=10)
 
     telephone_number = models.CharField(max_length=20)

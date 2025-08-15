@@ -159,3 +159,23 @@ PERMIT_FEE_REMARK_CHOICES = [
     ('X', 'X - 2 or more regions excluding Metro Manila'),
     ('A', 'A - Additional fees due to reassessment of premium and prizes'),
 ]
+
+REGION_CHOICES = [
+    ("NCR", "National Capital Region (NCR)"),
+    ("CAR", "Cordillera Administrative Region (CAR)"),
+    ("Region I", "Ilocos Region (Region I)"),
+    ("Region II", "Cagayan Valley (Region II)"),
+    ("Region III", "Central Luzon (Region III)"),
+    ("Region IV-A", "CALABARZON (Region IV-A)"),
+    ("MIMAROPA", "MIMAROPA Region"),
+    ("Region V", "Bicol Region (Region V)"),
+    ("Region VI", "Western Visayas (Region VI)"),
+    ("Region VII", "Central Visayas (Region VII)"),
+    ("Region VIII", "Eastern Visayas (Region VIII)"),
+    ("Region IX", "Zamboanga Peninsula (Region IX)"),
+    ("Region X", "Northern Mindanao (Region X)"),
+    ("Region XI", "Davao Region (Region XI)"),
+    ("Region XII", "SOCCSKSARGEN (Region XII)"),
+    ("Region XIII", "Caraga (Region XIII)"),
+    ("BARMM", "Bangsamoro Autonomous Region in Muslim Mindanao (BARMM)"),
+]
