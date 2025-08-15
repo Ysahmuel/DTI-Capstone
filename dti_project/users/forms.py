@@ -4,6 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from .models import User
 from django.contrib.auth import authenticate
 from django.utils.translation import gettext_lazy as _
+from django.utils.text import slugify
 
 class CustomLoginForm(AuthenticationForm):
     username = forms.EmailField(label="Email")  # override 'username' field to be an EmailField
@@ -36,6 +37,16 @@ class CustomUserCreationForm(UserCreationForm):
         user.first_name = self.cleaned_data['first_name']
         user.last_name = self.cleaned_data['last_name']
         user.email = self.cleaned_data['email']
+
+        # Generate a unique username from first and last name
+        base_username = slugify(f"{user.first_name}.{user.last_name}")
+        username = base_username
+        counter = 1
+        while User.objects.filter(username=username).exists():
+            username = f"{base_username}{counter}"
+            counter += 1
+        user.username = username
+
         if commit:
             user.save()
         return user
