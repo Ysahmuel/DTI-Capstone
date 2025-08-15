@@ -1,4 +1,5 @@
 import datetime
+import re
 from django import forms
 from .utils.form_helpers import create_inline_formset
 from .validators import validate_period
@@ -43,6 +44,15 @@ class BaseCustomForm(forms.ModelForm):
                 # Add 'form-group' class to each widget
                 existing_classes = field.widget.attrs.get('class', '')
                 field.widget.attrs['class'] = f"{existing_classes} form-group".strip()
+
+                # Inject 11-digit validation for contact_number fields
+                if name == 'contact_number' or name == 'mobile_number':
+                    field.validators.append(self.validate_contact_number)
+                    field.widget.attrs['maxlength'] = 11  # Enforce input limit in UI
+
+    def validate_contact_number(self, value):
+        if not re.fullmatch(r'\d{11}', str(value)):
+            raise forms.ValidationError("Contact/Mobile number must be exactly 11 digits.")
 
 
 class SalesPromotionPermitApplicationForm(BaseCustomForm):
