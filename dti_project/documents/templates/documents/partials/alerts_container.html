@@ -1,0 +1,21 @@
+<div class="alerts-container {% for message in messages %} {% if forloop.first %}{{ message.tags }}{% endif %}{% endfor %}">
+    <header>
+        {% for message in messages %}
+            {% if forloop.first %}
+                {% if message.tags == "success" %}
+                    <i class="fa-solid fa-circle-check"></i>
+                    <h4>Success!</h4>
+                {% elif message.tags == "error" %}
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <h4>Error!</h4>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        <i class="fa-solid fa-xmark" id="close-alert-btn"></i>
+    </header>
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+</div>

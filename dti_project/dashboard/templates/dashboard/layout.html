@@ -17,6 +17,7 @@
     <script src="{% static 'documents/js/documents.js' %}"></script>
     <script src="{% static 'documents/js/formsets.js' %}"></script>
     <script src="{% static 'documents/js/lazy_loading.js' %}"></script>
+    <script src="{% static 'documents/js/alerts.js' %}"></script>
 
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@latest"></script>
@@ -34,6 +35,10 @@
             {% block body %}
             {% endblock %}
         </div>
+        
+        {% if messages %}
+            {% include 'documents/partials/alerts_container.html' %}
+        {% endif %}
     </div>
 
 </body>

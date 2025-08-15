@@ -126,10 +126,12 @@ class FormsetMixin:
 
     def form_invalid(self, form):
         for field, errors in form.errors.items():
-            message = f"{field}: " + "; ".join(errors)
+            # Handle __all__ or non-field errors
+            field_label = field.replace("_", " ").title()
+
+            message = f"{field_label}: " + "; ".join(errors)
             messages.error(self.request, message)
 
-        messages.error(self.request, "Please correct the errors below.")
         return super().form_invalid(form)
 
 
