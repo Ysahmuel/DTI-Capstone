@@ -1,16 +1,24 @@
 /* Form container */
 .form-container {
+    overflow: visible;
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: var(--space-xl);
 }
 
 .form-container header {
+    position: sticky;
+    top: 0;
+    background-color: white; 
+    z-index: 10; 
     width: 100%;
+    padding-top: 1rem;
     padding-bottom: var(--space-lg);
     margin-bottom: var(--space-lg);
     border-bottom: solid 2px var(--border-color);
 }
+
 
 .form-container header h1 {
     font-size: clamp(2rem, 1.5vw, 5rem);
@@ -465,6 +473,7 @@
     font-size: clamp(1rem, 0.9vw, 2rem);
     font-weight: 500;
     line-height: clamp(1rem, 1.4vw, 2rem);
+    text-align: justify;
 }
 
 .service-group {
