@@ -229,7 +229,7 @@ class ServiceRepairAccreditationApplication(models.Model):
     form_of_organization = models.CharField(max_length=20, choices=FORM_OF_ORGANIZATION_CHOICES)
     industry_classification = models.CharField(max_length=255, blank=True)
 
-    annual_gross_service_revenue = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True, help_text="As of 31 December 20__")
+    annual_gross_service_revenue = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True, help_text="Annual Gross Service Revenue (as of Dec 31, 20__)")
     capital_investment = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     tax_identification_number = models.CharField(max_length=20)
     date_established = models.DateField(blank=True, null=True)
@@ -238,6 +238,8 @@ class ServiceRepairAccreditationApplication(models.Model):
     warranty_period = models.PositiveIntegerField(
         help_text="Number of days warranty is valid", 
         default=0,
+        blank=True,
+        null=True
     )
 
     def __str__(self):
@@ -246,7 +248,7 @@ class ServiceRepairAccreditationApplication(models.Model):
     def get_warranty_text(self):
         """Generate the warranty/undertaking text with the warranty period filled in"""
         warranty_template = """
-        {name_of_business} Warrants the quality of workmanship and process undertaken by the shop for a period of {warranty_period} ({warranty_period_words}) 
+        {name_of_business} warrants the quality of workmanship and process undertaken by the shop for a period of {warranty_period_words} ({warranty_period}) 
         days counted from the date of actual release and  delivery of each and/or job order to the respective customer.
 
         This warranty does not cover damage caused by misuse, accidents, or alteration of workmanship; in addition, 
