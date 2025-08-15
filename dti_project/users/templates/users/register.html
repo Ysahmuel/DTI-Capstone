@@ -43,7 +43,16 @@
 
                     <div class="form-group">
                         <label for="id_password1">Password</label>
-                        <input type="password" name="password1" id="id_password1" required>
+                        <input 
+                            type="password" 
+                            name="password1" 
+                            id="id_password1" 
+                            required
+                            hx-post="{% url 'check-password-strength' %}"
+                            hx-trigger="change delay:250ms"
+                            hx-target="#password-strength-result"
+                            hx-swap="innerHTML"
+                        >
                     </div>
                     <div class="form-group">
                         <label for="id_password2">Confirm Password</label>
@@ -52,10 +61,12 @@
 
                     <button type="submit">Create Account</button>
 
-                    <p>Already have an account? <a href="{% url 'sign-in' %}">Sign-in instead</a></p>
+                    <div class="message-feedback-container">
+                        <p>Already have an account? <a href="{% url 'sign-in' %}">Sign-in instead</a></p>
 
-                    <div id="email-check-result" class="email-check-message"></div>
-
+                        <div id="email-check-result" class="email-check-message"></div>
+                        <div id="password-strength-result"></div>
+                    </div>
 
                 </form>
 
