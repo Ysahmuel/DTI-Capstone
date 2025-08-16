@@ -260,3 +260,36 @@
     flex-direction: column;
     gap: 0.5rem;
 }
+
+#roles-form-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+    gap: 1rem;
+    margin: 0 0.5rem;
+}
+
+#roles-form-group h4 {
+    color: black;
+    font-size: clamp(0.5rem, 0.65vw, 1.5rem);
+    font-weight: 600;
+}
+
+.role-selection {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+}
+
+.role-choice-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.role-choice-item label {
+  display: inline-block;  
+  white-space: nowrap; 
+}
