@@ -1,3 +1,5 @@
+{% load custom_filters %}
+
 <aside class="side-navbar extended">
     <button id="collapse-nav-btn">
         <i class="fa-solid fa-angle-left"></i>
@@ -52,7 +54,7 @@
                         <img src="{{ user.profile_picture.url }}" alt="">
                         <div id="logged-in-user-details">
                             <strong>{% if user.is_authenticated %}{{ user }}{% endif %}</strong>
-                            <p>Admin</p>
+                            <p>{{ user.role|titlecase }}</p>
                         </div>
                     </a>
                 </li>
