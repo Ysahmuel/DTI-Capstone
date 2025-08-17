@@ -94,6 +94,7 @@ class PersonalDataSheet(models.Model):
         ('Divorced', 'Divorced')
     ]
 
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     first_name = models.CharField(max_length=50)
     middle_name = models.CharField(max_length=50, blank=True, null=True)
     last_name = models.CharField(max_length=50)
