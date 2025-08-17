@@ -194,6 +194,7 @@ class ServiceRepairAccreditationApplication(models.Model):
         ('COOP', 'Cooperative'),
     ]
 
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     application_type = models.CharField(max_length=10, choices=APPLICATION_TYPES)
     category = models.CharField(max_length=100, choices=CATEGORIES)
     star_rating = models.PositiveSmallIntegerField(choices=STAR_RATING_CHOICES, validators=[MinValueValidator(1), MaxValueValidator(5)])
@@ -288,6 +289,7 @@ class ServiceRepairAccreditationApplication(models.Model):
             return str(number)  # For larger numbers, just return the digit
         
 class OrderOfPayment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=55)
     date = models.DateField(default=timezone.now)
     address = models.TextField(max_length=255)
@@ -321,6 +323,7 @@ class OrderOfPayment(models.Model):
     
 class InspectionValidationReport(models.Model):
     # Basic Information
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     name_of_business = models.CharField(max_length=255)
     address = models.TextField()
     date = models.DateField(default=timezone.now)
@@ -449,6 +452,7 @@ class Service(models.Model):
         return f"{self.category.name} - {self.name}"
 
 class ChecklistEvaluationSheet(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     name_of_business = models.CharField(max_length=255)
     type_of_application = models.CharField(max_length=50, choices=[('New', 'New'), ('Renewal', 'Renewal')])
     renewal_due_date = models.DateField(null=True, blank=True, help_text='Date Expired: Dec 31')
