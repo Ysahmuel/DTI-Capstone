@@ -191,7 +191,7 @@
     justify-content: center;
     top: -8%;
     right: -2%;
-    background-color: var(--primary);
+    background-color: var(--accent);
     color: white;
     font-size: clamp(0.5rem, 0.7vw, 1.25rem);
     outline: solid 3px white;
