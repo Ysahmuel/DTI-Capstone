@@ -1,3 +1,5 @@
+@import url('searchbar.css');
+
 .main-content {
     background-color: rgba(242, 242, 242);
     flex: 1;
@@ -9,4 +11,10 @@
 
 .side-navbar.extended ~ .main-content {
     margin-left: var(--sidebar-expanded-width);
+}
+
+.dashboard-header {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
 }

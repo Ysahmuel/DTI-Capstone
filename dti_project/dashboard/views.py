@@ -1,9 +1,13 @@
+from django.http import JsonResponse
 from django.shortcuts import render
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from documents.models import ChecklistEvaluationSheet, InspectionValidationReport, OrderOfPayment, PersonalDataSheet, SalesPromotionPermitApplication, ServiceRepairAccreditationApplication
 from django.db.models import Value
+from django.db.models import Value, F
 from django.db.models.functions import Concat
+from .forms import SearchForm
+from users.models import User
     
 # Create your views here.
 class DashboardView(LoginRequiredMixin, TemplateView):
@@ -29,3 +33,44 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         })
 
         return context
+    
+class SearchView(View):
+    form_class = SearchForm
+    pass
+
+class SearchSuggestionsView(View):
+    def get(self, request, *args, **kwargs):
+        query = request.GET.get('query', '')
+        user_results = []
+        sales_promo_results = []
+
+        if query:
+            all_matching_users = User.objects.annotate(
+                full_name=Concat(F('first_name'), Value(' '), F('last_name'))
+            ).filter(full_name__icontains=query)
+
+            user_suggestions = all_matching_users
+            
+            for user in user_suggestions:
+                user_results.append({
+                    'id': user.id,
+                    'full_name': user.full_name,
+                    'profile_picture': user.profile_picture.url
+                })
+
+            all_matching_sales_promos = SalesPromotionPermitApplication.objects.filter(promo_title__icontains=query)
+            sales_promo_suggestions = all_matching_sales_promos
+
+            for promo in sales_promo_suggestions:
+                sales_promo_results.append({
+                    'id': promo.id,
+                    'title': promo.promo_title
+                })
+
+
+        return JsonResponse({
+            'users': user_results,
+            'user_count': all_matching_users.count(),
+            'sales_promos': sales_promo_results,
+            'sales_promo_count': all_matching_sales_promos.count()
+        })

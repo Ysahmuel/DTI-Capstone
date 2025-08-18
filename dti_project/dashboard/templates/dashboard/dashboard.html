@@ -3,7 +3,11 @@
 {% block title %} Dashboard {% endblock %}
 
 {% block body %}
-    <h1>Welcome {{ user }}</h1>
+    <header class="dashboard-header">
+        <h1>Welcome {{ user }}</h1>
+        {% include 'dashboard/components/searchbar.html' %}
+    </header>
+
     
     <div>
         <h2>Sales Promotion Permit Applications (Sample list only)</h2>
