@@ -6,6 +6,7 @@ from documents.models import ChecklistEvaluationSheet, InspectionValidationRepor
 from django.db.models import Value
 from django.db.models import Value, F
 from django.db.models.functions import Concat
+from documents.constants import MODEL_URLS
 from .forms import SearchForm
 from users.models import User
     
@@ -76,7 +77,7 @@ class SearchSuggestionsView(View):
             # Users search
             users_qs = User.objects.annotate(
                 full_name=Concat(F('first_name'), Value(' '), F('last_name'))
-            ).filter(full_name__icontains=query)
+            ).filter(full_name__icontains=query).exclude(role="admin")
 
             response_data['users'] = [
                 {
@@ -120,6 +121,7 @@ class SearchSuggestionsView(View):
                     {
                         'id': obj.id,
                         'model': model._meta.verbose_name,  
+                        'link': MODEL_URLS[model.__name__],
                         'display': getattr(obj, matched_field, str(obj))
                     }
                     for obj in qs
@@ -165,6 +167,7 @@ class SearchSuggestionsView(View):
                     {
                         'id': obj.id,
                         'model': model._meta.verbose_name,
+                        'link': MODEL_URLS[model.__name__],
                         'display': getattr(obj, matched_field, str(obj))
                     }
                     for obj in qs
