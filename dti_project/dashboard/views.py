@@ -83,7 +83,7 @@ class SearchSuggestionsView(View):
                     'id': u.id,
                     'full_name': u.full_name,
                     'profile_picture': u.profile_picture.url if u.profile_picture else '',
-                    'role': u.role
+                    'role': u.role.replace('_', ' ').title()
                 } for u in users_qs
             ]
             response_data['user_count'] = users_qs.count()
@@ -119,7 +119,7 @@ class SearchSuggestionsView(View):
                 serialized_docs = [
                     {
                         'id': obj.id,
-                        'model': model.__name__,
+                        'model': model._meta.verbose_name,  
                         'display': getattr(obj, matched_field, str(obj))
                     }
                     for obj in qs
@@ -164,7 +164,7 @@ class SearchSuggestionsView(View):
                 serialized_docs = [
                     {
                         'id': obj.id,
-                        'model': model.__name__,
+                        'model': model._meta.verbose_name,
                         'display': getattr(obj, matched_field, str(obj))
                     }
                     for obj in qs
