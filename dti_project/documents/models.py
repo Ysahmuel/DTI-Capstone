@@ -31,6 +31,10 @@ class YesNoField(models.CharField):
         super().__init__(*args, **kwargs)
 
 class SalesPromotionPermitApplication(BaseApplication):
+    class Meta:
+        verbose_name = "Sales Promotion Permit Application"
+        verbose_name_plural = "Sales Promotion Permit Applications"
+
     promo_title = models.CharField(max_length=255)
 
     sponsor_name = models.CharField(max_length=255)
@@ -94,6 +98,10 @@ class PersonalDataSheet(models.Model):
         ('Divorced', 'Divorced')
     ]
 
+    class Meta:
+        verbose_name = "Personal Data Sheet"
+        verbose_name_plural = "Personal Data Sheets"
+
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     first_name = models.CharField(max_length=50)
     middle_name = models.CharField(max_length=50, blank=True, null=True)
@@ -153,6 +161,10 @@ class CharacterReference(models.Model):
         return f"{self.name} ({self.company})"
 
 class ServiceRepairAccreditationApplication(models.Model):
+    class Meta:
+        verbose_name = "Accreditation of Service and Repair Enterprise"
+        verbose_name_plural = "Accreditation of Service and Repair Enterprises"
+        
     APPLICATION_TYPES = [
         ('NEW', 'New'),
         ('RENEWAL', 'Renewal'),
@@ -290,6 +302,10 @@ class ServiceRepairAccreditationApplication(models.Model):
             return str(number)  # For larger numbers, just return the digit
         
 class OrderOfPayment(models.Model):
+    class Meta:
+        verbose_name = "Order of Payment"
+        verbose_name_plural = "Orders of Payment"
+
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=55)
     date = models.DateField(default=timezone.now)
@@ -323,6 +339,10 @@ class OrderOfPayment(models.Model):
         return f"{self.name} {self.address}"
     
 class InspectionValidationReport(models.Model):
+    class Meta:
+        verbose_name = "Inspection Validation Report"
+        verbose_name_plural = "Inspection Validation Reports"
+
     # Basic Information
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     name_of_business = models.CharField(max_length=255)
@@ -453,6 +473,10 @@ class Service(models.Model):
         return f"{self.category.name} - {self.name}"
 
 class ChecklistEvaluationSheet(models.Model):
+    class Meta:
+        verbose_name = "Checklist of Requirements and Evaluation Sheet"
+        verbose_name_plural = "Checklist of Requirements and Evaluation Sheets"
+        
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     name_of_business = models.CharField(max_length=255)
     type_of_application = models.CharField(max_length=50, choices=[('New', 'New'), ('Renewal', 'Renewal')])
