@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return suggestionList;
     }
 
-    function createSuggestionItem(type, item) {
+    function createSuggestionItem(type, item, link) {
         const suggestionDiv = document.createElement('div');
         suggestionDiv.classList.add('suggestion-item');
 
@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (type === 'user') {
             itemContent = `
-                <a href="">
+                <a href="${item.link}/${item.id}">
                     <div class="details">
                         <div class="suggestion-item-image">
                             <img src=${item.profile_picture}></img>
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
         } else if (type === 'document') {
             itemContent = `
-                <a href="">
+                <a href="/documents/${item.link}/${item.id}">
                     <div class="details">
                         <div class="suggestion-item-image">
                             <i class="fa-solid fa-file"></i>
