@@ -82,8 +82,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="suggestion-item-image">
                             <img src=${item.profile_picture}></img>
                         </div>
-                        <strong>${item.full_name}</strong>
-                        <span class="role">${item.role}</span>
+                        <div class="column">
+                            <strong>${item.full_name}</strong>
+                            <span class="role">${item.role}</span>
+                        </div>
                     </div>
                 </a>
             `;
@@ -94,8 +96,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="suggestion-item-image">
                             <i class="fa-solid fa-file"></i>
                         </div>
-                        <strong>${item.display}</strong>
-                        <span class="doc-type">${item.model}</span>
+                        <div class="column">
+                            <strong>${item.display}</strong>
+                            <span class="doc-type">${item.model}</span>
+                        </div>
                     </div>
                 </a>
             `;
