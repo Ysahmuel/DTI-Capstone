@@ -22,20 +22,24 @@ document.addEventListener('DOMContentLoaded', function() {
                         // Admin: show users
                         if (data.user_count > 0) {
                             createCategoryHeader("Users", data.user_count);
+                           const suggestionList = createSuggestionList()
                             data.users.forEach(user => {
                                 const userSuggestion = createSuggestionItem("user", user);
-                                suggestionsBox.append(userSuggestion);
+                                suggestionList.append(userSuggestion);
                             });
+                            suggestionsBox.append(suggestionList); 
                         }
                     }
 
                     // Both admin + business_owner: show documents
                     if (data.documents.count > 0) {
-                        createCategoryHeader("Documents", data.documents.count);
+                        createCategoryHeader(data.role === 'admin' ? 'Documents' : 'My Documents', data.documents.count);
+                        const suggestionList = createSuggestionList()
                         data.documents.results.forEach(result => {
                             const documentSuggestion = createSuggestionItem("document", result);
-                            suggestionsBox.append(documentSuggestion);
+                            suggestionList.append(documentSuggestion);
                         });
+                        suggestionsBox.append(suggestionList); 
                     }
                 });
 
@@ -57,6 +61,12 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `;
         suggestionsBox.append(header);
+    }
+
+    function createSuggestionList() {
+        const suggestionList = document.createElement('div');
+        suggestionList.classList.add('suggestions-list');
+        return suggestionList;
     }
 
     function createSuggestionItem(type, item) {
