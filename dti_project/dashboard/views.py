@@ -40,37 +40,137 @@ class SearchView(View):
 
 class SearchSuggestionsView(View):
     def get(self, request, *args, **kwargs):
-        query = request.GET.get('query', '')
-        user_results = []
-        sales_promo_results = []
+        user = request.user
+        query = request.GET.get('query', '').strip()
 
-        if query:
-            all_matching_users = User.objects.annotate(
+        response_data = {
+            'role': user.role,
+            'users': [],
+            'user_count': 0,
+            'documents': {
+                'results': [],
+                'count': 0
+            },
+        }
+
+        if not query:
+            return JsonResponse(response_data)
+
+        # Document models for both admin & business owners
+        document_models = [
+            SalesPromotionPermitApplication,
+            PersonalDataSheet,
+            ServiceRepairAccreditationApplication,
+            OrderOfPayment,
+            InspectionValidationReport,
+            ChecklistEvaluationSheet,
+        ]
+
+        search_fields = [
+            'promo_title', 'name_of_business', 'name',
+            'first_name', 'middle_name', 'last_name'
+        ]
+
+        # --- ADMIN: search users + all documents ---
+        if user.role == 'admin':
+            # Users search
+            users_qs = User.objects.annotate(
                 full_name=Concat(F('first_name'), Value(' '), F('last_name'))
             ).filter(full_name__icontains=query)
 
-            user_suggestions = all_matching_users
-            
-            for user in user_suggestions:
-                user_results.append({
-                    'id': user.id,
-                    'full_name': user.full_name,
-                    'profile_picture': user.profile_picture.url
-                })
+            response_data['users'] = [
+                {
+                    'id': u.id,
+                    'full_name': u.full_name,
+                    'profile_picture': u.profile_picture.url if u.profile_picture else '',
+                    'role': u.role
+                } for u in users_qs
+            ]
+            response_data['user_count'] = users_qs.count()
 
-            all_matching_sales_promos = SalesPromotionPermitApplication.objects.filter(promo_title__icontains=query)
-            sales_promo_suggestions = all_matching_sales_promos
+            # Admin: search ALL documents (no user restriction)
+            for model in document_models:
+                model_fields = [f.name for f in model._meta.fields]
+                matched_field = None
+                qs = model.objects.all()
 
-            for promo in sales_promo_suggestions:
-                sales_promo_results.append({
-                    'id': promo.id,
-                    'title': promo.promo_title
-                })
+                if 'first_name' in model_fields and 'last_name' in model_fields:
+                    qs = qs.annotate(
+                        full_name=Concat(
+                            F('first_name'),
+                            Value(' '),
+                            F('middle_name'),
+                            Value(' '),
+                            F('last_name')
+                        )
+                    )
+                    matched_field = 'full_name'
+                else:
+                    for field in search_fields:
+                        if field in model_fields:
+                            matched_field = field
+                            break
 
+                if not matched_field:
+                    continue
 
-        return JsonResponse({
-            'users': user_results,
-            'user_count': all_matching_users.count(),
-            'sales_promos': sales_promo_results,
-            'sales_promo_count': all_matching_sales_promos.count()
-        })
+                qs = qs.filter(**{f'{matched_field}__icontains': query})
+
+                serialized_docs = [
+                    {
+                        'id': obj.id,
+                        'model': model.__name__,
+                        'display': getattr(obj, matched_field, str(obj))
+                    }
+                    for obj in qs
+                ]
+
+                response_data['documents']['results'].extend(serialized_docs)
+                response_data['documents']['count'] += qs.count()
+
+        # --- BUSINESS OWNER: only their own documents ---
+        elif user.role == 'business_owner':
+            for model in document_models:
+                model_fields = [f.name for f in model._meta.fields]
+                matched_field = None
+                qs = model.objects.all()
+
+                if 'first_name' in model_fields and 'last_name' in model_fields:
+                    qs = qs.annotate(
+                        full_name=Concat(
+                            F('first_name'),
+                            Value(' '),
+                            F('middle_name'),
+                            Value(' '),
+                            F('last_name')
+                        )
+                    )
+                    matched_field = 'full_name'
+                else:
+                    for field in search_fields:
+                        if field in model_fields:
+                            matched_field = field
+                            break
+
+                if not matched_field:
+                    continue
+
+                filter_kwargs = {f'{matched_field}__icontains': query}
+                if 'user' in model_fields:  # restrict to owner
+                    filter_kwargs['user'] = user
+
+                qs = qs.filter(**filter_kwargs)
+
+                serialized_docs = [
+                    {
+                        'id': obj.id,
+                        'model': model.__name__,
+                        'display': getattr(obj, matched_field, str(obj))
+                    }
+                    for obj in qs
+                ]
+
+                response_data['documents']['results'].extend(serialized_docs)
+                response_data['documents']['count'] += qs.count()
+
+        return JsonResponse(response_data)

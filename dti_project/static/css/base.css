@@ -16,6 +16,7 @@
     --text-light: rgb(170, 170, 170);
     --text-disabled: rgb(180, 180, 180);
     --text-lighter: rgb(190, 190, 190);
+    --text-lightest: rgb(210, 210, 210);
     --required-color: rgb(192, 16, 16);
     --success-color: rgb(28, 168, 28);
     --border-color: rgba(200, 200, 200, 0.5);

@@ -1,6 +1,6 @@
 .searchbar-container {
     position: relative;
-    padding: 1rem;
+    padding: 0.75rem;
     border: solid 1px var(--border-color);
     border-radius: var(--radius-lg);
     min-width: 25vw;
@@ -18,6 +18,7 @@
 }
 
 .searchbar-container.active .fa-magnifying-glass {
+    border-right: solid 1px var(--accent);
     color: var(--accent);
 }
 
@@ -31,8 +32,12 @@
 .searchbar-container input {
     border: none;
     outline: none;
-    font-size: clamp(0.5rem, 0.75vw, 1rem);
+    font-size: clamp(0.75rem, 0.75vw, 1rem);
     width: 100%;
+}
+
+.searchbar-container.active input::placeholder {
+    color: var(--accent);
 }
 
 .suggestions-box {
@@ -50,13 +55,16 @@
 }
 
 .suggestions-header {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
 }
 
 .suggestions-header h3 {
-    color: var(--text-lighter);
-    font-size: clamp(0.5rem, 0.75vw, 1rem);
-    font-weight: 400;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--text-light);
+    font-size: clamp(0.5rem, 0.7vw, 1rem);
+    font-weight: 500;
 }
 
 .suggestions-header .fa-angle-right {
@@ -65,11 +73,11 @@
 }
 
 .suggestion-count {
-    background-color: var(--text-lighter);
+    background-color: rgb(210, 210, 210);
     color: white;
+    font-size: clamp(0.4rem, 0.65vw, 0.75rem);
     font-weight: 600;
     border-radius: var(--radius-pill);
-    margin-left: 4px;
     padding: 2px 12px;
 }
 
@@ -99,7 +107,7 @@
 .suggestion-item .details strong {
     color: black;
     font-size: clamp(0.5rem, 0.75vw, 1.5rem);
-    font-weight: 400;
+    font-weight: 500;
 }
 
 .suggestion-item-image {
