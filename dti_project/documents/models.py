@@ -40,6 +40,15 @@ class DraftModel(models.Model):
     class Meta:
         abstract = True
 
+    def get_str_display(self, base_display: str) -> str:
+        """
+        Helper to append (Draft) if status is draft.
+        Child models can use this in __str__.
+        """
+        if self.status == "draft":
+            return f"{base_display} (Draft)"
+        return base_display
+
 class SalesPromotionPermitApplication(DraftModel, BaseApplication):
     class Meta:
         verbose_name = "Sales Promotion Permit Application"
@@ -81,7 +90,7 @@ class SalesPromotionPermitApplication(DraftModel, BaseApplication):
     cities_or_municipalities_covered = models.TextField(blank=True)
 
     def __str__(self):
-        return self.promo_title
+        return self.get_str_display(self.promo_title)
     
 class ProductCovered(models.Model):
     permit_application = models.ForeignKey(SalesPromotionPermitApplication, related_name='products', on_delete=models.CASCADE)
@@ -127,7 +136,7 @@ class PersonalDataSheet(DraftModel, models.Model):
     email_address = models.EmailField()
 
     def __str__(self):
-        return f"{self.first_name} {self.middle_name if self.middle_name else None} {self.last_name}"
+        return self.get_str_display(f"{self.first_name} {self.middle_name if self.middle_name else None} {self.last_name}")
 
 class EmployeeBackground(PeriodModel):
     personal_data_sheet = models.ForeignKey(PersonalDataSheet, related_name='employee_backgrounds', on_delete=models.CASCADE)
@@ -267,7 +276,7 @@ class ServiceRepairAccreditationApplication(DraftModel, models.Model):
     )
 
     def __str__(self):
-        return f"{self.name_of_business} - {self.application_type} - {self.category}"
+        return self.get_str_display(f"{self.name_of_business} - {self.application_type} - {self.category}")
 
     def get_warranty_text(self):
         """Generate the warranty/undertaking text with the warranty period filled in"""
@@ -346,7 +355,7 @@ class OrderOfPayment(DraftModel, models.Model):
         verbose_name_plural = 'Orders of Payment'
 
     def __str__(self):
-        return f"{self.name} {self.address}"
+        return self.get_str_display(f"{self.name} {self.address}")
     
 class InspectionValidationReport(DraftModel, models.Model):
     class Meta:
@@ -434,7 +443,7 @@ class InspectionValidationReport(DraftModel, models.Model):
         ordering = ['-date']
 
     def __str__(self):
-        return f"{self.name_of_business} - {self.date} - {self.type_of_application_activity}"
+        return self.get_str_display(f"{self.name_of_business} - {self.date} - {self.type_of_application_activity}")
         
     def get_recommendation_display(self):
         """Return a human-readable list of selected recommendations"""
@@ -614,4 +623,4 @@ class ChecklistEvaluationSheet(DraftModel, models.Model):
     )
 
     def __str__(self):
-        return f"{self.name_of_business} - {self.type_of_application}"
+        return self.get_str_display(f"{self.name_of_business} - {self.type_of_application}")
