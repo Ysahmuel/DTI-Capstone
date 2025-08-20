@@ -93,7 +93,7 @@ class SearchSuggestionsView(View):
             for model in document_models:
                 model_fields = [f.name for f in model._meta.fields]
                 matched_field = None
-                qs = model.objects.all()
+                qs = model.objects.exclude(status='draft')
 
                 if 'first_name' in model_fields and 'last_name' in model_fields:
                     qs = qs.annotate(
