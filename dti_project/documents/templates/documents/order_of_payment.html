@@ -4,15 +4,9 @@
 
 {% block body %}
 <div class="document-details-container">
-    <header>
-        <div class="column">
-            <h3>Order of Payment</h3>
-            <h1>{{ order }}</h1>
-        </div>
-        <div class="actions">
+    
+    {% include 'documents/components/document_header.html' with title="Order of Payment" obj=order %}
 
-        </div>
-    </header>
     <div class="details-grid">
         <section class="grid-item" id="details-grid-item">
             {% for group in detail_groups %}

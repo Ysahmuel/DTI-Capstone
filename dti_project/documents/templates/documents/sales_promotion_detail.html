@@ -4,15 +4,8 @@
 
 {% block body %}
 <div class="document-details-container">
-    <header>
-        <div class="column">
-            <h3>Sales Promotion Permit Application</h3>
-            <h1>{{ sales_promo.promo_title }}</h1>
-        </div>
-        <div class="actions">
 
-        </div>
-    </header>
+    {% include 'documents/components/document_header.html' with title="Sales Promotion Permit Application" obj=sales_promo %}
     
     <div class="details-grid">
 

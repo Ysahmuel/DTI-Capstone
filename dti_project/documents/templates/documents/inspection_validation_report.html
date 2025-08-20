@@ -4,15 +4,9 @@
 
 {% block body %}
 <div class="document-details-container">
-    <header>
-        <div class="column">
-            <h3>Inspection Validation Report</h3>
-            <h1>{{ report }}</h1>
-        </div>
-        <div class="actions">
 
-        </div>
-    </header>
+    {% include 'documents/components/document_header.html' with title="Inspection Validation Reportt" obj=report %}
+
     <div class="details-grid">
         <section class="grid-item" id="details-grid-item">
             {% for group in detail_groups %}

@@ -5,15 +5,7 @@
 {% block body %}
 <div class="document-details-container">
 
-    <header>
-        <div class="column">
-            <h3>Checklist of Requirements and Evaluation Sheet</h3>
-            <h1>{{ checklist_sheet }}</h1>
-        </div>
-        <div class="actions">
-
-        </div>
-    </header>
+    {% include 'documents/components/document_header.html' with title="Checklist of Requirements and Evaluation Sheet" obj=checklist_sheet %}
 
     <div class="details-grid">
 

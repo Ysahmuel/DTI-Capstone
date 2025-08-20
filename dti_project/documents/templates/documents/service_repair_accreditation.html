@@ -5,15 +5,7 @@
 {% block body %}
 <div class="document-details-container">
 
-    <header>
-        <div class="column">
-            <h3>Accreditation of Service and Repair Enterprises</h3>
-            <h1>{{ accreditation }}</h1>
-        </div>
-        <div class="actions">
-
-        </div>
-    </header>
+    {% include 'documents/components/document_header.html' with title="Accreditation of Service and Repair Enterprises" obj=accreditation %}
 
     <div class="details-grid">
 
