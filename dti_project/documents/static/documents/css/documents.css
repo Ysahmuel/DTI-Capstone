@@ -5,6 +5,10 @@
 /* ========================================
    DOCUMENT DETAILS LAYOUT
    ======================================== */
+.main-content:has(.document-details-container) {
+    overflow: hidden;
+}
+  
 .document-details-container {
   height: 100%;
 }
