@@ -30,7 +30,17 @@ class YesNoField(models.CharField):
         kwargs.setdefault('blank', True)
         super().__init__(*args, **kwargs)
 
-class SalesPromotionPermitApplication(BaseApplication):
+class DraftModel(models.Model):
+    status = models.CharField(
+        max_length=20,
+        choices=[("draft", "Draft"), ("submitted", "Submitted")],
+        default="draft"
+    )
+
+    class Meta:
+        abstract = True
+
+class SalesPromotionPermitApplication(DraftModel, BaseApplication):
     class Meta:
         verbose_name = "Sales Promotion Permit Application"
         verbose_name_plural = "Sales Promotion Permit Applications"
@@ -82,7 +92,7 @@ class ProductCovered(models.Model):
     def __str__(self):
         return f"{self.name} {self.brand}"
     
-class PersonalDataSheet(models.Model):
+class PersonalDataSheet(DraftModel, models.Model):
     GENDER_CHOICES = [
         ('Male', 'Male'),
         ('Female', 'Female'),
@@ -160,7 +170,7 @@ class CharacterReference(models.Model):
     def __str__(self):
         return f"{self.name} ({self.company})"
 
-class ServiceRepairAccreditationApplication(models.Model):
+class ServiceRepairAccreditationApplication(DraftModel, models.Model):
     class Meta:
         verbose_name = "Accreditation of Service and Repair Enterprise"
         verbose_name_plural = "Accreditation of Service and Repair Enterprises"
@@ -301,7 +311,7 @@ class ServiceRepairAccreditationApplication(models.Model):
         else:
             return str(number)  # For larger numbers, just return the digit
         
-class OrderOfPayment(models.Model):
+class OrderOfPayment(DraftModel, models.Model):
     class Meta:
         verbose_name = "Order of Payment"
         verbose_name_plural = "Orders of Payment"
@@ -338,7 +348,7 @@ class OrderOfPayment(models.Model):
     def __str__(self):
         return f"{self.name} {self.address}"
     
-class InspectionValidationReport(models.Model):
+class InspectionValidationReport(DraftModel, models.Model):
     class Meta:
         verbose_name = "Inspection Validation Report"
         verbose_name_plural = "Inspection Validation Reports"
@@ -472,7 +482,7 @@ class Service(models.Model):
     def __str__(self):
         return f"{self.category.name} - {self.name}"
 
-class ChecklistEvaluationSheet(models.Model):
+class ChecklistEvaluationSheet(DraftModel, models.Model):
     class Meta:
         verbose_name = "Checklist of Requirements and Evaluation Sheet"
         verbose_name_plural = "Checklist of Requirements and Evaluation Sheets"
