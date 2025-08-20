@@ -4,87 +4,134 @@ from .models import CharacterReference, ChecklistEvaluationSheet, EducationalAtt
 
 
 # Register your models here.
+# 🔹 Base admin for models inheriting DraftModel
+class StatusModelAdmin(admin.ModelAdmin):
+    """Base admin that adds status to list_display and list_filter dynamically."""
+
+    def get_list_display(self, request):
+        list_display = super().get_list_display(request)
+        if "status" not in list_display:
+            return list_display + ("status",)
+        return list_display
+
+    def get_list_filter(self, request):
+        list_filter = super().get_list_filter(request)
+        if "status" not in list_filter:
+            return list_filter + ("status",)
+        return list_filter
+
+
+# 🔹 Admin registrations
 @admin.register(SalesPromotionPermitApplication)
-class SalesPromotionAdmin(admin.ModelAdmin):
-    list_display = ('promo_title', )
-    search_fields = ('promo_title', 'sponsor_name', 'advertising_agency_name')
-    
+class SalesPromotionAdmin(StatusModelAdmin):
+    list_display = ("promo_title",)
+    search_fields = ("promo_title", "sponsor_name", "advertising_agency_name")
+
+
 @admin.register(ProductCovered)
-class ProductCoveredAdmin(admin.ModelAdmin):
-    list_display = ('name', 'permit_application_title')
-    search_fields = ('name', 'permit_application__promo_title')
+class ProductCoveredAdmin(admin.ModelAdmin):  # Not DraftModel
+    list_display = ("name", "permit_application_title")
+    search_fields = ("name", "permit_application__promo_title")
 
     def permit_application_title(self, obj):
         return obj.permit_application.promo_title
-    permit_application_title.short_description = 'Promo Title'
+    permit_application_title.short_description = "Promo Title"
+
 
 @admin.register(PersonalDataSheet)
-class PersonalDataSheetAdmin(admin.ModelAdmin):
-    list_display = ('last_name', 'first_name', 'email_address', 'sex')
-    search_fields = ('last_name', 'first_name', 'email_address')
-    list_filter = ('sex', 'civil_status')
+class PersonalDataSheetAdmin(StatusModelAdmin):
+    list_display = ("last_name", "first_name", "email_address", "sex")
+    search_fields = ("last_name", "first_name", "email_address")
+    list_filter = ("sex", "civil_status")
+
 
 @admin.register(EmployeeBackground)
-class EmployeeBackgroundAdmin(admin.ModelAdmin):
-    list_display = (get_full_name_from_personal_data, 'employer', 'position', 'start_date', 'end_date')
-    search_fields = ('employer', 'position')
+class EmployeeBackgroundAdmin(admin.ModelAdmin):  # Not DraftModel
+    list_display = (
+        get_full_name_from_personal_data,
+        "employer",
+        "position",
+        "start_date",
+        "end_date",
+    )
+    search_fields = ("employer", "position")
+
 
 @admin.register(TrainingsAttended)
-class TrainingsAttendedAdmin(admin.ModelAdmin):
-    list_display = (get_full_name_from_personal_data, 'training_course', 'conducted_by')
-    search_fields = ('training_course', 'conducted_by')
+class TrainingsAttendedAdmin(admin.ModelAdmin):  # Not DraftModel
+    list_display = (get_full_name_from_personal_data, "training_course", "conducted_by")
+    search_fields = ("training_course", "conducted_by")
+
 
 @admin.register(EducationalAttainment)
-class EducationalAttainmentAdmin(admin.ModelAdmin):
-    list_display = (get_full_name_from_personal_data, 'school', 'course')
-    search_fields = ('school', 'course')
+class EducationalAttainmentAdmin(admin.ModelAdmin):  # Not DraftModel
+    list_display = (get_full_name_from_personal_data, "school", "course")
+    search_fields = ("school", "course")
+
 
 @admin.register(CharacterReference)
-class CharacterReferencesAdmin(admin.ModelAdmin):
-    list_display = ('name', 'company', 'email', 'contact_number')
-    search_fields = ('name', 'company')
+class CharacterReferencesAdmin(admin.ModelAdmin):  # Not DraftModel
+    list_display = ("name", "company", "email", "contact_number")
+    search_fields = ("name", "company")
+
 
 @admin.register(ServiceRepairAccreditationApplication)
-class ServiceRepairAccreditationApplicationAdmin(admin.ModelAdmin):
-    list_display = ('name_of_business', 'full_name', 'application_type', 'category', 'star_rating')
-    search_fields = ('name_of_business', 'first_name', 'last_name')
-    list_filter = ('application_type', 'category', 'star_rating', 'social_classification', 'asset_size', 'form_of_organization')
+class ServiceRepairAccreditationApplicationAdmin(StatusModelAdmin):
+    list_display = (
+        "name_of_business",
+        "full_name",
+        "application_type",
+        "category",
+        "star_rating",
+    )
+    search_fields = ("name_of_business", "first_name", "last_name")
+    list_filter = (
+        "application_type",
+        "category",
+        "star_rating",
+        "social_classification",
+        "asset_size",
+        "form_of_organization",
+    )
 
     def full_name(self, obj):
         return f"{obj.first_name} {obj.middle_name or ''} {obj.last_name}".strip()
-    
-    full_name.short_description = 'Full Name'
+
+    full_name.short_description = "Full Name"
+
 
 @admin.register(OrderOfPayment)
-class OrderOfPaymentAdmin(admin.ModelAdmin):
-    list_display = ('name', 'date')
-    search_fields = ('name', )
+class OrderOfPaymentAdmin(StatusModelAdmin):
+    list_display = ("name", "date")
+    search_fields = ("name",)
+
 
 @admin.register(InspectionValidationReport)
-class InspectionValidationReportAdmin(admin.ModelAdmin):
-    list_display = ('name_of_business', 'type_of_application_activity', 'date')
-    search_fields = ('name_of_business', 'address')
-    list_filter = ('type_of_application_activity', 'date')
-    date_hierarchy = 'date'
-    ordering = ['-date']
+class InspectionValidationReportAdmin(StatusModelAdmin):
+    list_display = ("name_of_business", "type_of_application_activity", "date")
+    search_fields = ("name_of_business", "address")
+    list_filter = ("type_of_application_activity", "date")
+    date_hierarchy = "date"
+    ordering = ["-date"]
 
 
 @admin.register(ServiceCategory)
-class ServiceCategoryAdmin(admin.ModelAdmin):
-    list_display = ('key', 'name')
-    search_fields = ('key', 'name')
-    ordering = ['key']
+class ServiceCategoryAdmin(admin.ModelAdmin):  # Not DraftModel
+    list_display = ("key", "name")
+    search_fields = ("key", "name")
+    ordering = ["key"]
 
 
 @admin.register(Service)
-class ServiceAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category')
-    list_filter = ('category',)
-    search_fields = ('name',)
-    ordering = ['category', 'name']
+class ServiceAdmin(admin.ModelAdmin):  # Not DraftModel
+    list_display = ("name", "category")
+    list_filter = ("category",)
+    search_fields = ("name",)
+    ordering = ["category", "name"]
+
 
 @admin.register(ChecklistEvaluationSheet)
-class ChecklistEvaluationSheetAdmin(admin.ModelAdmin):
-    list_display = ('name_of_business', 'type_of_application', 'renewal_due_date', 'star_rating')
-    list_filter = ('type_of_application', 'star_rating')
-    search_fields = ('name_of_business', )
+class ChecklistEvaluationSheetAdmin(StatusModelAdmin):
+    list_display = ("name_of_business", "type_of_application", "renewal_due_date", "star_rating")
+    list_filter = ("type_of_application", "star_rating")
+    search_fields = ("name_of_business",)
