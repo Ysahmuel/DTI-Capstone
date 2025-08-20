@@ -20,7 +20,7 @@ class PeriodModel(models.Model):
 
     class Meta:
         abstract = True
-        ordering = ['start_date']
+        ordering = ['-start_date']
 
 class YesNoField(models.CharField):
     def __init__(self, *args, **kwargs):
