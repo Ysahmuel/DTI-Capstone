@@ -16,7 +16,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
     @staticmethod
     def get_queryset_or_all(model, user):
-        qs = model.objects.all() if user.role == 'admin' else model.objects.filter(user=user)
+        qs = model.objects.exclude(status='draft') if user.role == 'admin' else model.objects.filter(user=user)
         
         return qs.only('pk', 'id')  # Add other fields that __str__ methods need
 
