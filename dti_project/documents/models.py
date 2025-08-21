@@ -49,6 +49,26 @@ class DraftModel(models.Model):
             return f"{base_display} (Draft)"
         return base_display
 
+    def clean(self):
+        """
+        Only enforce required fields if status is 'submitted'.
+        """
+        super().clean()
+
+        if self.status == "submitted":
+            # Loop through all model fields
+            for field in self._meta.get_fields():
+                if isinstance(field, models.Field) and not field.blank and not field.null and field.name != "id":
+                    value = getattr(self, field.name)
+                    if value in (None, "", []):
+                        raise ValidationError({field.name: "This field is required."})
+
+    def save(self, *args, **kwargs):
+        # Run full validation only if submitted
+        if self.status == "submitted":
+            self.full_clean()
+        super().save(*args, **kwargs)
+
 class SalesPromotionPermitApplication(DraftModel, BaseApplication):
     class Meta:
         verbose_name = "Sales Promotion Permit Application"
