@@ -19,6 +19,21 @@
   max-height: 60vh;
 }
 
+.form-progress-nav ol::-webkit-scrollbar {
+    width: 0.5rem;
+    height: 1.5rem;
+}
+
+.form-progress-nav ol::-webkit-scrollbar-track {
+    background: var(--secondary-muted);
+    border-radius: var(--radius-md);
+}
+
+.form-progress-nav ol::-webkit-scrollbar-thumb {
+    background-color: var(--primary);
+    border-radius: var(--radius-pill);
+}
+
 .step-item {
   position: relative;
   display: flex;
