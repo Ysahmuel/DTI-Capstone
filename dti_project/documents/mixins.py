@@ -49,6 +49,8 @@ class FormSubmissionMixin:
 
             obj.status = "draft"
 
+            obj.user = request.user
+
             # Temporarily mark non-display fields as not required
             display_fields = getattr(obj, "required_for_display", lambda: [])()
             for name, field in form.fields.items():
@@ -59,14 +61,11 @@ class FormSubmissionMixin:
             missing_fields = [f for f in display_fields if not getattr(obj, f, None)]
             if missing_fields:
                 for field in missing_fields:
-                    # Clear any existing errors
                     if field in form.errors:
                         del form.errors[field]
-                    # Add the custom draft error
                     form.add_error(field, "This field is required for draft submission.")
                 return self.form_invalid(form, action="draft")
 
-            # Fill placeholders for other non-nullable fields to bypass DB NOT NULL
             obj.prepare_for_draft()
             obj.save(force_insert=True)
             self.object = obj
@@ -78,6 +77,9 @@ class FormSubmissionMixin:
         if form.is_valid():
             obj = form.save(commit=False)
             obj.status = "submitted"
+
+            obj.user = request.user
+
             obj.save()
             self.object = obj
 
