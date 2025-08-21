@@ -222,10 +222,44 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const documentsForm = document.querySelector('.documents-form');
     const documentsFormSubmitBtn = document.querySelector('.form-progress-nav .submit-btn');
+    const documentsFormDraftBtn = document.querySelector('.form-progress-nav .save-draft-btn')
 
-    if (documentsForm && documentsFormSubmitBtn) {
+    if (documentsForm) {
         documentsFormSubmitBtn.addEventListener('click', (e) => {
             e.preventDefault();
+            
+            // Remove any existing action input
+            const existingAction = documentsForm.querySelector('input[name="action"]');
+            if (existingAction) {
+                existingAction.remove();
+            }
+            
+            // Create and add action input
+            const actionInput = document.createElement('input');
+            actionInput.type = 'hidden';
+            actionInput.name = 'action';
+            actionInput.value = 'submitted';
+            documentsForm.appendChild(actionInput);
+            
+            documentsForm.submit();
+        });
+        
+        documentsFormDraftBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            // Remove any existing action input
+            const existingAction = documentsForm.querySelector('input[name="action"]');
+            if (existingAction) {
+                existingAction.remove();
+            }
+            
+            // Create and add action input
+            const actionInput = document.createElement('input');
+            actionInput.type = 'hidden';
+            actionInput.name = 'action';
+            actionInput.value = 'draft';
+            documentsForm.appendChild(actionInput);
+            
             documentsForm.submit();
         });
     }
