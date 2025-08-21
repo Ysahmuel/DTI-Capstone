@@ -3,11 +3,9 @@ from django.shortcuts import render
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from documents.models import ChecklistEvaluationSheet, InspectionValidationReport, OrderOfPayment, PersonalDataSheet, SalesPromotionPermitApplication, ServiceRepairAccreditationApplication
-from django.db.models import Value
-from django.db.models import Value, F
+from django.db.models import Value, F, Q
 from django.db.models.functions import Concat
 from documents.constants import MODEL_URLS
-from .forms import SearchForm
 from users.models import User
     
 # Create your views here.
@@ -16,9 +14,14 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
     @staticmethod
     def get_queryset_or_all(model, user):
-        qs = model.objects.exclude(status='draft') if user.role == 'admin' else model.objects.filter(user=user)
-        
-        return qs.only('pk', 'id')  # Add other fields that __str__ methods need
+        if user.role == "admin":
+            qs = model.objects.filter(
+                Q(status="draft", user=user) | ~Q(status="draft")
+            )
+        else:
+            qs = model.objects.filter(user=user)
+            
+        return qs.only("pk", "id")  # Add other fields that __str__ methods need
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -34,10 +37,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         })
 
         return context
-    
-class SearchView(View):
-    form_class = SearchForm
-    pass
 
 class SearchSuggestionsView(View):
     def get(self, request, *args, **kwargs):
