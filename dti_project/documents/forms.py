@@ -59,7 +59,7 @@ class SalesPromotionPermitApplicationForm(BaseCustomForm):
     class Meta:
         model = SalesPromotionPermitApplication
         fields = '__all__'
-        exclude = ['date_filed', 'user']
+        exclude = ['status', 'date_filed', 'user']
         widgets = {
             'promo_period_start': forms.DateInput(attrs={'type': 'date', 'class': 'form-group'}),
             'promo_period_end': forms.DateInput(attrs={'type': 'date', 'class': 'form-group'}),
@@ -85,7 +85,7 @@ class PersonalDataSheetForm(BaseCustomForm):
     class Meta:
         model = PersonalDataSheet
         fields = '__all__'
-        exclude = ['user']
+        exclude = ['status', 'user']
         widgets = {
             'current_address': forms.TextInput(attrs={'class': 'form-group'}),
             'date_of_birth': forms.DateInput(attrs={'type': 'date', 'class': 'form-group'})
@@ -119,13 +119,13 @@ class ServiceRepairAccreditationApplicationForm(BaseCustomForm):
     class Meta:
         model = ServiceRepairAccreditationApplication
         fields = '__all__'
-        exclude = ['user']
+        exclude = ['status', 'user']
 
 class InspectionValidationReportForm(BaseCustomForm):
     class Meta:
         model = InspectionValidationReport
         fields = '__all__'
-        exclude = ['date', 'user']
+        exclude = ['status', 'date', 'user']
         widgets = {
             'services_offered': forms.CheckboxSelectMultiple()
         }
@@ -144,7 +144,7 @@ class OrderOfPaymentForm(BaseCustomForm):
     class Meta:
         model = OrderOfPayment
         fields = '__all__'
-        exclude = ['date', 'user']
+        exclude = ['status', 'date', 'user']
 
 class ChecklistEvaluationSheetForm(BaseCustomForm):
     renewal_year = forms.IntegerField(label="Date Expired: Dec 31, ____", min_value=1900)
@@ -152,7 +152,7 @@ class ChecklistEvaluationSheetForm(BaseCustomForm):
     class Meta:
         model = ChecklistEvaluationSheet
         fields = '__all__'
-        exclude = ['user']
+        exclude = ['status', 'user']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

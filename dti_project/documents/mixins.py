@@ -37,6 +37,7 @@ class FormSubmissionMixin:
         form = self.get_form()
         action = request.POST.get("action")
 
+        # === DRAFT MODE ===
         if action == "draft":
             obj = self.model()
 
@@ -48,7 +49,6 @@ class FormSubmissionMixin:
                         setattr(obj, field_name, value)
 
             obj.status = "draft"
-
             obj.user = request.user
 
             # Temporarily mark non-display fields as not required
@@ -71,22 +71,30 @@ class FormSubmissionMixin:
             self.object = obj
 
             messages.success(request, f"{obj} saved as draft.")
-            return redirect("/")
+            return redirect("/")   # drafts always redirect home (or change if needed)
 
-        # Normal submission uses standard form validation
-        if form.is_valid():
-            obj = form.save(commit=False)
-            obj.status = "submitted"
+        # === SUBMITTED MODE ===
+        if action == "submitted":
+            if form.is_valid():
+                obj = form.save(commit=False)
+                obj.status = "submitted"
+                obj.user = request.user
+                obj.save()
+                self.object = obj
 
-            obj.user = request.user
+                messages.success(request, f"{obj} submitted successfully.")
+                return redirect(self.get_success_url())
+            else:
+                # 🔎 Debugging help: show *why* the form failed
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"{field}: {error}")
 
-            obj.save()
-            self.object = obj
+                return self.form_invalid(form, action="submitted")
 
-            messages.success(request, f"{obj} submitted successfully.")
-            return redirect(self.get_success_url())
-
+        # If no action provided, fallback
         return self.form_invalid(form, action=action)
+
 
     
 class FormsetMixin:

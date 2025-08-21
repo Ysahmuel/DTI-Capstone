@@ -199,7 +199,7 @@ class PersonalDataSheet(DraftModel, models.Model):
     email_address = models.EmailField()
 
     def __str__(self):
-        return self.get_str_display(f"{self.first_name} {self.middle_name if self.middle_name else None} {self.last_name}")
+        return self.get_str_display(f"{self.first_name} {self.last_name}")
 
 class EmployeeBackground(PeriodModel):
     personal_data_sheet = models.ForeignKey(PersonalDataSheet, related_name='employee_backgrounds', on_delete=models.CASCADE)
