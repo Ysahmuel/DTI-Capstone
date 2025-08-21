@@ -6,11 +6,63 @@ from django.core.exceptions import ImproperlyConfigured
 from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.http import JsonResponse
+from django.shortcuts import redirect
 from django.template.loader import render_to_string
 from .models import ServiceCategory
 
 logger = logging.getLogger(__name__)
 
+class MessagesMixin:
+    """Mixin for handling form success and error messages."""
+    def form_invalid(self, form):
+        for field, errors in form.errors.items():
+            # Handle __all__ or non-field errors
+            field_label = field.replace("_", " ").title()
+
+            message = f"{field_label}: " + "; ".join(errors)
+            messages.error(self.request, message)
+
+        return super().form_invalid(form)
+
+
+class FormSubmissionMixin:
+    def post(self, request, *args, **kwargs):
+        self.object = None
+        form = self.get_form()
+        action = request.POST.get("action")
+
+        if action == "draft":
+            # Create object manually without validation
+            obj = self.model()
+
+            for field in self.model._meta.fields:
+                if not field.auto_created:  # skip pk/related hidden fields
+                    value = request.POST.get(field.name)
+                    if value not in [None, ""]:
+                        setattr(obj, field.name, value)
+
+            obj.status = "draft"
+
+            # Save without running full_clean
+            obj.save(force_insert=True)
+
+            self.object = obj
+            messages.success(request, f"{obj} saved as draft.")
+            return redirect("/")  # or self.get_success_url() if drafts also redirect there
+
+        # Normal submission (with validation)
+        if form.is_valid():
+            obj = form.save(commit=False)
+            obj.status = "submitted"
+            obj.save()
+            self.object = obj
+
+            messages.success(request, f"{obj} submitted successfully.")
+            return redirect(self.get_success_url())
+
+        return self.form_invalid(form)
+    
+    
 class FormsetMixin:
     formset_classes = {}  # Example: {'employee': EmployeeBackgroundFormset, 'training': TrainingsAttendedFormset}
 
@@ -123,17 +175,6 @@ class FormsetMixin:
                     if non_form_errors:
                         messages.error(self.request, f"{key.capitalize()} Formset error: " + "; ".join(non_form_errors))
                 return self.form_invalid(form)
-
-    def form_invalid(self, form):
-        for field, errors in form.errors.items():
-            # Handle __all__ or non-field errors
-            field_label = field.replace("_", " ").title()
-
-            message = f"{field_label}: " + "; ".join(errors)
-            messages.error(self.request, message)
-
-        return super().form_invalid(form)
-
 
 class FormStepsMixin:
     form_steps = []  # Default empty list
