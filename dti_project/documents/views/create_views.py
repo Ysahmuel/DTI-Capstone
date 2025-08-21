@@ -29,7 +29,7 @@ class CreateSalesPromotionView(LoginRequiredMixin, MessagesMixin, FormSubmission
     def get_success_url(self):
         return reverse_lazy('sales-promotion-application', kwargs={'pk': self.object.pk})
     
-class CreatePersonalDataSheetView(LoginRequiredMixin, FormStepsMixin, FormsetMixin, CreateView):
+class CreatePersonalDataSheetView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, CreateView):
     template_name = 'documents/create_personal_data_sheet.html'
     model = PersonalDataSheet
     form_class = PersonalDataSheetForm
@@ -52,7 +52,7 @@ class CreatePersonalDataSheetView(LoginRequiredMixin, FormStepsMixin, FormsetMix
     def get_success_url(self):
         return reverse_lazy('personal-data-sheet', kwargs={'pk': self.object.pk})
     
-class CreateServiceRepairAccreditationApplicationView(LoginRequiredMixin, FormStepsMixin, FormsetMixin, CreateView):
+class CreateServiceRepairAccreditationApplicationView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, CreateView):
     template_name = 'documents/create_service_repair.html'
     model = ServiceRepairAccreditationApplication
     form_class = ServiceRepairAccreditationApplicationForm
@@ -75,7 +75,7 @@ class CreateServiceRepairAccreditationApplicationView(LoginRequiredMixin, FormSt
     def get_success_url(self):
         return reverse_lazy('service-repair-accreditation', kwargs={'pk': self.object.pk})
 
-class CreateInspectionValidationReportView(LoginRequiredMixin, FormStepsMixin, FormsetMixin, ServiceCategoryMixin, CreateView):
+class CreateInspectionValidationReportView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, ServiceCategoryMixin, CreateView):
     model = InspectionValidationReport
     template_name = 'documents/create_inspection_validation_report.html'
     form_class = InspectionValidationReportForm
@@ -93,7 +93,7 @@ class CreateInspectionValidationReportView(LoginRequiredMixin, FormStepsMixin, F
     def get_success_url(self):
         return reverse_lazy('inspection-validation-report', kwargs={'pk': self.object.pk})
     
-class CreateOrderOfPaymentView(LoginRequiredMixin, FormStepsMixin, FormsetMixin, CreateView):
+class CreateOrderOfPaymentView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, CreateView):
     model = OrderOfPayment
     template_name = 'documents/create_order_of_payment.html'
     form_class = OrderOfPaymentForm
@@ -108,7 +108,7 @@ class CreateOrderOfPaymentView(LoginRequiredMixin, FormStepsMixin, FormsetMixin,
     def get_success_url(self):
         return reverse_lazy('order-of-payment', kwargs={'pk': self.object.pk})
 
-class CreateChecklistEvaluationSheetView(LoginRequiredMixin, FormStepsMixin, FormsetMixin, CreateView):
+class CreateChecklistEvaluationSheetView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, CreateView):
     model = ChecklistEvaluationSheet
     template_name = 'documents/create_checklist_evaluation_sheet.html'
     form_class = ChecklistEvaluationSheetForm
