@@ -3,11 +3,11 @@ from ..utils.form_helpers import get_certification_text
 from ..constants import CHECKLIST_EVALUATION_FIELD_GROUPS, INSPECTION_VALIDATION_REPORT_FIELD_GROUPS, ORDER_OF_PAYMENT_FIELD_GROUPS, PERSONAL_DATA_SHEET_FIELD_GROUPS, SALES_PROMOTION_FIELD_GROUPS, SERVICE_REPAIR_ACCREDITATION_FIELD_GROUPS
 from ..forms import FORMSET_CLASSES, ChecklistEvaluationSheetForm, InspectionValidationReportForm, OrderOfPaymentForm, PersonalDataSheetForm, SalesPromotionPermitApplicationForm, ServiceRepairAccreditationApplicationForm
 from ..models import ChecklistEvaluationSheet, InspectionValidationReport, OrderOfPayment, PersonalDataSheet, SalesPromotionPermitApplication, ServiceRepairAccreditationApplication
-from ..mixins import FormStepsMixin, FormsetMixin, ServiceCategoryMixin
+from ..mixins import FormStepsMixin, FormSubmissionMixin, FormsetMixin, MessagesMixin, ServiceCategoryMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import CreateView
 
-class CreateSalesPromotionView(LoginRequiredMixin, FormStepsMixin, FormsetMixin, CreateView):
+class CreateSalesPromotionView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, CreateView):
     template_name = 'documents/create_sales_promotion.html'
     model = SalesPromotionPermitApplication
     context_object_name = 'sales_promo'
