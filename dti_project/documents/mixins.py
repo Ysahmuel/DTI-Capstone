@@ -14,20 +14,35 @@ logger = logging.getLogger(__name__)
 
 class MessagesMixin:
     """Mixin for handling form success and error messages."""
+    MAX_ERRORS = 5  # limit number of error fields shown
+
     def form_invalid(self, form, action=None):
+        normalized_errors = {}
+
+        # Collect all errors, skipping status + draft exceptions
         for field, errors in form.errors.items():
-            # Skip status field entirely
             if field == "status":
                 continue
-
-            # If draft, only show errors for fields in required_for_display
             if action == "draft":
                 if hasattr(form.instance, "required_for_display") and field not in form.instance.required_for_display():
                     continue
 
+            # Normalize field label (so 'application_type' == 'Application Type')
             field_label = field.replace("_", " ").title()
-            message = f"{field_label}: " + "; ".join(errors)
-            messages.error(self.request, message)
+            normalized_errors.setdefault(field_label, []).extend(errors)
+
+        # Convert back into list of (field_label, errors)
+        all_error_fields = list(normalized_errors.items())
+
+        # Show only up to MAX_ERRORS fields
+        for field_label, errors in all_error_fields[:self.MAX_ERRORS]:
+            for error in errors:
+                messages.error(self.request, f"{field_label}: {error}")
+
+        # Show summary if more remain
+        remaining = len(all_error_fields) - self.MAX_ERRORS
+        if remaining > 0:
+            messages.error(self.request, f"+ {remaining} more error(s)...")
 
         return super().form_invalid(form)
 
@@ -84,13 +99,6 @@ class FormSubmissionMixin:
 
                 messages.success(request, f"{obj} submitted successfully.")
                 return redirect(self.get_success_url())
-            else:
-                # 🔎 Debugging help: show *why* the form failed
-                for field, errors in form.errors.items():
-                    for error in errors:
-                        messages.error(request, f"{field}: {error}")
-
-                return self.form_invalid(form, action="submitted")
 
         # If no action provided, fallback
         return self.form_invalid(form, action=action)
