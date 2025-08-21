@@ -14,16 +14,22 @@ logger = logging.getLogger(__name__)
 
 class MessagesMixin:
     """Mixin for handling form success and error messages."""
-    def form_invalid(self, form):
+    def form_invalid(self, form, action=None):
         for field, errors in form.errors.items():
-            # Handle __all__ or non-field errors
-            field_label = field.replace("_", " ").title()
+            # Skip status field entirely
+            if field == "status":
+                continue
 
+            # If draft, only show errors for fields in required_for_display
+            if action == "draft":
+                if hasattr(form.instance, "required_for_display") and field not in form.instance.required_for_display():
+                    continue
+
+            field_label = field.replace("_", " ").title()
             message = f"{field_label}: " + "; ".join(errors)
             messages.error(self.request, message)
 
         return super().form_invalid(form)
-
 
 class FormSubmissionMixin:
     def post(self, request, *args, **kwargs):
@@ -32,25 +38,43 @@ class FormSubmissionMixin:
         action = request.POST.get("action")
 
         if action == "draft":
-            # Create object manually without validation
             obj = self.model()
 
-            for field in self.model._meta.fields:
-                if not field.auto_created:  # skip pk/related hidden fields
-                    value = request.POST.get(field.name)
+            # Set only POSTed fields on the instance
+            for field_name in form.fields:
+                if field_name in request.POST:
+                    value = request.POST.get(field_name)
                     if value not in [None, ""]:
-                        setattr(obj, field.name, value)
+                        setattr(obj, field_name, value)
 
             obj.status = "draft"
 
-            # Save without running full_clean
+            # Temporarily mark non-display fields as not required
+            display_fields = getattr(obj, "required_for_display", lambda: [])()
+            for name, field in form.fields.items():
+                if name not in display_fields:
+                    field.required = False
+
+            # Validate only display-required fields
+            missing_fields = [f for f in display_fields if not getattr(obj, f, None)]
+            if missing_fields:
+                for field in missing_fields:
+                    # Clear any existing errors
+                    if field in form.errors:
+                        del form.errors[field]
+                    # Add the custom draft error
+                    form.add_error(field, "This field is required for draft submission.")
+                return self.form_invalid(form, action="draft")
+
+            # Fill placeholders for other non-nullable fields to bypass DB NOT NULL
+            obj.prepare_for_draft()
             obj.save(force_insert=True)
-
             self.object = obj
-            messages.success(request, f"{obj} saved as draft.")
-            return redirect("/")  # or self.get_success_url() if drafts also redirect there
 
-        # Normal submission (with validation)
+            messages.success(request, f"{obj} saved as draft.")
+            return redirect("/")
+
+        # Normal submission uses standard form validation
         if form.is_valid():
             obj = form.save(commit=False)
             obj.status = "submitted"
@@ -60,8 +84,8 @@ class FormSubmissionMixin:
             messages.success(request, f"{obj} submitted successfully.")
             return redirect(self.get_success_url())
 
-        return self.form_invalid(form)
-    
+        return self.form_invalid(form, action=action)
+
     
 class FormsetMixin:
     formset_classes = {}  # Example: {'employee': EmployeeBackgroundFormset, 'training': TrainingsAttendedFormset}
