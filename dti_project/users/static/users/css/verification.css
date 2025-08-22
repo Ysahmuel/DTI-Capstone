@@ -9,6 +9,18 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
+
+  /* blur effect */
+  backdrop-filter: blur(0.5rem);
+  -webkit-backdrop-filter: blur(0.5rem);
+
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.verification-container section {
+  border-radius: var(--radius-md);
+  padding: clamp(1rem, 3vw, 3rem);
+  max-width: clamp(18rem, 30vw, 40rem);
 }
 
 .verification-container .title {
