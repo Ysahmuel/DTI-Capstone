@@ -1,12 +1,17 @@
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
-from django.urls import reverse_lazy
-from django.views.generic import CreateView
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse, reverse_lazy
+from django.views.generic import CreateView, View
 from django.contrib.auth.views import LoginView, LogoutView
+from .models import User
 from .forms import CustomLoginForm, CustomUserCreationForm
 from django.contrib.auth import login, logout as auth_logout, get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from django.contrib import messages
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Create your views here.
 class CustomLoginView(LoginView):
@@ -99,8 +104,26 @@ class VerifyUserView(View):
         else:
             return JsonResponse({'success': False, 'error': 'Invalid or expired verification code'}, status=400)
 
-        return context
-    
+class ResendCodeView(View):
+    """Handles resending OTP"""
+
+    def post(self, request, *args, **kwargs):
+        user_id = request.session.get('pending_verification_user')
+        if not user_id:
+            return JsonResponse({'success': False, 'error': 'No pending verification'}, status=400)
+
+        user = get_object_or_404(User, id=user_id)
+        user.generate_secure_otp_code()
+
+        # ✅ log it to terminal
+        print(f"[DEBUG] Resent verification code for {user.username}: {user.verification_code}")
+
+        return JsonResponse({
+            'success': True,
+            'message': 'Verification code resent!'
+        })
+
+# ---------------------- FUNCTION BASED VIEWS --------------------------- #    
 
 def logout(request):
     auth_logout(request)
