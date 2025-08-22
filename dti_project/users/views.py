@@ -28,30 +28,89 @@ class CustomRegisterView(CreateView):
     form_class = CustomUserCreationForm
     success_url = reverse_lazy('dashboard')
 
+    def post(self, request, *args, **kwargs):
+        print("=== POST METHOD CALLED ===")
+        print(f"Is AJAX: {request.headers.get('X-Requested-With') == 'XMLHttpRequest'}")
+        print(f"POST data: {dict(request.POST)}")
+        
+        # Handle AJAX requests
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            form = self.get_form()
+            print(f"Form created: {form}")
+            print(f"Form is valid: {form.is_valid()}")
+            
+            if not form.is_valid():
+                print(f"Form errors: {form.errors}")
+                print(f"Form non-field errors: {form.non_field_errors()}")
+            
+            if form.is_valid():
+                return self.form_valid(form)
+            else:
+                return self.form_invalid(form)
+        
+        # Handle normal form submissions (fallback)
+        return super().post(request, *args, **kwargs)
+
     def form_valid(self, form):
-        print("Form is valid, saving user now...")
+        print("=== FORM_VALID CALLED ===")
         user = form.save(commit=False)
 
         # Ensure user starts as unverified
         user.is_verified = False
         user.save()
+        print(f"User saved: {user.username}")
 
         # Generate OTP
         user.generate_secure_otp_code()
 
         # ✅ log the OTP to console instead of sending email
         print(f"[DEBUG] Verification code for {user.username}: {user.verification_code}")
-        logger.info(f"Generated verification code for {user.username}: {user.verification_code}")
 
         # Store user id in session for modal verification
         self.request.session['pending_verification_user'] = user.id
 
-        return JsonResponse({
-            'success': True,
-            'message': 'Registration successful! Please enter the verification code.',
-            'show_verification': True,
-            'masked_email': self.mask_email(user.email)
-        })
+        # Return JSON response for AJAX requests
+        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'message': 'Registration successful! Please enter the verification code.',
+                'show_verification': True,
+                'masked_email': self.mask_email(user.email)
+            })
+        
+        # Fallback for normal requests
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        print("=== FORM_INVALID CALLED ===")
+        print(f"All form errors: {form.errors}")
+        print(f"Form data: {form.cleaned_data if hasattr(form, 'cleaned_data') else 'No cleaned_data'}")
+        
+        # Add error messages to Django messages framework
+        for field, error_list in form.errors.items():
+            for error in error_list:
+                if field == '__all__':
+                    messages.error(self.request, f"Form Error: {error}")
+                else:
+                    field_name = field.replace('_', ' ').title()
+                    messages.error(self.request, f"{field_name}: {error}")
+        
+        # Handle AJAX form validation errors
+        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            errors = {}
+            for field, error_list in form.errors.items():
+                errors[field] = [str(error) for error in error_list]
+                print(f"Field '{field}' errors: {error_list}")
+            
+            return JsonResponse({
+                'success': False,
+                'errors': errors,
+                'message': 'Please correct the errors below.',
+                'detailed_errors': str(form.errors)  # Add this for debugging
+            }, status=400)
+        
+        # Fallback for normal requests
+        return super().form_invalid(form)
 
     @staticmethod
     def mask_email(email):

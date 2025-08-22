@@ -1,7 +1,72 @@
 document.addEventListener('DOMContentLoaded', function() { 
+    const form = document.querySelector('.authentication-form')
     const step3 = document.getElementById("step3"); 
     const maskedOutput = document.getElementById("maskedOutput"); 
     const codeInputs = document.querySelectorAll('.code-input');
+
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(form)
+        
+        // Debug: Log form data
+        console.log("=== FORM DATA ===");
+        for (let [key, value] of formData.entries()) {
+            console.log(`${key}: ${value}`);
+        }
+
+        try {
+            const response = await fetch(form.action, {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "X-CSRFToken": getCSRFToken(),
+                }
+            });
+
+            console.log("Response status:", response.status);
+            const data = await response.json();
+            console.log("Response data:", data);
+
+            if (data.success) {
+                // Show modal
+                const verificationContainer = document.querySelector('.verification-container');
+                if (verificationContainer) {
+                    verificationContainer.style.display = "flex";
+                }
+
+                // Update masked email
+                if (maskedOutput) {
+                    maskedOutput.textContent = data.masked_email;
+                }
+
+                // Start countdown
+                startCountdown(30);
+
+                // Reset inputs
+                const modalCodeInputs = document.querySelectorAll('.code-input');
+                modalCodeInputs.forEach((input) => (input.value = ""));
+                if (modalCodeInputs.length > 0) {
+                    modalCodeInputs[0].focus();
+                }
+            } else {
+                // Handle validation errors
+                console.log("=== VALIDATION ERRORS ===");
+                if (data.errors) {
+                    console.log("Field errors:", data.errors);
+                }
+                if (data.detailed_errors) {
+                    console.log("Detailed errors:", data.detailed_errors);
+                }
+                
+                alert("Registration failed: " + (data.message || "Unknown error"));
+            }
+        } catch (error) {
+            console.error("Error submitting form:", error);
+            alert("Something went wrong.");
+        }
+    })
  
     let countdownTimer; 
  
@@ -10,20 +75,22 @@ document.addEventListener('DOMContentLoaded', function() {
         const resendWrapper = document.getElementById("resendWrapper"); 
         const resendLink = document.getElementById("resendLink"); 
  
-        resendWrapper.style.display = "inline"; 
-        resendLink.style.display = "none"; 
-        countdownEl.textContent = seconds; 
- 
-        clearInterval(countdownTimer); 
-        countdownTimer = setInterval(() => { 
-            seconds--; 
+        if (resendWrapper && resendLink && countdownEl) {
+            resendWrapper.style.display = "inline"; 
+            resendLink.style.display = "none"; 
             countdownEl.textContent = seconds; 
-            if (seconds <= 0) { 
-                clearInterval(countdownTimer); 
-                resendWrapper.style.display = "none"; 
-                resendLink.style.display = "inline"; 
-            } 
-        }, 1000); 
+     
+            clearInterval(countdownTimer); 
+            countdownTimer = setInterval(() => { 
+                seconds--; 
+                countdownEl.textContent = seconds; 
+                if (seconds <= 0) { 
+                    clearInterval(countdownTimer); 
+                    resendWrapper.style.display = "none"; 
+                    resendLink.style.display = "inline"; 
+                } 
+            }, 1000);
+        }
     }
 
     // Auto-navigation logic for code inputs
@@ -92,29 +159,91 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
  
-    document.getElementById("resendLink").onclick = (e) => { 
-        e.preventDefault(); 
-        alert("Code resent! (fake demo)"); 
-        startCountdown(30);
-        
-        // Clear all inputs and focus first one
-        codeInputs.forEach(input => input.value = '');
-        codeInputs[0].focus();
-    }; 
- 
-    // Immediately show step3 on load 
-    step3.style.display = "block"; 
-    maskedOutput.textContent = "******@example.com"; // or phone placeholder 
-    startCountdown(30);
-    
-    // Focus first input on load
-    codeInputs[0].focus();
+    // Resend link handler
+    const resendLink = document.getElementById("resendLink");
+    if (resendLink) {
+        resendLink.onclick = (e) => { 
+            e.preventDefault(); 
+            alert("Code resent! (fake demo)"); 
+            startCountdown(30);
+            
+            // Clear all inputs and focus first one
+            const modalCodeInputs = document.querySelectorAll('.code-input');
+            modalCodeInputs.forEach(input => input.value = '');
+            if (modalCodeInputs.length > 0) {
+                modalCodeInputs[0].focus();
+            }
+        };
+    }
 
+    // Close modal handler
     const closeModalBtn = document.getElementById('close-verification-modal-btn');
     const verificationContainer = document.querySelector('.verification-container');
 
-    closeModalBtn.addEventListener('click', function() {
-        verificationContainer.style.display = 'none';
-    })
+    if (closeModalBtn && verificationContainer) {
+        closeModalBtn.addEventListener('click', function() {
+            verificationContainer.style.display = 'none';
+        })
+    }
+
+    // USE EVENT DELEGATION FOR VERIFY BUTTON
+    // This will work even if the button is hidden when the page loads
+    document.addEventListener('click', async function(e) {
+        // Check if the clicked element is the verify button
+        if (e.target.matches('.btn-verify')) {
+            e.preventDefault();
+            
+            console.log('=== VERIFY BUTTON CLICKED ===');
+            
+            // Get code inputs from the modal (they might be different from the initial codeInputs)
+            const modalCodeInputs = document.querySelectorAll('.code-input');
+            const code = Array.from(modalCodeInputs).map(input => input.value).join('');
+
+            console.log('Collected code:', code);
+            console.log('Code length:', code.length);
+
+            if (code.length != 6) {
+                alert("Please enter the full 6-digit code.");
+                return;
+            }
+
+            try {
+                console.log('Sending verification request...');
+                const response = await fetch('/users/verify-user/', {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "X-CSRFToken": getCSRFToken(),
+                        "X-Requested-With": "XMLHttpRequest",
+                    },
+                    body: new URLSearchParams({ code: code })
+                });
+
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Response data:', data);
+
+                if (data.success) {
+                    alert("✅ Verification successful!");
+                    window.location.href = data.redirect || "/dashboard/";
+                } else {
+                    alert("❌ " + (data.error || data.message || "Verification failed"));
+                }
+
+            } catch (error) {
+                console.error("Error verifying code:", error);
+                alert("Something went wrong. Please try again.");
+            }
+        }
+    });
+
+    function getCSRFToken() {
+        const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]");
+        if (!csrfToken) {
+            console.error("CSRF token not found!");
+            return '';
+        }
+        return csrfToken.value;
+    }
 
 });
