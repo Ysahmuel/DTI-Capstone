@@ -11,14 +11,14 @@ class UserAdmin(BaseUserAdmin):
     # Extend the default fieldsets to include role + profile_picture
     fieldsets = BaseUserAdmin.fieldsets + (
         ('Profile', {
-            'fields': ('role', 'profile_picture'),
+            'fields': ('role', 'profile_picture', 'is_verified', 'verification_code', 'verification_code_expiration_date'),
         }),
     )
 
     add_fieldsets = BaseUserAdmin.add_fieldsets + (
         (None, {
             'classes': ('wide',),
-            'fields': ('role', 'profile_picture'),
+            'fields': ('role', 'profile_picture', 'is_verified', 'verification_code', 'verification_code_expiration_date'),
         }),
     )
 
