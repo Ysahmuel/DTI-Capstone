@@ -1,3 +1,4 @@
+from datetime import timedelta
 import secrets
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
@@ -26,9 +27,13 @@ class User(AbstractUser):
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
     
-    def generate_secure_otp_code():
-        """Generate cryptographically secure 6-digit OTP"""
-        return ''.join(secrets.choices('0123456789', k=6))
+    def generate_secure_otp_code(self):
+        """Generate cryptographically secure 6-digit OTP and save to user"""
+        code = ''.join(secrets.choice('0123456789') for _ in range(6))
+        self.verification_code = code
+        self.verification_code_expiration_date = timezone.now() + timedelta(minutes=30)  # expires in 30 minutes
+        self.save(update_fields=["verification_code", "verification_code_expiration_date"])
+        return code
     
     def is_verification_code_valid(self, code):
         return (
