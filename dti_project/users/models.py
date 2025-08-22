@@ -36,8 +36,9 @@ class User(AbstractUser):
         return code
     
     def is_verification_code_valid(self, code):
+        """Check if verification code is valid and not expired"""
         return (
             self.verification_code == code and
             self.verification_code_expiration_date and
-            timezone.now > self.verification_code_expiration_date
+            timezone.now() < self.verification_code_expiration_date  # Fixed: now() and < instead of >
         )
