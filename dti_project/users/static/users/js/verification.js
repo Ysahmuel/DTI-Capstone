@@ -109,4 +109,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Focus first input on load
     codeInputs[0].focus();
+
+    const closeModalBtn = document.getElementById('close-verification-modal-btn');
+    const verificationContainer = document.querySelector('.verification-container');
+
+    closeModalBtn.addEventListener('click', function() {
+        verificationContainer.style.display = 'none';
+    })
+
 });

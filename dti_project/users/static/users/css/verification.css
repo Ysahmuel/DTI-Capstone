@@ -18,9 +18,20 @@
 }
 
 .verification-container section {
+  position: relative;
   border-radius: var(--radius-md);
   padding: clamp(1rem, 3vw, 3rem);
   max-width: clamp(18rem, 30vw, 40rem);
+}
+
+#close-verification-modal-btn {
+  position: absolute;
+  top: 5%;
+  right: 5%;
+  cursor: pointer;
+  font-size: clamp(0.5rem, 0.85vw, 1.25rem);
+  border: none;
+  outline: none;
 }
 
 .verification-container .title {
