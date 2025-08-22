@@ -1,5 +1,7 @@
+import secrets
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.utils import timezone
 
 # Create your models here.
 class User(AbstractUser):
@@ -17,6 +19,20 @@ class User(AbstractUser):
         choices=Roles.choices,
         default=Roles.BUSINESS_OWNER
     )
+    is_verified = models.BooleanField(default=False)
+    verification_code = models.CharField(max_length=6, blank=True, null=True)
+    verification_code_expiration_date = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+    
+    def generate_secure_otp_code():
+        """Generate cryptographically secure 6-digit OTP"""
+        return ''.join(secrets.choices('0123456789', k=6))
+    
+    def is_verification_code_valid(self, code):
+        return (
+            self.verification_code == code and
+            self.verification_code_expiration_date and
+            timezone.now > self.verification_code_expiration_date
+        )
