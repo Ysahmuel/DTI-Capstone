@@ -25,16 +25,79 @@ class CustomRegisterView(CreateView):
 
     def form_valid(self, form):
         print("Form is valid, saving user now...")
-        response = super().form_valid(form)
-        user = form.save()
+        user = form.save(commit=False)
 
-        print(f"User created: {user}")
-        login(self.request, user)
-        
-        return response
+        # Ensure user starts as unverified
+        user.is_verified = False
+        user.save()
+
+        # Generate OTP
+        user.generate_secure_otp_code()
+
+        # ✅ log the OTP to console instead of sending email
+        print(f"[DEBUG] Verification code for {user.username}: {user.verification_code}")
+        logger.info(f"Generated verification code for {user.username}: {user.verification_code}")
+
+        # Store user id in session for modal verification
+        self.request.session['pending_verification_user'] = user.id
+
+        return JsonResponse({
+            'success': True,
+            'message': 'Registration successful! Please enter the verification code.',
+            'show_verification': True,
+            'masked_email': self.mask_email(user.email)
+        })
+
+    @staticmethod
+    def mask_email(email):
+        """Mask email for display"""
+        if '@' not in email:
+            return email
+        username, domain = email.split('@', 1)
+        if len(username) <= 2:
+            masked_username = '*' * len(username)
+        else:
+            masked_username = username[:2] + '*' * (len(username) - 2)
+        return f"{masked_username}@{domain}"
     
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+
+class VerifyUserView(View):
+    """Handles OTP verification separately"""
+
+    def post(self, request, *args, **kwargs):
+        user_id = request.session.get('pending_verification_user')
+        if not user_id:
+            return JsonResponse({'success': False, 'error': 'No pending verification'}, status=400)
+
+        user = get_object_or_404(User, id=user_id)
+
+        # Get code from request
+        code = request.POST.get('verification_code') or request.POST.get('code', '')
+
+        if not code:
+            digits = [request.POST.get(f'digit_{i}', '') for i in range(1, 7)]
+            code = ''.join(digits)
+
+        if not code or len(code) != 6:
+            return JsonResponse({'success': False, 'error': 'Please enter a valid 6-digit code'}, status=400)
+
+        # Verify
+        if user.is_verification_code_valid(code):
+            user.is_verified = True
+            user.verification_code = None
+            user.verification_code_expiration_date = None
+            user.save()
+
+            login(request, user)
+            del request.session['pending_verification_user']
+
+            return JsonResponse({
+                'success': True,
+                'message': 'Verification successful!',
+                'redirect': reverse('dashboard')
+            })
+        else:
+            return JsonResponse({'success': False, 'error': 'Invalid or expired verification code'}, status=400)
 
         return context
     
