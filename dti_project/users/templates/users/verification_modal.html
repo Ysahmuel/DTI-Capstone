@@ -2,20 +2,8 @@
   
   {% include 'users/partials/verification-choice.html' %}
 
-  <!-- Step 2: enter email/phone -->
-  <section class="step-two-panel" id="step2">
-    <h2 class="title" id="methodTitle">Enter your details</h2>
-    <form id="detailsForm">
-      <input
-        type="text"
-        id="userInput"
-        placeholder="Enter here..."
-        class="input-field"
-        required
-      />
-      <button type="submit" class="btn-verify">Send Code</button>
-    </form>
-  </section>
+  {% include 'users/partials/verification-details.html' %}
+  
 
   <!-- Step 3: verification code -->
   <section class="step-three-panel" id="step3">
