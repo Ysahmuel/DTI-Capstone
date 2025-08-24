@@ -1,7 +1,7 @@
 @import url('searchbar.css');
 
 .main-content {
-    background-color: rgba(250, 250, 250);
+    background-color: rgba(242, 242, 242);
     flex: 1;
     margin-left: calc(var(--sidebar-collapsed-width) + 1rem);
     transition: margin-left var(--transition-duration) ease-in-out;
@@ -17,4 +17,50 @@
     display: flex;
     align-items: start;
     justify-content: space-between;
+}
+
+.dashboard-container {
+  padding: 20px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.card h2 {
+  margin-bottom: 15px;
+  font-size: 18px;
+  color: #333;
+}
+
+.card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.card ul li {
+  margin-bottom: 8px;
+}
+
+.card ul li a {
+  text-decoration: none;
+  color: #007bff;
+}
+
+.card ul li a:hover {
+  text-decoration: underline;
+}
+
+.wide {
+  grid-column: span 2;
 }
