@@ -30,37 +30,24 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log("Response data:", data);
 
             if (data.success) {
-                // Show modal
+                // Show modal for OTP
                 const verificationContainer = document.querySelector('.verification-container');
                 if (verificationContainer) {
                     verificationContainer.style.display = "flex";
                 }
-
-                // Update masked email
                 if (maskedOutput) {
                     maskedOutput.textContent = data.masked_email;
                 }
-
-                // Start countdown
                 startCountdown(30);
 
-                // Reset inputs
                 const modalCodeInputs = document.querySelectorAll('.code-input');
                 modalCodeInputs.forEach((input) => (input.value = ""));
                 if (modalCodeInputs.length > 0) {
                     modalCodeInputs[0].focus();
                 }
             } else {
-                // Handle validation errors
-                console.log("=== VALIDATION ERRORS ===");
-                if (data.errors) {
-                    console.log("Field errors:", data.errors);
-                }
-                if (data.detailed_errors) {
-                    console.log("Detailed errors:", data.detailed_errors);
-                }
-                
-                alert("Registration failed: " + (data.message || "Unknown error"));
+                //  Instead of alert, reload so Django messages show
+                window.location.reload();
             }
         } catch (error) {
             console.error("Error submitting form:", error);
