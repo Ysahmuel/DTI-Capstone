@@ -175,3 +175,9 @@
 .clickable:hover {
   color: #1d4ed8; 
 }
+
+#resend-btn {
+  cursor: pointer;
+  border: none;
+  outline: none;
+}

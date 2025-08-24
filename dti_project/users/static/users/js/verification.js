@@ -56,15 +56,16 @@ document.addEventListener('DOMContentLoaded', function() {
     })
  
     let countdownTimer; 
+
+    const resendBtn = document.getElementById("resend-btn"); 
  
     function startCountdown(seconds = 30) { 
         const countdownEl = document.getElementById("countdown"); 
-        const resendWrapper = document.getElementById("resendWrapper"); 
-        const resendLink = document.getElementById("resendLink"); 
+        const resendWrapper = document.getElementById("resendWrapper");
  
-        if (resendWrapper && resendLink && countdownEl) {
+        if (resendWrapper && resendBtn && countdownEl) {
             resendWrapper.style.display = "inline"; 
-            resendLink.style.display = "none"; 
+            resendBtn.style.display = "none"; 
             countdownEl.textContent = seconds; 
      
             clearInterval(countdownTimer); 
@@ -74,11 +75,36 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (seconds <= 0) { 
                     clearInterval(countdownTimer); 
                     resendWrapper.style.display = "none"; 
-                    resendLink.style.display = "inline"; 
+                    resendBtn.style.display = "inline"; 
                 } 
             }, 1000);
         }
     }
+
+    resendBtn.addEventListener('click', async function() {
+        const title = document.querySelector('#step3 .title') 
+        try {
+            const response = await fetch(`/users/resend-code/`, {
+                method: "POST",
+                headers: {
+                    'X-CSRFToken': getCSRFToken(),
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const data = await response.json()
+            if (data.success) {
+                console.log('Code resent successfully')
+                startCountdown(30)
+
+                if (title) {
+                    title.textContent = 'Code resent, check your inbox'
+                }
+            }
+        } catch (error) {
+            console.error('Error: failed to resend code')
+        }
+    })
 
     // Auto-navigation logic for code inputs
     codeInputs.forEach((input, index) => {
