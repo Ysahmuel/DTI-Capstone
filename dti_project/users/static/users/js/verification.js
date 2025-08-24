@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() { 
-    const form = document.querySelector('.authentication-form')
+    const form = document.querySelector('#register-form')
     const step3 = document.getElementById("step3"); 
     const maskedOutput = document.getElementById("maskedOutput"); 
     const codeInputs = document.querySelectorAll('.code-input');
