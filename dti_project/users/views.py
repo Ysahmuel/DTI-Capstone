@@ -84,34 +84,22 @@ class CustomRegisterView(CreateView):
     def form_invalid(self, form):
         print("=== FORM_INVALID CALLED ===")
         print(f"All form errors: {form.errors}")
-        print(f"Form data: {form.cleaned_data if hasattr(form, 'cleaned_data') else 'No cleaned_data'}")
-        
-        # Add error messages to Django messages framework
+
+        # Add error messages to Django messages
         for field, error_list in form.errors.items():
             for error in error_list:
                 if field == '__all__':
-                    messages.error(self.request, f"Form Error: {error}")
+                    messages.error(self.request, f"{error}")
                 else:
                     field_name = field.replace('_', ' ').title()
                     messages.error(self.request, f"{field_name}: {error}")
-        
-        # Handle AJAX form validation errors
-        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            errors = {}
-            for field, error_list in form.errors.items():
-                errors[field] = [str(error) for error in error_list]
-                print(f"Field '{field}' errors: {error_list}")
-            
-            return JsonResponse({
-                'success': False,
-                'errors': errors,
-                'message': 'Please correct the errors below.',
-                'detailed_errors': str(form.errors)  # Add this for debugging
-            }, status=400)
-        
-        # Fallback for normal requests
-        return super().form_invalid(form)
 
+        # AJAX response (minimal, since frontend will display Django messages)
+        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False}, status=400)
+
+        return super().form_invalid(form)
+    
     @staticmethod
     def mask_email(email):
         """Mask email for display"""
