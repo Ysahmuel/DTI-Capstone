@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, View
 from django.contrib.auth.views import LoginView, LogoutView
+from users.mixins import FormSubmissionMixin
 from .models import User
 from .forms import CustomLoginForm, CustomUserCreationForm
 from django.contrib.auth import login, logout as auth_logout, get_user_model
@@ -14,7 +15,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Create your views here.
-class CustomLoginView(LoginView):
+class CustomLoginView(FormSubmissionMixin, LoginView):
     template_name = 'users/login.html'
     redirect_authenticated_user = True
     authentication_form = CustomLoginForm
@@ -22,7 +23,7 @@ class CustomLoginView(LoginView):
     def get_success_url(self) -> str:
         return reverse_lazy('dashboard')
     
-class CustomRegisterView(CreateView):
+class CustomRegisterView(FormSubmissionMixin, CreateView):
     template_name = 'users/register.html'
     redirect_authenticated_user = True
     form_class = CustomUserCreationForm
@@ -80,25 +81,6 @@ class CustomRegisterView(CreateView):
         
         # Fallback for normal requests
         return super().form_valid(form)
-
-    def form_invalid(self, form):
-        print("=== FORM_INVALID CALLED ===")
-        print(f"All form errors: {form.errors}")
-
-        # Add error messages to Django messages
-        for field, error_list in form.errors.items():
-            for error in error_list:
-                if field == '__all__':
-                    messages.error(self.request, f"{error}")
-                else:
-                    field_name = field.replace('_', ' ').title()
-                    messages.error(self.request, f"{field_name}: {error}")
-
-        # AJAX response (minimal, since frontend will display Django messages)
-        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({'success': False}, status=400)
-
-        return super().form_invalid(form)
     
     @staticmethod
     def mask_email(email):
