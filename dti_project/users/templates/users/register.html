@@ -3,113 +3,107 @@
 {% block title %} Create an account {% endblock %}
 
 {% block body %}
-    <div class="backdrop-layer">
-        {% include 'users/verification_modal.html' %}
+    <div class="glass-layer">
+        <div class="authentication-form-container">
 
-            {% include 'documents/partials/alerts_container.html' %}
+            <form action="{% url 'register' %}" class="authentication-form" id="register-form" method="post">
 
-        <div class="glass-layer">
-            <div class="authentication-form-container">
+                <img src="/media/media/dti-logo.png" alt="DTI Logo Image" id="dti-logo">
 
-                <form action="{% url 'register' %}" class="authentication-form" id="register-form" method="post">
+                {% csrf_token %}
+                <header>
+                    <h1>Create an Account</h1>
+                    <h3>Create your account by filling out the form below.</h3>
+                </header>
 
-                    <img src="/media/media/dti-logo.png" alt="DTI Logo Image" id="dti-logo">
-
-                    {% csrf_token %}
-                    <header>
-                        <h1>Create an Account</h1>
-                        <h3>Create your account by filling out the form below.</h3>
-                    </header>
-
-                    <div class="row">
-                        <div class="form-group">
-                            <label for="id_first_name">First Name</label>
-                            <input type="text" name="first_name" id="id_first_name" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="id_last_name">Last Name</label>
-                            <input type="text" name="last_name" id="id_last_name" required>
-                        </div>
+                <div class="row">
+                    <div class="form-group">
+                        <label for="id_first_name">First Name</label>
+                        <input type="text" name="first_name" id="id_first_name" required>
                     </div>
                     <div class="form-group">
-                        <label for="id_email">Email</label>
-                        <input 
-                            type="email" 
-                            name="email" 
-                            id="id_email" 
-                            required
-                            hx-post="{% url 'check-email-exists' %}"
-                            hx-trigger="change delay:250ms"
-                            hx-target="#email-check-result"
-                            hx-swap="innerHTML"
-                        >
+                        <label for="id_last_name">Last Name</label>
+                        <input type="text" name="last_name" id="id_last_name" required>
                     </div>
+                </div>
+                <div class="form-group">
+                    <label for="id_email">Email</label>
+                    <input 
+                        type="email" 
+                        name="email" 
+                        id="id_email" 
+                        required
+                        hx-post="{% url 'check-email-exists' %}"
+                        hx-trigger="change delay:250ms"
+                        hx-target="#email-check-result"
+                        hx-swap="innerHTML"
+                    >
+                </div>
 
-                    <div class="form-group">
-                        <label for="id_password1">Password</label>
-                        <input 
-                            type="password" 
-                            name="password1" 
-                            id="id_password1" 
-                            required
-                            hx-post="{% url 'check-password-strength' %}"
-                            hx-trigger="keyup change delay:100ms"
-                            hx-target="#password-strength-result"
-                            hx-swap="innerHTML"
-                        >
-                    </div>
-                    <div class="form-group">
-                        <label for="id_password2">Confirm Password</label>
-                        <input type="password" name="password2" id="id_password2" required>
-                    </div>
+                <div class="form-group">
+                    <label for="id_password1">Password</label>
+                    <input 
+                        type="password" 
+                        name="password1" 
+                        id="id_password1" 
+                        required
+                        hx-post="{% url 'check-password-strength' %}"
+                        hx-trigger="keyup change delay:100ms"
+                        hx-target="#password-strength-result"
+                        hx-swap="innerHTML"
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="id_password2">Confirm Password</label>
+                    <input type="password" name="password2" id="id_password2" required>
+                </div>
 
-                    <div class="form-group" id="roles-form-group">
-                        <h4>Role: </h4>
-                        <div class="role-selection">
-                            <div class="role-choice-item">
-                                <input type="radio" name="role" id="id_role_business_owner" value="business_owner">
-                                <label for="id_role_business_owner">Business Owner</label>
-                            </div>
-                            <div class="role-choice-item">
-                                <input type="radio" name="role" id="id_role_admin" value="admin">
-                                <label for="id_role_admin">Admin</label>
-                            </div>
+                <div class="form-group" id="roles-form-group">
+                    <h4>Role: </h4>
+                    <div class="role-selection">
+                        <div class="role-choice-item">
+                            <input type="radio" name="role" id="id_role_business_owner" value="business_owner">
+                            <label for="id_role_business_owner">Business Owner</label>
+                        </div>
+                        <div class="role-choice-item">
+                            <input type="radio" name="role" id="id_role_admin" value="admin">
+                            <label for="id_role_admin">Admin</label>
                         </div>
                     </div>
+                </div>
 
-                    <button type="submit">Create Account</button>
+                <button type="submit">Create Account</button>
 
-                    <div class="message-feedback-container">
-                        <p>Already have an account? <a href="{% url 'sign-in' %}">Sign-in instead</a></p>
+                <div class="message-feedback-container">
+                    <p>Already have an account? <a href="{% url 'sign-in' %}">Sign-in instead</a></p>
 
-                        <div id="email-check-result" class="email-check-message"></div>
-                        <div id="password-strength-result"></div>
-                    </div>
+                    <div id="email-check-result" class="email-check-message"></div>
+                    <div id="password-strength-result"></div>
+                </div>
 
-                </form>
+            </form>
 
-                <div class="graphics-panel">
-                    <header>
-                        <h1>Join now to access your DTI services dashboard.</h1>
-                        <h3>Easily manage your business, track applications, and stay informed with the latest DTI updates.</h3>
-                    </header>
-                    <div class="bar-graph-preview">
-                        <div class="wrapper">
-                            <h4>Dashboard</h4>
-                            <div class="actions">
-                                <span></span>
-                                <span></span>
-                            </div>
+            <div class="graphics-panel">
+                <header>
+                    <h1>Join now to access your DTI services dashboard.</h1>
+                    <h3>Easily manage your business, track applications, and stay informed with the latest DTI updates.</h3>
+                </header>
+                <div class="bar-graph-preview">
+                    <div class="wrapper">
+                        <h4>Dashboard</h4>
+                        <div class="actions">
+                            <span></span>
+                            <span></span>
                         </div>
-                        <ul>
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                        </ul>
                     </div>
+                    <ul>
+                        <li></li>
+                        <li></li>
+                        <li></li>
+                        <li></li>
+                        <li></li>
+                        <li></li>
+                    </ul>
                 </div>
             </div>
         </div>

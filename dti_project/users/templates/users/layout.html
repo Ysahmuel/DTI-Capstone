@@ -24,7 +24,15 @@
     <script src="https://unpkg.com/htmx.org@latest"></script>
 </head>
 <body>
-    {% block body %}
-    {% endblock %}
+    <div class="backdrop-layer">
+        {% include 'users/verification_modal.html' %}
+
+        {% if messages %}
+            {% include 'documents/partials/alerts_container.html' %}
+        {% endif %}
+
+        {% block body %}
+        {% endblock %}
+    </div>
 </body>
 </html>
