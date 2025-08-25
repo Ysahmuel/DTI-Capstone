@@ -41,6 +41,18 @@
   gap: 1rem;
 }
 
+.document-details-container button {
+  color: var(--text-light);
+  border: none;
+  outline: none;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.document-details-container button:hover {
+  color: var(--accent);
+}
+
 .document-details-container .actions a {
   color: var(--text-light);
   text-decoration: none;
