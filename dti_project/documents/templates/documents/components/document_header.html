@@ -7,7 +7,7 @@
         <button id="upload-to-excel-btn">
             <i class="fa-solid fa-file-excel"></i>
         </button>
-        {% if update_url_name and object.status == 'draft' %}
+        {% if update_url_name and object.status == 'draft' and object.user == user %}
             <a href="{% url update_url_name object.id %}">
                 <i class="fa-solid fa-pen-to-square"></i>
             </a>
