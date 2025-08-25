@@ -120,6 +120,7 @@ class OrderOfPaymentDetailView(LoginRequiredMixin, DetailView):
         context['detail_groups'] = ORDER_OF_PAYMENT_DETAIL_GROUPS
         context['remark_prefixes'] = remark_prefixes
         context['permit_fees'] = permit_fees
+        context["update_url_name"] = "update-order-of-payment"
 
         return context
 
