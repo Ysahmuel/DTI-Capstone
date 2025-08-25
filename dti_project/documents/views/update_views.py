@@ -19,7 +19,7 @@ class UpdateServiceRepairAccreditationApplicationView(LoginRequiredMixin, Messag
         # Example: check user permission before letting mixin run
         service_accreditation = self.get_object()
         if service_accreditation.user != request.user:
-            messages.error(request, "You cannot edit this personal data sheet.")
+            messages.error(request, "You cannot edit this service accreditation.")
             return redirect("/")
         
         if service_accreditation.status != 'draft':
