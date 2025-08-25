@@ -98,18 +98,42 @@ class UpdateOrderOfPaymentView(LoginRequiredMixin, MessagesMixin, FormSubmission
 
         # Fall back to mixin’s handling
         return super().post(request, *args, **kwargs)
-    
-    def get_context_data(self, **kwargs):
-        context =  super().get_context_data(**kwargs)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         context['field_groups'] = self.FIELD_GROUPS
 
         return context
 
+    def get_success_url(self):
+        return reverse_lazy('order-of-payment', kwargs={'pk': self.object.pk})
+    
+class UpdateChecklistEvaluationSheetView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, UpdateView):
+    model = ChecklistEvaluationSheet
+    template_name = 'documents/update_templates/update_checklist_evaluation_sheet.html'
+    form_class = ChecklistEvaluationSheetForm
+    context_object_name = 'checklist'
+    
+    FIELD_GROUPS = CHECKLIST_EVALUATION_FIELD_GROUPS
+    
+    def post(self, request, *args, **kwargs):
+        # Example: check user permission before letting mixin run
+        checklist = self.get_object()
+        if checklist.user != request.user:
+            messages.error(request, "You cannot edit this checklist.")
+            return redirect("/")
+        
+        if checklist.status != 'draft':
+            messages.error(request, 'You can only edit drafts')
+            return redirect('/')
+
+        # Fall back to mixin’s handling
+        return super().post(request, *args, **kwargs)
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['field_groups'] = self.FIELD_GROUPS
         return context
 
     def get_success_url(self):
-        return reverse_lazy('order-of-payment', kwargs={'pk': self.object.pk})
+        return reverse_lazy('checklist-evaluation-sheet', kwargs={'pk': self.object.pk})

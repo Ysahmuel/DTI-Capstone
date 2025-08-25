@@ -17,5 +17,5 @@ from .detail_views import (
 
     UpdateServiceRepairAccreditationApplicationView,
     UpdateInspectionValidationReportView,
-    UpdateOrderOfPaymentView
+    UpdateChecklistEvaluationSheetView
 )
