@@ -135,5 +135,6 @@ class ChecklistEvaluationSheetDetailView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         context['detail_groups'] = CHECKLIST_EVALUATION_DETAIL_GROUPS
         context['requirement_groups'] = CHECKLIST_REQUIREMENT_GROUPS
+        context["update_url_name"] = "update-checklist-evaluation-sheet"
 
         return context
