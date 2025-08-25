@@ -4,6 +4,11 @@
         <h1>{{ obj }}</h1>
     </div>
     <div class="actions">
+        {% if update_url_name %}
+            <a href="{% url update_url_name object.id %}">
+                <i class="fa-solid fa-pen-to-square"></i>
+            </a>
+        {% endif %}
         {% include 'dashboard/components/searchbar.html' %}
     </div>
 </header>
