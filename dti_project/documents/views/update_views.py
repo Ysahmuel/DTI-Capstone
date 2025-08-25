@@ -1,12 +1,88 @@
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic.edit import UpdateView
-from ..constants import ORDER_OF_PAYMENT_FIELD_GROUPS, SALES_PROMOTION_FIELD_GROUPS
-from ..mixins import FormStepsMixin, FormSubmissionMixin, FormsetMixin, MessagesMixin
-from ..forms import FORMSET_CLASSES, OrderOfPaymentForm, SalesPromotionPermitApplicationForm
-from ..models import OrderOfPayment, SalesPromotionPermitApplication
+from ..utils.form_helpers import get_certification_text
+from ..constants import CHECKLIST_EVALUATION_FIELD_GROUPS, INSPECTION_VALIDATION_REPORT_FIELD_GROUPS, ORDER_OF_PAYMENT_FIELD_GROUPS, PERSONAL_DATA_SHEET_FIELD_GROUPS, SALES_PROMOTION_FIELD_GROUPS, SERVICE_REPAIR_ACCREDITATION_FIELD_GROUPS
+from ..mixins import FormStepsMixin, FormSubmissionMixin, FormsetMixin, MessagesMixin, ServiceCategoryMixin
+from ..forms import FORMSET_CLASSES, ChecklistEvaluationSheetForm, InspectionValidationReportForm, OrderOfPaymentForm, PersonalDataSheetForm, SalesPromotionPermitApplicationForm, ServiceRepairAccreditationApplicationForm
+from ..models import ChecklistEvaluationSheet, InspectionValidationReport, OrderOfPayment, PersonalDataSheet, SalesPromotionPermitApplication, ServiceRepairAccreditationApplication
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
+
+
+class UpdateSalesPromotionView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, UpdateView):
+    model = SalesPromotionPermitApplication
+    template_name = 'documents/update_templates/update_sales_promo.html'
+    context_object_name = 'sales_promo'
+    form_class = SalesPromotionPermitApplicationForm
+    formset_classes = {
+        'product': FORMSET_CLASSES['product_covered']
+    }
+
+    FIELD_GROUPS = SALES_PROMOTION_FIELD_GROUPS
+    additional_sections = ['coverage']
+    
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        # Example: check user permission before letting mixin run
+        promo = self.get_object()
+        if promo.user != request.user:
+            messages.error(request, "You cannot edit this promotion.")
+            return redirect("sales_promo_list")
+
+        # Fall back to mixin’s handling
+        return super().post(request, *args, **kwargs)
+    
+    def get_context_data(self, **kwargs):
+        context =  super().get_context_data(**kwargs)
+
+        context['field_groups'] = self.FIELD_GROUPS
+
+        return context
+
+class UpdatePersonalDataSheetView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, UpdateView):
+    template_name = 'documents/create_personal_data_sheet.html'
+    model = PersonalDataSheet
+    form_class = PersonalDataSheetForm
+    formset_classes = {
+        'employee_background': FORMSET_CLASSES['employee_background'],
+        'trainings_attended': FORMSET_CLASSES['trainings_attended'],
+        'educational_attainment': FORMSET_CLASSES['educational_attainment'],
+        'character_references': FORMSET_CLASSES['character_references'],
+    }
+    context_object_name = 'personal_data'
+
+    FIELD_GROUPS = PERSONAL_DATA_SHEET_FIELD_GROUPS
+
+    def post(self, request, *args, **kwargs):
+        # Example: check user permission before letting mixin run
+        personal_data_sheet = self.get_object()
+        if personal_data_sheet.user != request.user:
+            messages.error(request, "You cannot edit this personal data sheet.")
+            return redirect("/")
+        
+        if personal_data_sheet.status != 'draft':
+            messages.error(request, 'You can only edit drafts')
+            return redirect('/')
+
+        self.object = personal_data_sheet
+        form = self.get_form(self.get_form_class())
+        form.files = request.FILES
+
+        # Fall back to mixin’s handling
+        return super().post(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['field_groups'] = self.FIELD_GROUPS
+
+        return context
+    
+    def get_success_url(self):
+        return reverse_lazy('personal-data-sheet', kwargs={'pk': self.object.pk})
+
 class UpdateServiceRepairAccreditationApplicationView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, UpdateView):
     template_name = 'documents/update_templates/update_service_repair_accreditation.html'
     model = ServiceRepairAccreditationApplication
@@ -102,7 +178,6 @@ class UpdateOrderOfPaymentView(LoginRequiredMixin, MessagesMixin, FormSubmission
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['field_groups'] = self.FIELD_GROUPS
-
         return context
 
     def get_success_url(self):

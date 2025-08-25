@@ -16,6 +16,11 @@ urlpatterns = [
     path('service-repair-accreditation/<int:pk>', views.ServiceRepairAccreditationApplicationDetailView.as_view(), name='service-repair-accreditation'),
     path("inspection-validation-report/<int:pk>", views.InspectionValidationReportDetailView.as_view(), name="inspection-validation-report"),
     path("order-of-payment/<int:pk>", views.OrderOfPaymentDetailView.as_view(), name="order-of-payment"),
+    path("checklist-evaluation-sheet/<int:pk>", views.ChecklistEvaluationSheetDetailView.as_view(), name='checklist-evaluation-sheet'),
+
+    # UPDATE VIEWS
+    path("sales-promotion-application/<int:pk>/update", views.UpdateSalesPromotionView.as_view(), name='update-sales-promotion'),
+    path("personal-data-sheet/<int:pk>/update", views.UpdatePersonalDataSheetView.as_view(), name='update-personal-data-sheet'),
     path("service-repair-accreditation/<int:pk>/update", views.UpdateServiceRepairAccreditationApplicationView.as_view(), name='update-service-repair-accreditation'),
     path("inspection-validation-report/<int:pk>/update", views.UpdateInspectionValidationReportView.as_view(), name="update-inspection-validation-report"),
     path("order-of-payment/<int:pk>/update", views.UpdateOrderOfPaymentView.as_view(), name="update-order-of-payment"),
