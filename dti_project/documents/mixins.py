@@ -9,6 +9,7 @@ from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.template.loader import render_to_string
 from .models import ServiceCategory
+from django.views.generic import CreateView
 
 logger = logging.getLogger(__name__)
 
@@ -48,15 +49,26 @@ class MessagesMixin:
 
 class FormSubmissionMixin:
     def post(self, request, *args, **kwargs):
-        self.object = None
-        form = self.get_form()
+        # Django normally sets this in dispatch → set it here
+        self.object = None  
+
         action = request.POST.get("action")
+
+        # If UpdateView, fetch existing object
+        if hasattr(self, "get_object") and not isinstance(self, CreateView):
+            try:
+                self.object = self.get_object()
+            except:
+                self.object = None
+
+        # Use form bound to self.object
+        form = self.get_form(self.get_form_class())
 
         # === DRAFT MODE ===
         if action == "draft":
-            obj = self.model()
+            obj = self.object or self.model()  # update if exists, else new
 
-            # Set only POSTed fields on the instance
+            # Set only POSTed fields
             for field_name in form.fields:
                 if field_name in request.POST:
                     value = request.POST.get(field_name)
@@ -66,13 +78,12 @@ class FormSubmissionMixin:
             obj.status = "draft"
             obj.user = request.user
 
-            # Temporarily mark non-display fields as not required
+            # Handle display-required validation
             display_fields = getattr(obj, "required_for_display", lambda: [])()
             for name, field in form.fields.items():
                 if name not in display_fields:
                     field.required = False
 
-            # Validate only display-required fields
             missing_fields = [f for f in display_fields if not getattr(obj, f, None)]
             if missing_fields:
                 for field in missing_fields:
@@ -82,11 +93,11 @@ class FormSubmissionMixin:
                 return self.form_invalid(form, action="draft")
 
             obj.prepare_for_draft()
-            obj.save(force_insert=True)
+            obj.save()  # works for both create + update
             self.object = obj
 
             messages.success(request, f"{obj} saved as draft.")
-            return redirect("/")   # drafts always redirect home (or change if needed)
+            return redirect("/")
 
         # === SUBMITTED MODE ===
         if action == "submitted":
@@ -100,7 +111,6 @@ class FormSubmissionMixin:
                 messages.success(request, f"{obj} submitted successfully.")
                 return redirect(self.get_success_url())
 
-        # If no action provided, fallback
         return self.form_invalid(form, action=action)
 
 
