@@ -16,5 +16,6 @@ urlpatterns = [
     path('service-repair-accreditation/<int:pk>', views.ServiceRepairAccreditationApplicationDetailView.as_view(), name='service-repair-accreditation'),
     path("inspection-validation-report/<int:pk>", views.InspectionValidationReportDetailView.as_view(), name="inspection-validation-report"),
     path("order-of-payment/<int:pk>", views.OrderOfPaymentDetailView.as_view(), name="order-of-payment"),
+    path("service-repair-accreditation/<int:pk>/update", views.UpdateServiceRepairAccreditationApplicationView.as_view(), name='update-service-repair-accreditation'),
     path("order-of-payment/<int:pk>/update", views.UpdateOrderOfPaymentView.as_view(), name="update-order-of-payment"),
 ]

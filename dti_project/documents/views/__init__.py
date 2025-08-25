@@ -15,5 +15,6 @@ from .detail_views import (
     ChecklistEvaluationSheetDetailView
 )
 
+    UpdateServiceRepairAccreditationApplicationView,
     UpdateOrderOfPaymentView
 )

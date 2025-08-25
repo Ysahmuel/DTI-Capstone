@@ -7,6 +7,30 @@ from ..forms import FORMSET_CLASSES, OrderOfPaymentForm, SalesPromotionPermitApp
 from ..models import OrderOfPayment, SalesPromotionPermitApplication
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
+class UpdateServiceRepairAccreditationApplicationView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, UpdateView):
+    template_name = 'documents/update_templates/update_service_repair_accreditation.html'
+    model = ServiceRepairAccreditationApplication
+    form_class = ServiceRepairAccreditationApplicationForm
+    context_object_name = 'accreditation'
+
+    FIELD_GROUPS = SERVICE_REPAIR_ACCREDITATION_FIELD_GROUPS
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['field_groups'] = SERVICE_REPAIR_ACCREDITATION_FIELD_GROUPS
+        
+        # Create an unsaved instance with default values
+        application = ServiceRepairAccreditationApplication(
+            name_of_business=self.request.user,
+            warranty_period=30  # Or whatever default
+        )
+        context['warranty_text'] = application.get_warranty_text()
+
+        return context
+    
+    def get_success_url(self):
+        return reverse_lazy('service-repair-accreditation', kwargs={'pk': self.object.pk})
+
 class UpdateOrderOfPaymentView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, UpdateView):
     model = OrderOfPayment
     template_name = 'documents/update_templates/update_order_of_payment.html'
