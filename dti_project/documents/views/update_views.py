@@ -15,6 +15,20 @@ class UpdateServiceRepairAccreditationApplicationView(LoginRequiredMixin, Messag
 
     FIELD_GROUPS = SERVICE_REPAIR_ACCREDITATION_FIELD_GROUPS
 
+    def post(self, request, *args, **kwargs):
+        # Example: check user permission before letting mixin run
+        service_accreditation = self.get_object()
+        if service_accreditation.user != request.user:
+            messages.error(request, "You cannot edit this personal data sheet.")
+            return redirect("/")
+        
+        if service_accreditation.status != 'draft':
+            messages.error(request, 'You can only edit drafts')
+            return redirect('/')
+
+        # Fall back to mixin’s handling
+        return super().post(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['field_groups'] = SERVICE_REPAIR_ACCREDITATION_FIELD_GROUPS
