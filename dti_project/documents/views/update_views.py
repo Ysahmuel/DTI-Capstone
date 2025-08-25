@@ -44,6 +44,38 @@ class UpdateServiceRepairAccreditationApplicationView(LoginRequiredMixin, Messag
     
     def get_success_url(self):
         return reverse_lazy('service-repair-accreditation', kwargs={'pk': self.object.pk})
+    
+class UpdateInspectionValidationReportView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, ServiceCategoryMixin, UpdateView):
+    model = InspectionValidationReport
+    template_name = 'documents/update_templates/update_inspection_validation_report.html'
+    form_class = InspectionValidationReportForm
+    context_object_name = 'report'
+    FIELD_GROUPS = INSPECTION_VALIDATION_REPORT_FIELD_GROUPS
+    additional_sections = ['service_categories']
+
+    def post(self, request, *args, **kwargs):
+        # Example: check user permission before letting mixin run
+        inspection_report = self.get_object()
+        if inspection_report.user != request.user:
+            messages.error(request, "You cannot edit this inspection report.")
+            return redirect("/")
+        
+        if inspection_report.status != 'draft':
+            messages.error(request, 'You can only edit drafts')
+            return redirect('/')
+
+        # Fall back to mixin’s handling
+        return super().post(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['field_groups'] = self.FIELD_GROUPS
+        context['certification_text'] = get_certification_text()
+        context['service_categories'] = self.get_service_categories_with_services()
+        return context
+
+    def get_success_url(self):
+        return reverse_lazy('inspection-validation-report', kwargs={'pk': self.object.pk})
 
 class UpdateOrderOfPaymentView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, UpdateView):
     model = OrderOfPayment
