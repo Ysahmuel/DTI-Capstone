@@ -162,7 +162,7 @@ class ProductCovered(models.Model):
     specifications = models.TextField(blank=True)
 
     def __str__(self):
-        return f"{self.name} {self.brand}"
+        return f"{self.name} - {self.brand}"
     
 class PersonalDataSheet(DraftModel, models.Model):
     GENDER_CHOICES = [
@@ -218,7 +218,7 @@ class TrainingsAttended(PeriodModel):
         verbose_name_plural = 'Trainings Attended'
 
     def __str__(self):
-        return self.training_course
+        return f"{self.training_course} - {self.conducted_by}"
     
 class EducationalAttainment(PeriodModel):
     personal_data_sheet = models.ForeignKey(PersonalDataSheet, related_name='educational_attainment', on_delete=models.CASCADE)
