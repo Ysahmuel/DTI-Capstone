@@ -1,5 +1,11 @@
-<header style="display: flex; align-items: center; justify-content: space-between;">
-    <h1>{{ title }}</h1>
+<header style="display: flex; align-items: start; justify-content: space-between;">
+    <h1>
+        {% if object %}
+            Edit {{ title }}: {{ object }}
+        {% else %}
+            {{ title }}
+        {% endif %}
+    </h1>
     <div class="actions">
         {% include 'dashboard/components/searchbar.html' %}
     </div>
