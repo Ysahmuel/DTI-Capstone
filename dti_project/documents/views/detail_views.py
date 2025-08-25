@@ -65,6 +65,7 @@ class PersonalDataSheetDetailView(TabsSectionMixin, LoginRequiredMixin, DetailVi
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['detail_groups'] = PERSONAL_DATA_SHEET_DETAIL_GROUPS
+        context["update_url_name"] = "update-personal-data-sheet"
 
         return context
 
@@ -76,6 +77,7 @@ class ServiceRepairAccreditationApplicationDetailView(LoginRequiredMixin, Detail
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['detail_groups'] = SERVICE_REPAIR_ACCREDITATION_DETAIL_GROUPS
+        context["update_url_name"] = "update-service-repair-accreditation"
 
         return context
     
