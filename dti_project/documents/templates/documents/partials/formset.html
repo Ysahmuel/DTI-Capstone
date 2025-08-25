@@ -55,8 +55,13 @@
             {% for form in formset %}
                 {% if form.instance.pk %}
                     <li class="preview-item" data-form-index="{{ forloop.counter0 }}">
-                        <strong>{{ form.instance.name|default:form.instance.title }} - {{ form.instance.brand|default:form.instance.organization }}</strong>
-                        <p class="period">({{ form.instance.start_date|default:form.instance.date_from }} - {{ form.instance.end_date|default:form.instance.date_to|default:"Present" }})</p>
+                        <strong>{{ form.instance }}</strong>
+                        {% if form.instance.start_date %}
+                            <p class="period">({{ form.instance.start_date }} - {{ form.instance.end_date|default:"Present" }})</p>
+                        {% elif form.instance.date_from %}
+                            <p class="period">({{ form.instance.date_from }} - {{ form.instance.date_to|default:"Present" }})</p>
+                        {% endif %}
+
                         
                         <!-- Hidden formset inputs for existing data -->
                         <div class="hidden-formset" style="display: none;">
