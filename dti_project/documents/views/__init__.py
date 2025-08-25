@@ -14,3 +14,6 @@ from .detail_views import (
     OrderOfPaymentDetailView,
     ChecklistEvaluationSheetDetailView
 )
+
+    UpdateOrderOfPaymentView
+)
