@@ -66,40 +66,38 @@ class FormSubmissionMixin:
 
         # === DRAFT MODE ===
         if action == "draft":
-            obj = self.object or self.model()  # update if exists, else new
+            obj = self.object or self.model()
 
-            # Set only POSTed fields
-            for field_name in form.fields:
-                if field_name in request.FILES:
-                    setattr(obj, field_name, request.FILES[field_name])
-                if field_name in request.POST:
-                    value = request.POST.get(field_name)
-                    if value not in [None, ""]:
-                        setattr(obj, field_name, value)
+            # Rebind form with files just in case
+            form = self.form_class(request.POST, request.FILES, instance=obj)
 
-            obj.status = "draft"
-            obj.user = request.user
-
-            # Handle display-required validation
+            # Relax required fields for draft
             display_fields = getattr(obj, "required_for_display", lambda: [])()
             for name, field in form.fields.items():
                 if name not in display_fields:
                     field.required = False
 
-            missing_fields = [f for f in display_fields if not getattr(obj, f, None)]
-            if missing_fields:
-                for field in missing_fields:
-                    if field in form.errors:
-                        del form.errors[field]
-                    form.add_error(field, "This field is required for draft submission.")
+            if form.is_valid():
+                obj = form.save(commit=False)
+                obj.status = "draft"
+                obj.user = request.user
+                obj.prepare_for_draft()
+                obj.save()
+                self.object = obj
+
+                # --- handle formsets too (optional for drafts) ---
+                formsets = self.get_formsets(instance=obj)
+                if self.formsets_valid(formsets):
+                    self.save_formsets(formsets)
+
+                messages.success(request, f"{obj} saved as draft.")
+                return redirect("/")  # or self.get_success_url() if you want preview
+            else:
+                # Add draft-specific missing field errors
+                missing_fields = [f for f in display_fields if not form.cleaned_data.get(f)]
+                for f in missing_fields:
+                    form.add_error(f, "This field is required for draft submission.")
                 return self.form_invalid(form, action="draft")
-
-            obj.prepare_for_draft()
-            obj.save()  # works for both create + update
-            self.object = obj
-
-            messages.success(request, f"{obj} saved as draft.")
-            return redirect("/")
 
         # === SUBMITTED MODE ===
         if action == "submitted":
@@ -110,12 +108,16 @@ class FormSubmissionMixin:
                 obj.save()
                 self.object = obj
 
-                messages.success(request, f"{obj} submitted successfully.")
-                return redirect(self.get_success_url())
+                # --- handle formsets ---
+                formsets = self.get_formsets(instance=obj)
+                if self.formsets_valid(formsets):
+                    self.save_formsets(formsets)
+                    messages.success(request, f"{obj} submitted successfully.")
+                    return redirect(self.get_success_url())
+                else:
+                    return self.form_invalid(form, action="submitted")
 
         return self.form_invalid(form, action=action)
-
-
     
 class FormsetMixin:
     formset_classes = {}  # Example: {'employee': EmployeeBackgroundFormset, 'training': TrainingsAttendedFormset}
