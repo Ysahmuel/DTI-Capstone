@@ -43,7 +43,7 @@ class UpdateSalesPromotionView(LoginRequiredMixin, MessagesMixin, FormSubmission
         return context
 
 class UpdatePersonalDataSheetView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, UpdateView):
-    template_name = 'documents/create_personal_data_sheet.html'
+    template_name = 'documents/update_templates/update_personal_data_sheet.html'
     model = PersonalDataSheet
     form_class = PersonalDataSheetForm
     formset_classes = {
@@ -52,12 +52,11 @@ class UpdatePersonalDataSheetView(LoginRequiredMixin, MessagesMixin, FormSubmiss
         'educational_attainment': FORMSET_CLASSES['educational_attainment'],
         'character_references': FORMSET_CLASSES['character_references'],
     }
-    context_object_name = 'personal_data'
+    context_object_name = 'personal_data_sheet'
 
     FIELD_GROUPS = PERSONAL_DATA_SHEET_FIELD_GROUPS
 
     def post(self, request, *args, **kwargs):
-        # Example: check user permission before letting mixin run
         personal_data_sheet = self.get_object()
         if personal_data_sheet.user != request.user:
             messages.error(request, "You cannot edit this personal data sheet.")
@@ -67,17 +66,11 @@ class UpdatePersonalDataSheetView(LoginRequiredMixin, MessagesMixin, FormSubmiss
             messages.error(request, 'You can only edit drafts')
             return redirect('/')
 
-        self.object = personal_data_sheet
-        form = self.get_form(self.get_form_class())
-        form.files = request.FILES
-
-        # Fall back to mixin’s handling
         return super().post(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['field_groups'] = self.FIELD_GROUPS
-
         return context
     
     def get_success_url(self):
