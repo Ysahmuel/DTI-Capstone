@@ -70,6 +70,8 @@ class FormSubmissionMixin:
 
             # Set only POSTed fields
             for field_name in form.fields:
+                if field_name in request.FILES:
+                    setattr(obj, field_name, request.FILES[field_name])
                 if field_name in request.POST:
                     value = request.POST.get(field_name)
                     if value not in [None, ""]:
