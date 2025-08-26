@@ -85,13 +85,21 @@ class FormSubmissionMixin:
                 obj.save()
                 self.object = obj
 
-                # --- handle formsets too (optional for drafts) ---
+                # Handle formsets for drafts
                 formsets = self.get_formsets(instance=obj)
-                if self.formsets_valid(formsets):
-                    self.save_formsets(formsets)
+                
+                # For drafts, relax formset validation
+                for formset_name, formset in formsets.items():
+                    for form_instance in formset:
+                        for field_name, field in form_instance.fields.items():
+                            if field_name != 'DELETE':  # Keep DELETE field validation
+                                field.required = False
+
+                # Always save formsets for drafts, even if they have validation errors
+                self.save_formsets(formsets, ignore_errors=True)
 
                 messages.success(request, f"{obj} saved as draft.")
-                return redirect("/")  # or self.get_success_url() if you want preview
+                return redirect("/")
             else:
                 # Add draft-specific missing field errors
                 missing_fields = [f for f in display_fields if not form.cleaned_data.get(f)]
@@ -118,7 +126,7 @@ class FormSubmissionMixin:
                     return self.form_invalid(form, action="submitted")
 
         return self.form_invalid(form, action=action)
-    
+
 class FormsetMixin:
     formset_classes = {}  # Example: {'employee': EmployeeBackgroundFormset, 'training': TrainingsAttendedFormset}
 
