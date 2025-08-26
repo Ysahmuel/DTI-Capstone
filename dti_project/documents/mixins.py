@@ -116,7 +116,6 @@ class FormSubmissionMixin:
                 obj.save()
                 self.object = obj
 
-                # --- handle formsets ---
                 formsets = self.get_formsets(instance=obj)
                 if self.formsets_valid(formsets):
                     self.save_formsets(formsets)
@@ -181,12 +180,34 @@ class FormsetMixin:
         """
         return all(formset.is_valid() for formset in formsets.values())
     
-    def save_formsets(self, formsets):
-        """
-        Save all valid formsets.
-        """
-        for formset in formsets.values():
-            formset.save()
+    def save_formsets(self, formsets, ignore_errors=False):
+        """Override to handle draft mode formset saving."""
+        if ignore_errors:
+            # For drafts, save individual valid forms even if formset as a whole isn't valid
+            for formset_name, formset in formsets.items():
+                for form_instance in formset:
+                    if form_instance.is_valid() and form_instance.cleaned_data:
+                        # Check if form has actual data (not just DELETE=False)
+                        has_data = any(
+                            form_instance.cleaned_data.get(field) 
+                            for field in form_instance.cleaned_data 
+                            if field not in ['DELETE', 'id']
+                        )
+                        if has_data:
+                            try:
+                                instance = form_instance.save(commit=False)
+                                # Set the foreign key to the main object
+                                fk_field = getattr(instance, formset.fk.name)
+                                if not fk_field:
+                                    setattr(instance, formset.fk.name, self.object)
+                                instance.save()
+                            except Exception as e:
+                                # In draft mode, continue even if individual form save fails
+                                print(f"Draft formset form save error (continuing): {e}")
+        else:
+            # Normal formset saving for submitted mode
+            for formset in formsets.values():
+                formset.save()
 
     def form_valid(self, form):
         print("=== DEBUG: form_valid called ===")
