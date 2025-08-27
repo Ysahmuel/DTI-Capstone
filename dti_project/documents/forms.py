@@ -88,8 +88,24 @@ class PersonalDataSheetForm(BaseCustomForm):
         exclude = ['status', 'user']
         widgets = {
             'current_address': forms.TextInput(attrs={'class': 'form-group'}),
-            'date_of_birth': forms.DateInput(attrs={'type': 'date', 'class': 'form-group'})
+            'date_of_birth': forms.DateInput(attrs={'type': 'date', 'class': 'form-group'}),
+            'image': forms.FileInput(attrs={
+                'class': 'hidden-file-input',
+                'accept': 'image/*',
+                'id': 'id_image'
+            })
         }
+
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            # Hide the "Currently" label for image field
+            self.fields['image'].widget.attrs.update({
+                'style': 'display: none;'
+            })
+            # Remove help text that shows "Currently: filename"
+            self.fields['image'].widget.clear_checkbox_label = ''
+            self.fields['image'].widget.initial_text = ''
+            self.fields['image'].widget.input_text = ''
 
 class EmployeeBackgroundForm(BaseCustomForm):
     class Meta:
