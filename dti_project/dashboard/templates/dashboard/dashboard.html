@@ -12,86 +12,56 @@
     <div class="grid">
 
         <!-- Transactions Summary -->
-        <section class="card wide">
+        <section class="card wide transaction-overview">
             <h2>Transactions Overview</h2>
-            <p><strong>Total Applications:</strong> {{ sales_promos|length|add:personal_data_sheets|add:service_accreditations|add:inspection_reports|add:orders_of_payment|add:checklist_evaluation_sheets }}</p>
-            <p><strong>Sales Promos:</strong> {{ sales_promos|length }}</p>
-            <p><strong>PDS:</strong> {{ personal_data_sheets|length }}</p>
-            <p><strong>Service Accreditations:</strong> {{ service_accreditations|length }}</p>
+            <div class="tiles">
+                <div class="tile">
+                    <div class="tile-number">
+                        {{ sales_promos|length|add:personal_data_sheets|add:service_accreditations|add:inspection_reports|add:orders_of_payment|add:checklist_evaluation_sheets }}
+                    </div>
+                    <div class="tile-title">Total Applications</div>
+                </div>
+                <div class="tile">
+                    <div class="tile-number">{{ sales_promos|length }}</div>
+                    <div class="tile-title">Sales Promos</div>
+                </div>
+                <div class="tile">
+                    <div class="tile-number">{{ personal_data_sheets|length }}</div>
+                    <div class="tile-title">PDS</div>
+                </div>
+                <div class="tile">
+                    <div class="tile-number">{{ service_accreditations|length }}</div>
+                    <div class="tile-title">Service Accreditations</div>
+                </div>
+                <div class="tile">
+                    <div class="tile-number">{{ inspection_reports|length }}</div>
+                    <div class="tile-title">Inspection Reports</div>
+                </div>
+                <div class="tile">
+                    <div class="tile-number">{{ orders_of_payment|length }}</div>
+                    <div class="tile-title">Orders of Payment</div>
+                </div>
+                <div class="tile">
+                    <div class="tile-number">{{ checklist_evaluation_sheets|length }}</div>
+                    <div class="tile-title">Checklist Evaluation Sheets</div>
+                </div>
+            </div>
         </section>
 
-        <!-- Sales Promo -->
+        <!-- Cards Loop -->
+        {% for section in sections %}
         <section class="card">
-            <h2>Sales Promotion Applications</h2>
+            <h2>{{ section.title }}</h2>
             <ul>
-                {% for promo in sales_promos %}
-                <li><a href="{% url 'sales-promotion-application' promo.id %}">{{ promo }}</a></li>
+                {% for item in section.data %}
+                    <li><a href="{% url section.url item.id %}">{{ item }}</a></li>
                 {% empty %}
-                <li>No records yet.</li>
+                    <li>No records yet.</li>
                 {% endfor %}
             </ul>
         </section>
+        {% endfor %}
 
-        <!-- PDS -->
-        <section class="card">
-            <h2>Personal Data Sheets</h2>
-            <ul>
-                {% for sheet in personal_data_sheets %}
-                <li><a href="{% url 'personal-data-sheet' sheet.id %}">{{ sheet }}</a></li>
-                {% empty %}
-                <li>No records yet.</li>
-                {% endfor %}
-            </ul>
-        </section>
-
-        <!-- Service Accreditations -->
-        <section class="card">
-            <h2>Service & Repair Accreditations</h2>
-            <ul>
-                {% for accreditation in service_accreditations %}
-                <li><a href="{% url 'service-repair-accreditation' accreditation.id %}">{{ accreditation }}</a></li>
-                {% empty %}
-                <li>No records yet.</li>
-                {% endfor %}
-            </ul>
-        </section>
-
-        <!-- Inspection Reports -->
-        <section class="card">
-            <h2>Inspection Reports</h2>
-            <ul>
-                {% for report in inspection_reports %}
-                <li><a href="{% url 'inspection-validation-report' report.id %}">{{ report }}</a></li>
-                {% empty %}
-                <li>No records yet.</li>
-                {% endfor %}
-            </ul>
-        </section>
-
-        <!-- Orders of Payment -->
-        <section class="card">
-            <h2>Orders of Payment</h2>
-            <ul>
-                {% for order in orders_of_payment %}
-                <li><a href="{% url 'order-of-payment' order.id %}">{{ order }}</a></li>
-                {% empty %}
-                <li>No records yet.</li>
-                {% endfor %}
-            </ul>
-        </section>
-
-        
-        <!-- Checklist -->
-        <section class="card">
-            <h2>Checklist Evaluation Sheets</h2>
-            <ul>
-                {% for sheet in checklist_evaluation_sheets %}
-                <li><a href="{% url 'checklist-evaluation-sheet' sheet.id %}">{{ sheet }}</a></li>
-                {% empty %}
-                <li>No records yet.</li>
-                {% endfor %}
-            </ul>
-        </section>
     </div>
 </main>
 {% endblock %}
