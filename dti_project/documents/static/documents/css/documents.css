@@ -27,12 +27,12 @@
 .document-details-container header h3 {
   color: var(--text-muted);
   font-size: clamp(0.5rem, 0.9vw, 1.5rem);
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .document-details-container header h1 {
   font-size: clamp(1rem, 1.5vw, 3rem);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .document-details-container .actions {
@@ -410,4 +410,8 @@
     grid-row: span 11;
     height: 100%;
     overflow: auto;
+}
+
+.current-document-type-span {
+    color: var(--text-lighter);
 }
