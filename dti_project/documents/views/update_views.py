@@ -1,16 +1,18 @@
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic.edit import UpdateView
+from ..mixins.service_mixins import ServiceCategoryMixin
+from ..mixins.form_mixins import FormStepsMixin, FormSubmissionMixin, FormsetMixin, MessagesMixin
+from ..mixins.permissions_mixins import OwnershipDraftMixin
 from ..utils.form_helpers import get_certification_text
 from ..constants import CHECKLIST_EVALUATION_FIELD_GROUPS, INSPECTION_VALIDATION_REPORT_FIELD_GROUPS, ORDER_OF_PAYMENT_FIELD_GROUPS, PERSONAL_DATA_SHEET_FIELD_GROUPS, SALES_PROMOTION_FIELD_GROUPS, SERVICE_REPAIR_ACCREDITATION_FIELD_GROUPS
-from ..mixins import FormStepsMixin, FormSubmissionMixin, FormsetMixin, MessagesMixin, ServiceCategoryMixin
 from ..forms import FORMSET_CLASSES, ChecklistEvaluationSheetForm, InspectionValidationReportForm, OrderOfPaymentForm, PersonalDataSheetForm, SalesPromotionPermitApplicationForm, ServiceRepairAccreditationApplicationForm
 from ..models import ChecklistEvaluationSheet, InspectionValidationReport, OrderOfPayment, PersonalDataSheet, SalesPromotionPermitApplication, ServiceRepairAccreditationApplication
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 
 
-class UpdateSalesPromotionView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, UpdateView):
+class UpdateSalesPromotionView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, OwnershipDraftMixin, UpdateView):
     model = SalesPromotionPermitApplication
     template_name = 'documents/update_templates/update_sales_promo.html'
     context_object_name = 'sales_promo'
@@ -24,16 +26,6 @@ class UpdateSalesPromotionView(LoginRequiredMixin, MessagesMixin, FormSubmission
     
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        # Example: check user permission before letting mixin run
-        promo = self.get_object()
-        if promo.user != request.user:
-            messages.error(request, "You cannot edit this promotion.")
-            return redirect("sales_promo_list")
-
-        # Fall back to mixin’s handling
-        return super().post(request, *args, **kwargs)
     
     def get_context_data(self, **kwargs):
         context =  super().get_context_data(**kwargs)
@@ -42,7 +34,7 @@ class UpdateSalesPromotionView(LoginRequiredMixin, MessagesMixin, FormSubmission
 
         return context
 
-class UpdatePersonalDataSheetView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, UpdateView):
+class UpdatePersonalDataSheetView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, OwnershipDraftMixin, UpdateView):
     template_name = 'documents/update_templates/update_personal_data_sheet.html'
     model = PersonalDataSheet
     form_class = PersonalDataSheetForm
@@ -56,18 +48,6 @@ class UpdatePersonalDataSheetView(LoginRequiredMixin, MessagesMixin, FormSubmiss
 
     FIELD_GROUPS = PERSONAL_DATA_SHEET_FIELD_GROUPS
 
-    def post(self, request, *args, **kwargs):
-        personal_data_sheet = self.get_object()
-        if personal_data_sheet.user != request.user:
-            messages.error(request, "You cannot edit this personal data sheet.")
-            return redirect("/")
-        
-        if personal_data_sheet.status != 'draft':
-            messages.error(request, 'You can only edit drafts')
-            return redirect('/')
-
-        return super().post(request, *args, **kwargs)
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['field_groups'] = self.FIELD_GROUPS
@@ -76,27 +56,13 @@ class UpdatePersonalDataSheetView(LoginRequiredMixin, MessagesMixin, FormSubmiss
     def get_success_url(self):
         return reverse_lazy('personal-data-sheet', kwargs={'pk': self.object.pk})
 
-class UpdateServiceRepairAccreditationApplicationView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, UpdateView):
+class UpdateServiceRepairAccreditationApplicationView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, OwnershipDraftMixin, UpdateView):
     template_name = 'documents/update_templates/update_service_repair_accreditation.html'
     model = ServiceRepairAccreditationApplication
     form_class = ServiceRepairAccreditationApplicationForm
     context_object_name = 'accreditation'
 
     FIELD_GROUPS = SERVICE_REPAIR_ACCREDITATION_FIELD_GROUPS
-
-    def post(self, request, *args, **kwargs):
-        # Example: check user permission before letting mixin run
-        service_accreditation = self.get_object()
-        if service_accreditation.user != request.user:
-            messages.error(request, "You cannot edit this service accreditation.")
-            return redirect("/")
-        
-        if service_accreditation.status != 'draft':
-            messages.error(request, 'You can only edit drafts')
-            return redirect('/')
-
-        # Fall back to mixin’s handling
-        return super().post(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -114,27 +80,13 @@ class UpdateServiceRepairAccreditationApplicationView(LoginRequiredMixin, Messag
     def get_success_url(self):
         return reverse_lazy('service-repair-accreditation', kwargs={'pk': self.object.pk})
     
-class UpdateInspectionValidationReportView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, ServiceCategoryMixin, UpdateView):
+class UpdateInspectionValidationReportView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, ServiceCategoryMixin, OwnershipDraftMixin, UpdateView):
     model = InspectionValidationReport
     template_name = 'documents/update_templates/update_inspection_validation_report.html'
     form_class = InspectionValidationReportForm
     context_object_name = 'report'
     FIELD_GROUPS = INSPECTION_VALIDATION_REPORT_FIELD_GROUPS
     additional_sections = ['service_categories']
-
-    def post(self, request, *args, **kwargs):
-        # Example: check user permission before letting mixin run
-        inspection_report = self.get_object()
-        if inspection_report.user != request.user:
-            messages.error(request, "You cannot edit this inspection report.")
-            return redirect("/")
-        
-        if inspection_report.status != 'draft':
-            messages.error(request, 'You can only edit drafts')
-            return redirect('/')
-
-        # Fall back to mixin’s handling
-        return super().post(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -146,27 +98,13 @@ class UpdateInspectionValidationReportView(LoginRequiredMixin, MessagesMixin, Fo
     def get_success_url(self):
         return reverse_lazy('inspection-validation-report', kwargs={'pk': self.object.pk})
 
-class UpdateOrderOfPaymentView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, UpdateView):
+class UpdateOrderOfPaymentView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, OwnershipDraftMixin, UpdateView):
     model = OrderOfPayment
     template_name = 'documents/update_templates/update_order_of_payment.html'
     form_class = OrderOfPaymentForm
     context_object_name = 'order'
     
     FIELD_GROUPS = ORDER_OF_PAYMENT_FIELD_GROUPS
-
-    def post(self, request, *args, **kwargs):
-        # Example: check user permission before letting mixin run
-        order = self.get_object()
-        if order.user != request.user:
-            messages.error(request, "You cannot edit this order of payment.")
-            return redirect("/")
-        
-        if order.status != 'draft':
-            messages.error(request, 'You can only edit drafts')
-            return redirect('/')
-
-        # Fall back to mixin’s handling
-        return super().post(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -176,27 +114,13 @@ class UpdateOrderOfPaymentView(LoginRequiredMixin, MessagesMixin, FormSubmission
     def get_success_url(self):
         return reverse_lazy('order-of-payment', kwargs={'pk': self.object.pk})
     
-class UpdateChecklistEvaluationSheetView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, UpdateView):
+class UpdateChecklistEvaluationSheetView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, OwnershipDraftMixin, UpdateView):
     model = ChecklistEvaluationSheet
     template_name = 'documents/update_templates/update_checklist_evaluation_sheet.html'
     form_class = ChecklistEvaluationSheetForm
     context_object_name = 'checklist'
     
     FIELD_GROUPS = CHECKLIST_EVALUATION_FIELD_GROUPS
-    
-    def post(self, request, *args, **kwargs):
-        # Example: check user permission before letting mixin run
-        checklist = self.get_object()
-        if checklist.user != request.user:
-            messages.error(request, "You cannot edit this checklist.")
-            return redirect("/")
-        
-        if checklist.status != 'draft':
-            messages.error(request, 'You can only edit drafts')
-            return redirect('/')
-
-        # Fall back to mixin’s handling
-        return super().post(request, *args, **kwargs)
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

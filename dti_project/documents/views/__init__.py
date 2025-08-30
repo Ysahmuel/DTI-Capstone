@@ -23,3 +23,7 @@ from .update_views import (
     UpdateOrderOfPaymentView,
     UpdateChecklistEvaluationSheetView
 )
+
+from .list_views import (
+    AllDocumentListView
+)
