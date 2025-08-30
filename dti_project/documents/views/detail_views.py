@@ -8,7 +8,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 class SalesPromotionDetailView(LoginRequiredMixin, DetailView):
     model = SalesPromotionPermitApplication
-    template_name = 'documents/sales_promotion_detail.html'
+    template_name = 'documents/detail_templates/sales_promotion_detail.html'
     context_object_name = 'sales_promo'
 
     def get_context_data(self, **kwargs):
@@ -54,7 +54,7 @@ class SalesPromotionDetailView(LoginRequiredMixin, DetailView):
         return context
     
 class PersonalDataSheetDetailView(TabsSectionMixin, LoginRequiredMixin, DetailView):
-    template_name = 'documents/personal_data_sheet.html'
+    template_name = 'documents/detail_templates/personal_data_sheet.html'
     model = PersonalDataSheet
     context_object_name = 'personal_data_sheet'
     
@@ -70,7 +70,7 @@ class PersonalDataSheetDetailView(TabsSectionMixin, LoginRequiredMixin, DetailVi
         return context
 
 class ServiceRepairAccreditationApplicationDetailView(LoginRequiredMixin, DetailView):
-    template_name = 'documents/service_repair_accreditation.html'
+    template_name = 'documents/detail_templates/service_repair_accreditation.html'
     model = ServiceRepairAccreditationApplication
     context_object_name = 'accreditation'
 
@@ -82,7 +82,7 @@ class ServiceRepairAccreditationApplicationDetailView(LoginRequiredMixin, Detail
         return context
     
 class InspectionValidationReportDetailView(LoginRequiredMixin, DetailView):
-    template_name = 'documents/inspection_validation_report.html'
+    template_name = 'documents/detail_templates/inspection_validation_report.html'
     model = InspectionValidationReport
     context_object_name = 'report'
 
@@ -97,7 +97,7 @@ class InspectionValidationReportDetailView(LoginRequiredMixin, DetailView):
         return context
     
 class OrderOfPaymentDetailView(LoginRequiredMixin, DetailView):
-    template_name = 'documents/order_of_payment.html'
+    template_name = 'documents/detail_templates/order_of_payment.html'
     model = OrderOfPayment
     context_object_name = 'order'
 
@@ -127,7 +127,7 @@ class OrderOfPaymentDetailView(LoginRequiredMixin, DetailView):
         return context
 
 class ChecklistEvaluationSheetDetailView(LoginRequiredMixin, DetailView):
-    template_name = 'documents/checklist_evaluation_sheet.html'
+    template_name = 'documents/detail_templates/checklist_evaluation_sheet.html'
     model = ChecklistEvaluationSheet
     context_object_name = 'checklist_sheet'
 
