@@ -10,7 +10,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import CreateView
 
 class CreateSalesPromotionView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, CreateView):
-    template_name = 'documents/create_sales_promotion.html'
+    template_name = 'documents/create_templates/create_sales_promotion.html'
     model = SalesPromotionPermitApplication
     context_object_name = 'sales_promo'
     form_class = SalesPromotionPermitApplicationForm
@@ -32,7 +32,7 @@ class CreateSalesPromotionView(LoginRequiredMixin, MessagesMixin, FormSubmission
         return reverse_lazy('sales-promotion-application', kwargs={'pk': self.object.pk})
     
 class CreatePersonalDataSheetView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, CreateView):
-    template_name = 'documents/create_personal_data_sheet.html'
+    template_name = 'documents/create_templates/create_personal_data_sheet.html'
     model = PersonalDataSheet
     form_class = PersonalDataSheetForm
     formset_classes = {
@@ -55,7 +55,7 @@ class CreatePersonalDataSheetView(LoginRequiredMixin, MessagesMixin, FormSubmiss
         return reverse_lazy('personal-data-sheet', kwargs={'pk': self.object.pk})
     
 class CreateServiceRepairAccreditationApplicationView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, CreateView):
-    template_name = 'documents/create_service_repair.html'
+    template_name = 'documents/create_templates/create_service_repair.html'
     model = ServiceRepairAccreditationApplication
     form_class = ServiceRepairAccreditationApplicationForm
 
@@ -79,7 +79,7 @@ class CreateServiceRepairAccreditationApplicationView(LoginRequiredMixin, Messag
 
 class CreateInspectionValidationReportView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, ServiceCategoryMixin, CreateView):
     model = InspectionValidationReport
-    template_name = 'documents/create_inspection_validation_report.html'
+    template_name = 'documents/create_templates/create_inspection_validation_report.html'
     form_class = InspectionValidationReportForm
 
     FIELD_GROUPS = INSPECTION_VALIDATION_REPORT_FIELD_GROUPS
@@ -97,7 +97,7 @@ class CreateInspectionValidationReportView(LoginRequiredMixin, MessagesMixin, Fo
     
 class CreateOrderOfPaymentView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, CreateView):
     model = OrderOfPayment
-    template_name = 'documents/create_order_of_payment.html'
+    template_name = 'documents/create_templates/create_order_of_payment.html'
     form_class = OrderOfPaymentForm
     
     FIELD_GROUPS = ORDER_OF_PAYMENT_FIELD_GROUPS
@@ -112,7 +112,7 @@ class CreateOrderOfPaymentView(LoginRequiredMixin, MessagesMixin, FormSubmission
 
 class CreateChecklistEvaluationSheetView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, CreateView):
     model = ChecklistEvaluationSheet
-    template_name = 'documents/create_checklist_evaluation_sheet.html'
+    template_name = 'documents/create_templates/create_checklist_evaluation_sheet.html'
     form_class = ChecklistEvaluationSheetForm
     
     FIELD_GROUPS = CHECKLIST_EVALUATION_FIELD_GROUPS
