@@ -4,21 +4,21 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: var(--space-xl);
 }
 
 .form-container header {
     position: sticky;
     top: 0;
-    background-color: white; 
+    background-color: white;
     z-index: 10; 
     width: 100%;
     padding-top: 1rem;
     padding-bottom: var(--space-lg);
+    padding-left: 2rem;
+    padding-right: 2rem;
     margin-bottom: var(--space-lg);
     border-bottom: solid 2px var(--border-color);
 }
-
 
 .form-container header h1 {
     font-size: clamp(2rem, 1.5vw, 5rem);
@@ -29,6 +29,7 @@
     display: flex;
     align-items: start;
     gap: var(--space-lg);
+    margin: 0 1rem;
 }
 
 /* Fieldset styles */

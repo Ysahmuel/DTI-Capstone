@@ -1,13 +1,14 @@
 import re
 
-from ..mixins import TabsSectionMixin
+from ..mixins.context_mixins import TabsSectionMixin
 from ..constants import CHECKLIST_EVALUATION_DETAIL_GROUPS, CHECKLIST_REQUIREMENT_GROUPS, INSPECTION_VALIDATION_DETAIL_GROUPS, ORDER_OF_PAYMENT_DETAIL_GROUPS, PERSONAL_DATA_SHEET_DETAIL_GROUPS, PERSONAL_DATA_SHEET_TAB_SECTIONS, SALES_PROMOTION_DETAIL_GROUPS, SERVICE_REPAIR_ACCREDITATION_DETAIL_GROUPS
 from ..models import ChecklistEvaluationSheet, InspectionValidationReport, OrderOfPayment, PersonalDataSheet, SalesPromotionPermitApplication, ServiceRepairAccreditationApplication
 from django.views.generic import DetailView
+from django.contrib.auth.mixins import LoginRequiredMixin
 
-class SalesPromotionDetailView(DetailView):
+class SalesPromotionDetailView(LoginRequiredMixin, DetailView):
     model = SalesPromotionPermitApplication
-    template_name = 'documents/sales_promotion_detail.html'
+    template_name = 'documents/detail_templates/sales_promotion_detail.html'
     context_object_name = 'sales_promo'
 
     def get_context_data(self, **kwargs):
@@ -52,8 +53,8 @@ class SalesPromotionDetailView(DetailView):
 
         return context
     
-class PersonalDataSheetDetailView(TabsSectionMixin, DetailView):
-    template_name = 'documents/personal_data_sheet.html'
+class PersonalDataSheetDetailView(TabsSectionMixin, LoginRequiredMixin, DetailView):
+    template_name = 'documents/detail_templates/personal_data_sheet.html'
     model = PersonalDataSheet
     context_object_name = 'personal_data_sheet'
     
@@ -64,22 +65,24 @@ class PersonalDataSheetDetailView(TabsSectionMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['detail_groups'] = PERSONAL_DATA_SHEET_DETAIL_GROUPS
+        context["update_url_name"] = "update-personal-data-sheet"
 
         return context
 
-class ServiceRepairAccreditationApplicationDetailView(DetailView):
-    template_name = 'documents/service_repair_accreditation.html'
+class ServiceRepairAccreditationApplicationDetailView(LoginRequiredMixin, DetailView):
+    template_name = 'documents/detail_templates/service_repair_accreditation.html'
     model = ServiceRepairAccreditationApplication
     context_object_name = 'accreditation'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['detail_groups'] = SERVICE_REPAIR_ACCREDITATION_DETAIL_GROUPS
+        context["update_url_name"] = "update-service-repair-accreditation"
 
         return context
     
-class InspectionValidationReportDetailView(DetailView):
-    template_name = 'documents/inspection_validation_report.html'
+class InspectionValidationReportDetailView(LoginRequiredMixin, DetailView):
+    template_name = 'documents/detail_templates/inspection_validation_report.html'
     model = InspectionValidationReport
     context_object_name = 'report'
 
@@ -93,8 +96,8 @@ class InspectionValidationReportDetailView(DetailView):
 
         return context
     
-class OrderOfPaymentDetailView(DetailView):
-    template_name = 'documents/order_of_payment.html'
+class OrderOfPaymentDetailView(LoginRequiredMixin, DetailView):
+    template_name = 'documents/detail_templates/order_of_payment.html'
     model = OrderOfPayment
     context_object_name = 'order'
 
@@ -119,11 +122,12 @@ class OrderOfPaymentDetailView(DetailView):
         context['detail_groups'] = ORDER_OF_PAYMENT_DETAIL_GROUPS
         context['remark_prefixes'] = remark_prefixes
         context['permit_fees'] = permit_fees
+        context["update_url_name"] = "update-order-of-payment"
 
         return context
 
-class ChecklistEvaluationSheetDetailView(DetailView):
-    template_name = 'documents/checklist_evaluation_sheet.html'
+class ChecklistEvaluationSheetDetailView(LoginRequiredMixin, DetailView):
+    template_name = 'documents/detail_templates/checklist_evaluation_sheet.html'
     model = ChecklistEvaluationSheet
     context_object_name = 'checklist_sheet'
 
@@ -131,5 +135,6 @@ class ChecklistEvaluationSheetDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         context['detail_groups'] = CHECKLIST_EVALUATION_DETAIL_GROUPS
         context['requirement_groups'] = CHECKLIST_REQUIREMENT_GROUPS
+        context["update_url_name"] = "update-checklist-evaluation-sheet"
 
         return context

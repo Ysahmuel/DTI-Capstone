@@ -14,3 +14,16 @@ from .detail_views import (
     OrderOfPaymentDetailView,
     ChecklistEvaluationSheetDetailView
 )
+
+from .update_views import (
+    UpdateSalesPromotionView,
+    UpdatePersonalDataSheetView,
+    UpdateServiceRepairAccreditationApplicationView,
+    UpdateInspectionValidationReportView,
+    UpdateOrderOfPaymentView,
+    UpdateChecklistEvaluationSheetView
+)
+
+from .list_views import (
+    AllDocumentListView
+)

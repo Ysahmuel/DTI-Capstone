@@ -13,13 +13,14 @@ from documents.models import (
     ServiceRepairAccreditationApplication,
 )
 from documents.constants import MODEL_URLS
+from documents.mixins.permissions_mixins import UserRoleMixin
 from users.models import User
 
 
 # -------------------------------
 # DASHBOARD VIEW
 # -------------------------------
-class DashboardView(LoginRequiredMixin, TemplateView):
+class DashboardView(LoginRequiredMixin, UserRoleMixin, TemplateView):
     template_name = "dashboard/dashboard.html"
 
     @staticmethod
