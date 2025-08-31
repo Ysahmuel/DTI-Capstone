@@ -6,22 +6,12 @@ from documents.models import ChecklistEvaluationSheet, InspectionValidationRepor
 from django.db.models import Value, F, Q
 from django.db.models.functions import Concat
 from documents.constants import MODEL_URLS
+from documents.mixins.permissions_mixins import UserRoleMixin
 from users.models import User
     
 # Create your views here.
-class DashboardView(LoginRequiredMixin, TemplateView):
+class DashboardView(LoginRequiredMixin, UserRoleMixin, TemplateView):
     template_name = "dashboard/dashboard.html"
-
-    @staticmethod
-    def get_queryset_or_all(model, user):
-        if user.role == "admin":
-            qs = model.objects.filter(
-                Q(status="draft", user=user) | ~Q(status="draft")
-            )
-        else:
-            qs = model.objects.filter(user=user)
-            
-        return qs.only("pk", "id")  # Add other fields that __str__ methods need
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
