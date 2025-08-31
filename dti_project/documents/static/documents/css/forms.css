@@ -4,7 +4,6 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: var(--space-xl);
 }
 
 .form-container header {
