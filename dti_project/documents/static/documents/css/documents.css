@@ -13,24 +13,31 @@
   height: 100%;
 }
 
-.document-details-container header {
+.document-details-container header,
+.document-list-container header
+{
   display: flex;
   align-items: center;
   justify-content: space-between;
   background-color: white;
+  padding: 1rem 2rem;
   padding-bottom: var(--space-sm);
   margin-bottom: var(--space-lg);
   border-bottom: solid 2px var(--border-color);
   width: 100%;
 }
 
-.document-details-container header h3 {
+.document-details-container header h3,
+.document-list-container header h3
+{
   color: var(--text-muted);
   font-size: clamp(0.5rem, 0.9vw, 1.5rem);
   font-weight: 400;
 }
 
-.document-details-container header h1 {
+.document-details-container header h1,
+.document-list-container header h1
+{
   font-size: clamp(1rem, 1.5vw, 3rem);
   font-weight: 600;
 }
