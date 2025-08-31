@@ -1,0 +1,33 @@
+{% extends 'dashboard/layout.html' %}
+
+{% block title %} All Documents {% endblock %}
+
+{% block body %}
+    <div class="document-list-container">
+
+        <header>
+            <h1>Documents <span class="current-document-type-span"> / Main</span></h1>
+            {% include 'dashboard/components/searchbar.html' %}
+        </header>
+
+        {% include 'documents/components/document_type_list.html' %}
+
+        <div class="documents-table-container">
+            <h3>All Documents</h3>
+            <table class="documents-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Date Created</th>
+                        <th>Document Type</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+{% endblock %}
