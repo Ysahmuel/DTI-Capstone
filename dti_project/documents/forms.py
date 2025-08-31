@@ -168,7 +168,7 @@ class ChecklistEvaluationSheetForm(BaseCustomForm):
     class Meta:
         model = ChecklistEvaluationSheet
         fields = '__all__'
-        exclude = ['status', 'user']
+        exclude = ['status', 'user', 'date']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
