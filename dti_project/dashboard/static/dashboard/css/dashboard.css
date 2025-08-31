@@ -1,7 +1,7 @@
 @import url('searchbar.css');
 
 .main-content {
-    background-color: rgba(242, 242, 242);
+    background-color: rgba(250, 250, 250);
     flex: 1;
     margin-left: calc(var(--sidebar-collapsed-width) + 1rem);
     transition: margin-left var(--transition-duration) ease-in-out;
