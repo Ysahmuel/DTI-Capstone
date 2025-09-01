@@ -40,6 +40,10 @@ class DraftModel(models.Model):
     class Meta:
         abstract = True
 
+    @property
+    def model_verbose_name(self):
+        return self._meta.verbose_name
+
     def get_str_display(self, base_display: str) -> str:
         if self.status == "draft":
             return f"{base_display} (Draft)"
