@@ -85,7 +85,7 @@ class PersonalDataSheetForm(BaseCustomForm):
     class Meta:
         model = PersonalDataSheet
         fields = '__all__'
-        exclude = ['status', 'user']
+        exclude = ['status', 'user', 'date']
         widgets = {
             'current_address': forms.TextInput(attrs={'class': 'form-group'}),
             'date_of_birth': forms.DateInput(attrs={'type': 'date', 'class': 'form-group'}),
