@@ -6,7 +6,7 @@
 {% block body %}
     <div class="document-list-container">
 
-        <header>
+        <header class="document-list-header">
             <h1>Documents <span class="current-document-type-span"> / Main</span></h1>
             {% include 'dashboard/components/searchbar.html' %}
         </header>
@@ -14,7 +14,12 @@
         {% include 'documents/components/document_type_list.html' %}
 
         <section class="documents-table-container">
-            <h3>All Documents</h3>
+            <header class="documents-table-header">
+                <h3>All Documents</h3>
+                <div class="actions">
+
+                </div>
+            </header>
             <table class="documents-table">
                 <thead>
                     <tr>
