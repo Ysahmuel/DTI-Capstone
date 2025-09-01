@@ -501,32 +501,30 @@
 .documents-table {
     margin-top: 1rem;
     width: calc(100% - 1.5rem); 
+    border-collapse: collapse; 
+    border-spacing: 0;          /* <-- explicitly kill gaps */
 }
 
 .documents-table thead {
-    border-collapse: collapse;
     width: 100%;
 }
 
-.documents-table thead tr {
-    display: table-row; /* ensures it's not flex */
-}
-
-.document-value-row {
-    padding: 1rem 0;
-    cursor: pointer;
-    transition: 0.3s ease-in;
-}
-
-.document-value-row:hover {
-    background-color: rgb(238, 238, 238);
-}
-
 .documents-table th {
-    display: table-cell; /* ensures header cells act like table cells */
-    text-align: left; /* align text to the start */
+    text-align: left;
     color: var(--text-secondary);
     font-weight: 400;
     border-bottom: solid 1px var(--border-color);
     padding-bottom: 1rem;
+}
+
+.document-value-row {
+    cursor: pointer;
+}
+
+.document-value-row td {
+    padding: 1rem 0;
+}
+
+.document-value-row:hover td {
+    background-color: rgb(228, 238, 255); 
 }
