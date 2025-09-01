@@ -490,6 +490,7 @@
 
 .documents-table-container {
     margin: 1.5rem;
+    margin-top: 3rem;
 }
 
 .documents-table-container h3 {
@@ -509,6 +510,16 @@
 
 .documents-table thead tr {
     display: table-row; /* ensures it's not flex */
+}
+
+.document-value-row {
+    padding: 1rem 0;
+    cursor: pointer;
+    transition: 0.3s ease-in;
+}
+
+.document-value-row:hover {
+    background-color: rgb(238, 238, 238);
 }
 
 .documents-table th {

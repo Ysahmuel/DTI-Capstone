@@ -294,7 +294,7 @@ class ServiceRepairAccreditationApplication(DraftModel, models.Model):
     application_type = models.CharField(max_length=10, choices=APPLICATION_TYPES)
     category = models.CharField(max_length=100, choices=CATEGORIES)
     star_rating = models.PositiveSmallIntegerField(choices=STAR_RATING_CHOICES, validators=[MinValueValidator(1), MaxValueValidator(5)])
-
+    date = models.DateField(default=timezone.now)
     name_of_business = models.CharField(max_length=255)
 
     # Business Address Fields

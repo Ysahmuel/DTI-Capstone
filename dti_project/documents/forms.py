@@ -135,7 +135,7 @@ class ServiceRepairAccreditationApplicationForm(BaseCustomForm):
     class Meta:
         model = ServiceRepairAccreditationApplication
         fields = '__all__'
-        exclude = ['status', 'user']
+        exclude = ['status', 'user', 'date']
 
 class InspectionValidationReportForm(BaseCustomForm):
     class Meta:
