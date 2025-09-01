@@ -17,7 +17,10 @@
             <header class="documents-table-header">
                 <h3>All Documents</h3>
                 <div class="actions">
-
+                    <a href="{% url 'export-to-excel' %}" id="export-excel-btn">
+                        Convert to Excel file
+                        <i class="fa-solid fa-file-excel"></i>
+                    </a>
                 </div>
             </header>
             <table class="documents-table">

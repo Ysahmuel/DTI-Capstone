@@ -27,3 +27,7 @@ from .update_views import (
 from .list_views import (
     AllDocumentListView
 )
+
+from .excel_views import (
+    export_to_excel
+)
