@@ -12,12 +12,8 @@
     </thead>
     <tbody>
         {% for document in documents %}
-            <tr class="document-value-row">
-                <td class="document-link-cell">
-                    <a href="{{ document.get_absolute_url }}">
-                        {{ document }}
-                    </a>
-                </td>
+            <tr class="document-value-row" data-href="{{ document.get_absolute_url }}">
+                <td>{{ document }}</td>
                 <td>{{ document.model_verbose_name|titlecase }}</td>
                 <td>{{ document.user }}</td>
                 <td>{{ document.status|titlecase }}</td>

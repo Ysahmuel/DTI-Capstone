@@ -572,14 +572,6 @@
     background-color: rgb(228, 238, 255); 
 }
 
-.document-link-cell a {
-    display: block;         
-    width: 100%;            
-    height: 100%;           
-    color: var(--text-primary);
-    text-decoration: none;
-}
-
 #export-excel-btn {
     display: flex;
     align-items: start;
