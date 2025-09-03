@@ -10,6 +10,10 @@ from ..models import ChecklistEvaluationSheet, InspectionValidationReport, Order
 from ..views.list_views import AllDocumentListView
 
 
+class ImportFromExcelView(View):
+    pass
+
+
 @login_required
 def export_to_excel(request, queryset=None, filename="export.xlsx"):
     """
