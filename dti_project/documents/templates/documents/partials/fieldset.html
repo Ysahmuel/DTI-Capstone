@@ -4,6 +4,7 @@
     <p class="part-count">Part {{ counter }} of {{ total_parts }}</p>
     <legend>{{ group.0 }}</legend>
 
+    <!-- update condition to return true later if group.3 is true or 'has paragraph text' -->
     {% if group.0 == 'Certification' %} <p class="form-paragraph-text">{{ certification_text }}</p> {% endif %}
 
     <div class="stepped-layout">
@@ -13,13 +14,23 @@
                     <label for="{{ form.image_for_label }}">{{ form.image.label|safe }} (Passport Size Photo)</label>
                     <div class="upload-image-container">
 
-                        <button class="upload-file-btn" type="button">
-                            <i class="fa-solid fa-upload"></i>
-                        </button>
+                        {% if object.image %}
+                            <img src="{{ object.image.url }}" alt="{{ object }} image">
 
-                        <h3 id="drag-drop-text">Drag and drop or <span class="highlighted-span">choose file</span> to upload</h3>
-                        <p id="file-text">No file chosen yet.</p>
-                        {{ form.image }}
+                            <h3 id="drag-drop-text">Click to <span class="highlighted-span">change image</span></h3>
+                            <p id="file-text">{{ object.image }}</p>
+                        {% else %}
+                            <button class="upload-file-btn" type="button">
+                                <i class="fa-solid fa-upload"></i>
+                            </button>
+
+                            <h3 id="drag-drop-text">
+                                Drag and drop or <span class="highlighted-span">choose file</span> to upload
+                            </h3>
+                            <p id="file-text">No file chosen yet.</p>
+                        {% endif %}
+
+                        {{ form.image.as_widget }}
 
                     </div>
                 </div>
