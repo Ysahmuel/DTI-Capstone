@@ -1,0 +1,220 @@
+.profile-wrapper {
+    display: flex;
+    justify-content: center;
+    padding: 2rem;
+    background: var(--background, #f4f6f9);
+    min-height: 100vh;
+}
+
+.profile-card {
+    background: #fff;
+    width: 100%;
+    max-width: 900px;
+    border-radius: 1rem;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    overflow: hidden;
+    animation: fadeIn 0.6s ease-in-out;
+}
+
+/* Banner */
+.profile-banner {
+    background: linear-gradient(135deg, var(--primary, #0f0853), #3b82f6);
+    height: 150px;
+}
+
+/* Profile Header */
+.profile-content {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem;
+    gap: 1.5rem;
+    margin-top: -75px;
+}
+
+.profile-picture-wrapper {
+    flex-shrink: 0;
+    position: relative;
+}
+
+.profile-picture,
+.profile-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 4px solid #fff;
+    object-fit: cover;
+    background: #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #555;
+    transition: transform 0.3s;
+}
+
+.profile-picture-wrapper:hover .profile-picture,
+.profile-avatar:hover {
+    transform: scale(1.05);
+}
+
+/* Form overlay on picture */
+.profile-picture-input {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 40px;
+    height: 40px;
+    background: var(--primary, #0f0853);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    color: #fff;
+    font-size: 1.2rem;
+    border: 2px solid #fff;
+    transition: background 0.3s;
+}
+
+.profile-picture-input:hover {
+    background: #1e1b6b;
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-name {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+.profile-username {
+    color: #6b7280;
+    font-size: 1rem;
+    margin-top: 0.25rem;
+}
+
+.role-badge {
+    display: inline-block;
+    padding: 0.4rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-top: 0.5rem;
+    color: #fff;
+}
+
+/* Role Colors */
+.role-admin { background: #ef4444; }
+.role-user { background: #3b82f6; }
+.role-manager { background: #10b981; }
+
+/* Form Section */
+.profile-body {
+    padding: 1.5rem;
+    border-top: 1px solid #f0f0f0;
+}
+
+.profile-body h2 {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    color: var(--primary, #0f0853);
+}
+
+/* Form Styles */
+.profile-body form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.profile-body label {
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+    color: var(--primary, #0f0853);
+}
+
+.profile-body input[type="text"],
+.profile-body input[type="email"],
+.profile-body input[type="file"] {
+    padding: 0.65rem 1rem;
+    border-radius: 0.6rem;
+    border: 1px solid #d1d5db;
+    font-size: 0.95rem;
+    transition: border 0.3s, box-shadow 0.3s;
+    width: 100%;
+    background: #fff;
+}
+
+.profile-body input:focus {
+    outline: none;
+    border-color: var(--primary, #0f0853);
+    box-shadow: 0 0 0 4px rgba(15, 8, 83, 0.1);
+}
+
+.profile-body input:disabled {
+    background: #f9fafb;
+    cursor: not-allowed;
+}
+
+/* Buttons */
+.profile-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.btn {
+    padding: 0.65rem 1.3rem;
+    border-radius: 0.6rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-primary {
+    background: var(--primary, #0f0853);
+    color: #fff;
+}
+.btn-primary:hover {
+    background: #1e1b6b;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.btn-secondary {
+    background: #e5e7eb;
+    color: #111827;
+}
+.btn-secondary:hover {
+    background: #d1d5db;
+    transform: translateY(-1px);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .profile-content {
+        flex-direction: column;
+        align-items: center;
+        margin-top: -50px;
+    }
+    .profile-picture,
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}

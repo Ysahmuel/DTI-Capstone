@@ -62,10 +62,11 @@
         <section aria-labelledby="account-menu-heading" id="account-menu-section">
             <ul class="side-nav-list">
                 <li class="nav-item">
-                    <a href="" id="profile-link">
+                    <a href="{% url 'profile' user.id %}" id="profile-link">
                         <img src="{{ user.profile_picture.url }}" alt="">
                         <div id="logged-in-user-details">
-                            <strong>{% if user.is_authenticated %}{{ user }}{% endif %}</strong>
+                            <strong>{% if user.is_authenticated %}{{ user.get_full_name|default:user.username }}
+                                {% endif%}</strong>
                             <p>{{ user.role|titlecase }}</p>
                         </div>
                     </a>

@@ -11,10 +11,27 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.contrib import messages
 import logging
+from django.views.generic import TemplateView, View, DetailView, UpdateView
+from users.models import User
 
 logger = logging.getLogger(__name__)
 
 # Create your views here.
+#Profile Detail and Edit Views
+class ProfileDetailView(DetailView):
+    model = User
+    template_name = "users/profile.html"
+    context_object_name = "profile"
+
+class ProfileEditView(UpdateView):
+    model = User
+    fields = ['first_name', 'last_name', 'email', 'profile_picture']
+    template_name = "users/profile_edit.html"
+    context_object_name = "profile"  # make `profile` available in template
+
+    def get_success_url(self):
+        return reverse_lazy('profile', kwargs={'pk': self.object.pk})
+
 class CustomLoginView(FormSubmissionMixin, LoginView):
     template_name = 'users/login.html'
     redirect_authenticated_user = True
