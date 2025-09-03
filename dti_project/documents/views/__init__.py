@@ -28,6 +28,10 @@ from .list_views import (
     AllDocumentListView,
     SalesPromotionListView,
     PersonalDataSheetListView,
+    ServiceRepairAccreditationApplicationListView,
+    InspectionValidationReportListView,
+    OrderOfPaymentListView,
+    ChecklistEvaluationSheetListView,
 )
 
 from .excel_views import (

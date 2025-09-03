@@ -9,7 +9,7 @@
     </li>
 
     <li class="document-type-card">
-        <a href="{% url 'personal-data-sheet-list' %}" class="document-type-icon  {% if active_doc_type == 'personal_data_sheets' %} active {% endif %}">
+        <a href="{% url 'personal-data-sheet-list' %}" class="document-type-icon {% if active_doc_type == 'personal_data_sheets' %} active {% endif %}">
             <i class="fas fa-id-card"></i>
         </a>
         <strong class="document-type-name">Personal Data Sheets</strong>
@@ -17,7 +17,7 @@
     </li>
 
     <li class="document-type-card">
-        <a href="" class="document-type-icon">
+        <a href="{% url 'service-repair-list' %}" class="document-type-icon {% if active_doc_type == 'service_accreditations' %} active {% endif %}">
             <i class="fas fa-tools"></i>
         </a>
         <strong class="document-type-name">Service and Repair Accreditations</strong>
@@ -25,15 +25,15 @@
     </li>
 
     <li class="document-type-card">
-        <a href="" class="document-type-icon">
+        <a href="{% url 'inspection-validation-list' %}" class="document-type-icon {% if active_doc_type == 'inspection_reports' %} active {% endif %}">
             <i class="fas fa-clipboard-check"></i>
         </a>
-        <strong class="document-type-name">Inspection Validation Report</strong>
+        <strong class="document-type-name">Inspection Validation Reports</strong>
         <p class="document-type-count">{{ inspection_reports_count }} Items</p>
     </li>
 
     <li class="document-type-card">
-        <a href="" class="document-type-icon">
+        <a href="{% url 'order-of-payment-list' %}" class="document-type-icon {% if active_doc_type == 'orders_of_payment' %} active {% endif %}">
             <i class="fas fa-receipt"></i>
         </a>
         <strong class="document-type-name">Orders of Payment</strong>
@@ -41,7 +41,7 @@
     </li>
 
     <li class="document-type-card">
-        <a href="" class="document-type-icon">
+        <a href="{% url 'checklist-list' %}" class="document-type-icon {% if active_doc_type == 'checklist_evaluation_sheets' %} active {% endif %}">
             <i class="fas fa-tasks"></i>
         </a>
         <strong class="document-type-name">Requirement Checklists</strong>

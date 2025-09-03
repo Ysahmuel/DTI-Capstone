@@ -6,6 +6,28 @@ from ..models import ChecklistEvaluationSheet, InspectionValidationReport, Order
 from itertools import chain
 from operator import attrgetter
 
+class BaseDocumentListView(UserRoleMixin, DocumentCountMixin, ListView):
+    """
+    Generic list view for document models.
+    Just set `model`, `template_name`, `context_object_name`, and `active_doc_type`.
+    """
+    active_doc_type = None  # override in subclasses
+
+    def get_queryset(self):
+        user = self.request.user
+        qs = self.get_queryset_or_all(self.model, user)
+
+        def get_date(obj):
+            return getattr(obj, 'date_filed', None) or getattr(obj, 'date', None) or datetime.date.min
+
+        return sorted(qs, key=get_date, reverse=True)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["documents"] = self.get_queryset()
+        context["active_doc_type"] = self.active_doc_type
+        return context
+    
 class AllDocumentListView(UserRoleMixin, DocumentCountMixin, ListView):
     template_name = 'documents/list_templates/all_documents_list.html'
     context_object_name = 'documents'
@@ -53,51 +75,43 @@ class AllDocumentListView(UserRoleMixin, DocumentCountMixin, ListView):
 
         return context
 
-
-class SalesPromotionListView(UserRoleMixin, DocumentCountMixin, ListView):
+class SalesPromotionListView(BaseDocumentListView):
     model = SalesPromotionPermitApplication
-    template_name = 'documents/list_templates/sales_promotion_list.html'
-    context_object_name = 'sales_promos'
+    template_name = "documents/list_templates/sales_promotion_list.html"
+    context_object_name = "sales_promos"
+    active_doc_type = "sales_promos"
 
-    def get_queryset(self):
-        user = self.request.user
 
-        sales_promos = self.get_queryset_or_all(SalesPromotionPermitApplication, user)
-
-        def get_date(obj):
-            return getattr(obj, 'date_filed', None) or getattr(obj, 'date', None) or datetime.date.min
-
-        documents = sorted(sales_promos, key=get_date, reverse=True)
-        return documents
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        context['documents'] = self.get_queryset()
-        context['active_doc_type'] = 'sales_promos'
-
-        return context
-    
-class PersonalDataSheetListView(UserRoleMixin, DocumentCountMixin, ListView):
+class PersonalDataSheetListView(BaseDocumentListView):
     model = PersonalDataSheet
-    template_name = 'documents/list_templates/personal_data_sheet_list.html'
-    context_object_name = 'personal_data_sheets'
+    template_name = "documents/list_templates/personal_data_sheet_list.html"
+    context_object_name = "personal_data_sheets"
+    active_doc_type = "personal_data_sheets"
 
-    def get_queryset(self):
-        user = self.request.user
 
-        personal_data_sheets = self.get_queryset_or_all(PersonalDataSheet, user)
+class ServiceRepairAccreditationApplicationListView(BaseDocumentListView):
+    model = ServiceRepairAccreditationApplication
+    template_name = "documents/list_templates/service_repair_list.html"
+    context_object_name = "service_accreditations"
+    active_doc_type = "service_accreditations"
 
-        def get_date(obj):
-            return getattr(obj, 'date_filed', None) or getattr(obj, 'date', None) or datetime.date.min
 
-        documents = sorted(personal_data_sheets, key=get_date, reverse=True)
-        return documents
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+class InspectionValidationReportListView(BaseDocumentListView):
+    model = InspectionValidationReport
+    template_name = "documents/list_templates/inspection_validation_report_list.html"
+    context_object_name = "inspection_reports"
+    active_doc_type = "inspection_reports"
 
-        context['documents'] = self.get_queryset()
-        context['active_doc_type'] = 'personal_data_sheets'
 
-        return context
+class OrderOfPaymentListView(BaseDocumentListView):
+    model = OrderOfPayment
+    template_name = "documents/list_templates/order_of_payment_list.html"
+    context_object_name = "orders_of_payment"
+    active_doc_type = "orders_of_payment"
+
+
+class ChecklistEvaluationSheetListView(BaseDocumentListView):
+    model = ChecklistEvaluationSheet
+    template_name = "documents/list_templates/checklist_evaluation_list.html"
+    context_object_name = "checklist_evaluation_sheets"
+    active_doc_type = "checklist_evaluation_sheets"

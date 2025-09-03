@@ -30,6 +30,10 @@ urlpatterns = [
     path("all-documents", views.AllDocumentListView.as_view(), name='all-documents'),
     path("sales-promotion-permit-applications", views.SalesPromotionListView.as_view(), name='sales-promotion-list'),
     path("personal-data-sheets", views.PersonalDataSheetListView.as_view(), name='personal-data-sheet-list'),
+    path("service-repair-accreditations/", views.ServiceRepairAccreditationApplicationListView.as_view(), name="service-repair-list"),
+    path("inspection-validation-reports/", views.InspectionValidationReportListView.as_view(), name="inspection-validation-list"),
+    path("orders-of-payment/", views.OrderOfPaymentListView.as_view(), name="order-of-payment-list"),
+    path("checklist-evaluation-sheets/", views.ChecklistEvaluationSheetListView.as_view(), name="checklist-list"),
 
     # EXCEL VIEWS
     path("export-to-excel", views.export_to_excel, name='export-to-excel')
