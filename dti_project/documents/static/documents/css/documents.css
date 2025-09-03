@@ -14,8 +14,8 @@
   padding-bottom: 2rem;
 }
 
-.document-details-container header,
-.document-list-container header
+.document-details-header,
+.document-list-header
 {
   display: flex;
   align-items: center;
@@ -27,28 +27,28 @@
   width: 100%;
 }
 
-.document-details-container header h3,
-.document-list-container header h3
+.document-details-header h3,
+.document-list-header h3
 {
   color: var(--text-muted);
   font-size: clamp(0.5rem, 0.9vw, 1.5rem);
   font-weight: 400;
 }
 
-.document-details-container header h1,
-.document-list-container header h1
+.document-details-header h1,
+.document-list-header h1
 {
-  font-size: clamp(1rem, 1.5vw, 3rem);
+  font-size: clamp(1.5rem, 1.5vw, 3rem);
   font-weight: 600;
 }
 
-.document-details-container .actions {
+.document-details-header .actions {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
 
-.document-details-container button {
+.document-details-header button {
   color: var(--text-light);
   border: none;
   outline: none;
@@ -56,17 +56,17 @@
   transition: 0.3s;
 }
 
-.document-details-container button:hover {
+.document-details-header button:hover {
   color: var(--accent);
 }
 
-.document-details-container .actions a {
+.document-details-header .actions a {
   color: var(--text-light);
   text-decoration: none;
   transition: 0.3s;
 }
 
-.document-details-container .actions a:hover {
+.document-details-header .actions a:hover {
   color: var(--accent);
 }
 
@@ -79,6 +79,7 @@
   width: 100%;
   height: 100%;
   margin: 0 1rem;
+  padding-right: 2rem;
 }
 
 .details-grid .grid-item {
@@ -468,12 +469,16 @@
     transition: 0.15s ease-in;
 }
 
-.document-type-icon:hover {
+.document-type-icon:hover,
+.document-type-icon.active
+{
     background-color: var(--input-focus);
     border: solid 1px var(--accent);
 }
 
-.document-type-icon:hover i {
+.document-type-icon:hover i,
+.document-type-icon.active i
+{
     color: var(--accent);
 }
 
@@ -490,32 +495,115 @@
 
 .documents-table-container {
     margin: 1.5rem;
+    margin-top: 3rem;
 }
 
 .documents-table-container h3 {
     font-weight: 500;
-    margin-bottom: 2rem;
 }
 
 .documents-table {
     margin-top: 1rem;
     width: calc(100% - 1.5rem); 
+    border-collapse: collapse; 
+    border-spacing: 0;          /* <-- explicitly kill gaps */
 }
 
-.documents-table thead {
-    border-collapse: collapse;
+.documents-table-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 3rem;
+    padding-right: 2.5rem;
     width: 100%;
 }
 
-.documents-table thead tr {
-    display: table-row; /* ensures it's not flex */
+.documents-table-header .actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.documents-table-header .actions button {
+    background-color: white;
+    border: solid 1px var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: clamp(0.5rem, 0.75vw, 1.5rem);
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    transition: 0.1s;
+}
+
+.documents-table-header #filter-btn i {
+    transition: 0.1s;
+}
+
+.documents-table-header #filter-btn:hover {
+    border: solid 1px var(--accent);
+}
+
+.documents-table-header #filter-btn:hover i {
+    color: var(--accent);
+}
+
+.documents-table thead {
+    width: 100%;
 }
 
 .documents-table th {
-    display: table-cell; /* ensures header cells act like table cells */
-    text-align: left; /* align text to the start */
+    text-align: left;
     color: var(--text-secondary);
     font-weight: 400;
     border-bottom: solid 1px var(--border-color);
     padding-bottom: 1rem;
+    padding-left: 1rem;
+}
+
+.document-value-row {
+    cursor: pointer;
+}
+
+.document-value-row td {
+    padding: 1rem 0;
+    padding-left: 1rem;
+}
+
+.document-value-row:hover td {
+    background-color: rgb(228, 238, 255); 
+}
+
+#upload-from-excel-btn {
+    background-color: var(--accent);
+    color: white;
+}
+
+#export-excel-btn {
+    display: flex;
+    align-items: start;
+    background-color: white;
+    border: solid 1px var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: clamp(0.5rem, 0.75vw, 1.5rem);
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    transition: 0.1s;
+}
+
+#export-excel-btn i {
+    color: var(--text-muted);
+    transition: 0.1s;
+}
+
+#export-excel-btn:hover {
+    border: solid 1px var(--accent);
+    color: var(--accent);
+}
+
+#export-excel-btn:hover i {
+    color: var(--accent);  
 }

@@ -11,12 +11,12 @@ urlpatterns = [
     path('create/checklist-evaluation', views.CreateChecklistEvaluationSheetView.as_view(), name='create-checklist-evaluation-sheet'),
 
     # DETAIL VIEWS
-    path("sales-promotion-application/<int:pk>", views.SalesPromotionDetailView.as_view(), name="sales-promotion-application"),
-    path("personal-data-sheet/<int:pk>", views.PersonalDataSheetDetailView.as_view(), name="personal-data-sheet"),
-    path('service-repair-accreditation/<int:pk>', views.ServiceRepairAccreditationApplicationDetailView.as_view(), name='service-repair-accreditation'),
-    path("inspection-validation-report/<int:pk>", views.InspectionValidationReportDetailView.as_view(), name="inspection-validation-report"),
-    path("order-of-payment/<int:pk>", views.OrderOfPaymentDetailView.as_view(), name="order-of-payment"),
-    path("checklist-evaluation-sheet/<int:pk>", views.ChecklistEvaluationSheetDetailView.as_view(), name='checklist-evaluation-sheet'),
+    path("sales-promotion-applications/<int:pk>", views.SalesPromotionDetailView.as_view(), name="sales-promotion-application"),
+    path("personal-data-sheets/<int:pk>", views.PersonalDataSheetDetailView.as_view(), name="personal-data-sheet"),
+    path('service-repair-accreditations/<int:pk>', views.ServiceRepairAccreditationApplicationDetailView.as_view(), name='service-repair-accreditation'),
+    path("inspection-validation-reports/<int:pk>", views.InspectionValidationReportDetailView.as_view(), name="inspection-validation-report"),
+    path("order-of-payments/<int:pk>", views.OrderOfPaymentDetailView.as_view(), name="order-of-payment"),
+    path("checklist-evaluation-sheets/<int:pk>", views.ChecklistEvaluationSheetDetailView.as_view(), name='checklist-evaluation-sheet'),
 
     # UPDATE VIEWS
     path("sales-promotion-application/<int:pk>/update", views.UpdateSalesPromotionView.as_view(), name='update-sales-promotion'),
@@ -28,4 +28,13 @@ urlpatterns = [
 
     # LIST VIEWS
     path("all-documents", views.AllDocumentListView.as_view(), name='all-documents'),
+    path("sales-promotion-permit-applications", views.SalesPromotionListView.as_view(), name='sales-promotion-list'),
+    path("personal-data-sheets", views.PersonalDataSheetListView.as_view(), name='personal-data-sheet-list'),
+    path("service-repair-accreditations/", views.ServiceRepairAccreditationApplicationListView.as_view(), name="service-repair-list"),
+    path("inspection-validation-reports/", views.InspectionValidationReportListView.as_view(), name="inspection-validation-list"),
+    path("orders-of-payment/", views.OrderOfPaymentListView.as_view(), name="order-of-payment-list"),
+    path("checklist-evaluation-sheets/", views.ChecklistEvaluationSheetListView.as_view(), name="checklist-list"),
+
+    # EXCEL VIEWS
+    path("export-to-excel", views.export_to_excel, name='export-to-excel')
 ]

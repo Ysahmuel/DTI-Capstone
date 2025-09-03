@@ -1,0 +1,51 @@
+<ul class="document-type-list">
+
+    <li class="document-type-card">
+        <a href="{% url 'sales-promotion-list' %}" class="document-type-icon {% if active_doc_type == 'sales_promos' %} active {% endif %}">
+            <i class="fas fa-bullhorn"></i>
+        </a>
+        <strong class="document-type-name">Sales Promotion Permit Applications</strong>
+        <p class="document-type-count">{{ sales_promos_count }} Items</p>
+    </li>
+
+    <li class="document-type-card">
+        <a href="{% url 'personal-data-sheet-list' %}" class="document-type-icon {% if active_doc_type == 'personal_data_sheets' %} active {% endif %}">
+            <i class="fas fa-id-card"></i>
+        </a>
+        <strong class="document-type-name">Personal Data Sheets</strong>
+        <p class="document-type-count">{{ personal_data_sheets_count }} Items</p>
+    </li>
+
+    <li class="document-type-card">
+        <a href="{% url 'service-repair-list' %}" class="document-type-icon {% if active_doc_type == 'service_accreditations' %} active {% endif %}">
+            <i class="fas fa-tools"></i>
+        </a>
+        <strong class="document-type-name">Service and Repair Accreditations</strong>
+        <p class="document-type-count">{{ service_accreditations_count }} Items</p>
+    </li>
+
+    <li class="document-type-card">
+        <a href="{% url 'inspection-validation-list' %}" class="document-type-icon {% if active_doc_type == 'inspection_reports' %} active {% endif %}">
+            <i class="fas fa-clipboard-check"></i>
+        </a>
+        <strong class="document-type-name">Inspection Validation Reports</strong>
+        <p class="document-type-count">{{ inspection_reports_count }} Items</p>
+    </li>
+
+    <li class="document-type-card">
+        <a href="{% url 'order-of-payment-list' %}" class="document-type-icon {% if active_doc_type == 'orders_of_payment' %} active {% endif %}">
+            <i class="fas fa-receipt"></i>
+        </a>
+        <strong class="document-type-name">Orders of Payment</strong>
+        <p class="document-type-count">{{ orders_of_payment_count }} Items</p>
+    </li>
+
+    <li class="document-type-card">
+        <a href="{% url 'checklist-list' %}" class="document-type-icon {% if active_doc_type == 'checklist_evaluation_sheets' %} active {% endif %}">
+            <i class="fas fa-tasks"></i>
+        </a>
+        <strong class="document-type-name">Requirement Checklists</strong>
+        <p class="document-type-count">{{ checklist_evaluation_sheets_count }} Items</p>
+    </li>
+
+</ul>

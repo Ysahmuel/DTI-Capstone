@@ -11,10 +11,27 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.contrib import messages
 import logging
+from django.views.generic import TemplateView, View, DetailView, UpdateView
+from users.models import User
 
 logger = logging.getLogger(__name__)
 
 # Create your views here.
+#Profile Detail and Edit Views
+class ProfileDetailView(DetailView):
+    model = User
+    template_name = "users/profile.html"
+    context_object_name = "profile"
+
+class ProfileEditView(UpdateView):
+    model = User
+    fields = ['first_name', 'last_name', 'email', 'profile_picture']
+    template_name = "users/profile_edit.html"
+    context_object_name = "profile"  # make `profile` available in template
+
+    def get_success_url(self):
+        return reverse_lazy('profile', kwargs={'pk': self.object.pk})
+
 class CustomLoginView(FormSubmissionMixin, LoginView):
     template_name = 'users/login.html'
     redirect_authenticated_user = True
@@ -34,65 +51,44 @@ class CustomRegisterView(FormSubmissionMixin, CreateView):
         print(f"Is AJAX: {request.headers.get('X-Requested-With') == 'XMLHttpRequest'}")
         print(f"POST data: {dict(request.POST)}")
         
-        # Handle AJAX requests
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             form = self.get_form()
-            print(f"Form created: {form}")
-            print(f"Form is valid: {form.is_valid()}")
-            
-            if not form.is_valid():
-                print(f"Form errors: {form.errors}")
-                print(f"Form non-field errors: {form.non_field_errors()}")
-            
             if form.is_valid():
                 return self.form_valid(form)
             else:
                 return self.form_invalid(form)
-        
-        # Handle normal form submissions (fallback)
+
         return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
         print("=== FORM_VALID CALLED ===")
         user = form.save(commit=False)
-
-        # Ensure user starts as unverified
         user.is_verified = False
         user.save()
-        print(f"User saved: {user.username}")
 
-        # Generate OTP
         user.generate_secure_otp_code()
-
-        # ✅ log the OTP to console instead of sending email
         print(f"[DEBUG] Verification code for {user.username}: {user.verification_code}")
 
-        # Store user id in session for modal verification
         self.request.session['pending_verification_user'] = user.id
 
-        # Return JSON response for AJAX requests
         if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return JsonResponse({
                 'success': True,
                 'message': 'Registration successful! Please enter the verification code.',
                 'show_verification': True,
-                'masked_email': self.mask_email(user.email)
+                'masked_email': self.mask_email(user.email),
             })
-        
-        # Fallback for normal requests
+
         return super().form_valid(form)
-    
+
     @staticmethod
     def mask_email(email):
-        """Mask email for display"""
         if '@' not in email:
             return email
         username, domain = email.split('@', 1)
-        if len(username) <= 2:
-            masked_username = '*' * len(username)
-        else:
-            masked_username = username[:2] + '*' * (len(username) - 2)
+        masked_username = username[:2] + '*' * (len(username) - 2) if len(username) > 2 else '*' * len(username)
         return f"{masked_username}@{domain}"
+
     
 
 class VerifyUserView(View):

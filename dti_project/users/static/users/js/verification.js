@@ -46,8 +46,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     modalCodeInputs[0].focus();
                 }
             } else {
-                //  Instead of alert, reload so Django messages show
-                window.location.reload();
+                if (data.messages_html) {
+                    const alertsContainer = document.querySelector('.alerts-container');
+                    if (alertsContainer) {
+                        alertsContainer.outerHTML = data.messages_html;
+                    } else {
+                        document.querySelector('.backdrop-layer')
+                            .insertAdjacentHTML('afterbegin', data.messages_html);
+                    }
+                }
             }
         } catch (error) {
             console.error("Error submitting form:", error);

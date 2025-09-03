@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="{% static 'dashboard/css/navbar.css' %}">
     <link rel="stylesheet" href="{% static 'documents/css/documents.css' %}">
 
+    {% block extra_css %}{% endblock %}
+    
     <!-- JS -->
     <script src="{% static 'dashboard/js/scripts.js' %}"></script>
     <script src="{% static 'dashboard/js/searchbar.js' %}"></script>
@@ -19,6 +21,7 @@
     <script src="{% static 'documents/js/formsets.js' %}"></script>
     <script src="{% static 'documents/js/lazy_loading.js' %}"></script>
     <script src="{% static 'documents/js/alerts.js' %}"></script>
+    <script src="{% static 'documents/js/document_table.js' %}"></script>
 
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@latest"></script>

@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.http import JsonResponse
+from django.template.loader import render_to_string
 
 class FormSubmissionMixin:
     def form_invalid(self, form):
@@ -15,8 +16,14 @@ class FormSubmissionMixin:
                     field_name = field.replace('_', ' ').title()
                     messages.error(self.request, f"{field_name}: {error}")
 
-        # AJAX response (minimal, since frontend will display Django messages)
+        # ✅ If AJAX, return rendered HTML for the alerts container
         if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({'success': False}, status=400)
+            messages_html = render_to_string(
+                "documents/partials/alerts_container.html",
+                {"messages": messages.get_messages(self.request)},
+                request=self.request
+            )
+            return JsonResponse({'success': False, 'messages_html': messages_html}, status=400)
 
+        # Fallback for normal requests
         return super().form_invalid(form)

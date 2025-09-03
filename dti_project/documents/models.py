@@ -1,5 +1,6 @@
 from django.db import models
 from django.forms import ValidationError
+from django.urls import reverse
 from django.utils import timezone
 from .utils.model_helpers import remark_amount_fields
 from .model_choices import APPLICATION_OR_ACTIVITY_CHOICES, OFFICE_SHOP_CHOICES, RECOMMENDATION_CHOICES, REGION_CHOICES, REMARKS_CHOICES, REQUIREMENT_CHOICES, SERVICE_CATEGORY_CHOICES, STAR_RATING_CHOICES, YES_NO_CHOICES
@@ -39,6 +40,10 @@ class DraftModel(models.Model):
 
     class Meta:
         abstract = True
+
+    @property
+    def model_verbose_name(self):
+        return self._meta.verbose_name
 
     def get_str_display(self, base_display: str) -> str:
         if self.status == "draft":
@@ -154,6 +159,9 @@ class SalesPromotionPermitApplication(DraftModel, BaseApplication):
 
     def __str__(self):
         return self.get_str_display(self.promo_title)
+
+    def get_absolute_url(self):
+        return reverse("sales-promotion-application", args=[self.pk])
     
 class ProductCovered(models.Model):
     permit_application = models.ForeignKey(SalesPromotionPermitApplication, related_name='products', on_delete=models.CASCADE)
@@ -184,6 +192,7 @@ class PersonalDataSheet(DraftModel, models.Model):
         verbose_name = "Personal Data Sheet"
         verbose_name_plural = "Personal Data Sheets"
 
+    date = models.DateField(default=timezone.now)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     first_name = models.CharField(max_length=50)
     middle_name = models.CharField(max_length=50, blank=True, null=True)
@@ -200,6 +209,9 @@ class PersonalDataSheet(DraftModel, models.Model):
 
     def __str__(self):
         return self.get_str_display(f"{self.first_name} {self.last_name}")
+    
+    def get_absolute_url(self):
+        return reverse("personal-data-sheet", args=[self.pk])
 
 class EmployeeBackground(PeriodModel):
     personal_data_sheet = models.ForeignKey(PersonalDataSheet, related_name='employee_backgrounds', on_delete=models.CASCADE)
@@ -293,7 +305,7 @@ class ServiceRepairAccreditationApplication(DraftModel, models.Model):
     application_type = models.CharField(max_length=10, choices=APPLICATION_TYPES)
     category = models.CharField(max_length=100, choices=CATEGORIES)
     star_rating = models.PositiveSmallIntegerField(choices=STAR_RATING_CHOICES, validators=[MinValueValidator(1), MaxValueValidator(5)])
-
+    date = models.DateField(default=timezone.now)
     name_of_business = models.CharField(max_length=255)
 
     # Business Address Fields
@@ -340,6 +352,9 @@ class ServiceRepairAccreditationApplication(DraftModel, models.Model):
 
     def __str__(self):
         return self.get_str_display(f"{self.name_of_business} - {self.application_type} - {self.category}")
+
+    def get_absolute_url(self):
+        return reverse("service-repair-accreditation", args=[self.pk])
 
     def get_warranty_text(self):
         """Generate the warranty/undertaking text with the warranty period filled in"""
@@ -419,6 +434,9 @@ class OrderOfPayment(DraftModel, models.Model):
 
     def __str__(self):
         return self.get_str_display(f"{self.name} {self.address}")
+    
+    def get_absolute_url(self):
+        return reverse("order-of-payment", args=[self.pk])
     
 class InspectionValidationReport(DraftModel, models.Model):
     class Meta:
@@ -507,6 +525,9 @@ class InspectionValidationReport(DraftModel, models.Model):
 
     def __str__(self):
         return self.get_str_display(f"{self.name_of_business} - {self.date} - {self.type_of_application_activity}")
+    
+    def get_absolute_url(self):
+        return reverse("inspection-validation-report", args=[self.pk])
         
     def get_recommendation_display(self):
         """Return a human-readable list of selected recommendations"""
@@ -564,6 +585,8 @@ class ChecklistEvaluationSheet(DraftModel, models.Model):
     type_of_application = models.CharField(max_length=50, choices=[('New', 'New'), ('Renewal', 'Renewal')])
     renewal_due_date = models.DateField(null=True, blank=True, help_text='Date Expired: Dec 31')
     star_rating = models.PositiveSmallIntegerField(choices=STAR_RATING_CHOICES, validators=[MinValueValidator(1), MaxValueValidator(5)])
+    date = models.DateField(default=timezone.now)
+
 
     req_application_form = models.BooleanField(
         default=False,
@@ -687,3 +710,6 @@ class ChecklistEvaluationSheet(DraftModel, models.Model):
 
     def __str__(self):
         return self.get_str_display(f"{self.name_of_business} - {self.type_of_application}")
+    
+    def get_absolute_url(self):
+        return reverse("checklist-evaluation-sheet", args=[self.pk])
