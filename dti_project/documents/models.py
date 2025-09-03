@@ -1,5 +1,6 @@
 from django.db import models
 from django.forms import ValidationError
+from django.urls import reverse
 from django.utils import timezone
 from .utils.model_helpers import remark_amount_fields
 from .model_choices import APPLICATION_OR_ACTIVITY_CHOICES, OFFICE_SHOP_CHOICES, RECOMMENDATION_CHOICES, REGION_CHOICES, REMARKS_CHOICES, REQUIREMENT_CHOICES, SERVICE_CATEGORY_CHOICES, STAR_RATING_CHOICES, YES_NO_CHOICES
@@ -158,6 +159,9 @@ class SalesPromotionPermitApplication(DraftModel, BaseApplication):
 
     def __str__(self):
         return self.get_str_display(self.promo_title)
+
+    def get_absolute_url(self):
+        return reverse("sales-promotion-application", args=[self.pk])
     
 class ProductCovered(models.Model):
     permit_application = models.ForeignKey(SalesPromotionPermitApplication, related_name='products', on_delete=models.CASCADE)
@@ -205,6 +209,9 @@ class PersonalDataSheet(DraftModel, models.Model):
 
     def __str__(self):
         return self.get_str_display(f"{self.first_name} {self.last_name}")
+    
+    def get_absolute_url(self):
+        return reverse("personal-data-sheet", args=[self.pk])
 
 class EmployeeBackground(PeriodModel):
     personal_data_sheet = models.ForeignKey(PersonalDataSheet, related_name='employee_backgrounds', on_delete=models.CASCADE)
@@ -346,6 +353,9 @@ class ServiceRepairAccreditationApplication(DraftModel, models.Model):
     def __str__(self):
         return self.get_str_display(f"{self.name_of_business} - {self.application_type} - {self.category}")
 
+    def get_absolute_url(self):
+        return reverse("service-repair-accreditation", args=[self.pk])
+
     def get_warranty_text(self):
         """Generate the warranty/undertaking text with the warranty period filled in"""
         warranty_template = """
@@ -424,6 +434,9 @@ class OrderOfPayment(DraftModel, models.Model):
 
     def __str__(self):
         return self.get_str_display(f"{self.name} {self.address}")
+    
+    def get_absolute_url(self):
+        return reverse("order-of-payment", args=[self.pk])
     
 class InspectionValidationReport(DraftModel, models.Model):
     class Meta:
@@ -512,6 +525,9 @@ class InspectionValidationReport(DraftModel, models.Model):
 
     def __str__(self):
         return self.get_str_display(f"{self.name_of_business} - {self.date} - {self.type_of_application_activity}")
+    
+    def get_absolute_url(self):
+        return reverse("inspection-validation-report", args=[self.pk])
         
     def get_recommendation_display(self):
         """Return a human-readable list of selected recommendations"""
@@ -694,3 +710,6 @@ class ChecklistEvaluationSheet(DraftModel, models.Model):
 
     def __str__(self):
         return self.get_str_display(f"{self.name_of_business} - {self.type_of_application}")
+    
+    def get_absolute_url(self):
+        return reverse("checklist-evaluation-sheet", args=[self.pk])
