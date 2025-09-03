@@ -1,0 +1,80 @@
+{% extends "dashboard/layout.html" %}
+{% load static %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'users/css/profile_edit.css' %}">
+{% endblock %}
+
+{% block body %}
+<div class="profile-wrapper">
+    <div class="profile-card">
+        <!-- Banner -->
+        <div class="profile-banner"></div>
+
+        <!-- Profile Header -->
+        <div class="profile-content">
+            <div class="profile-picture-wrapper">
+                {% if profile.profile_picture %}
+                    <img src="{{ profile.profile_picture.url }}" 
+                         alt="{{ profile.username }}" 
+                         class="profile-picture">
+                {% else %}
+                    <div class="profile-avatar">
+                        {{ profile.get_full_name|slice:":1" }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="profile-info">
+                <h1 class="profile-name">{{ profile.get_full_name }}</h1>
+                <p class="profile-username">@{{ profile.username }}</p>
+                <span class="role-badge role-{{ profile.role }}">
+                    {{ profile.role|title }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Edit Form -->
+        <div class="profile-body">
+            <h2>Edit Information</h2>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_first_name">First Name</label>
+                    <input type="text" name="first_name" id="id_first_name"
+                           class="form-control" value="{{ profile.first_name }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="id_last_name">Last Name</label>
+                    <input type="text" name="last_name" id="id_last_name"
+                           class="form-control" value="{{ profile.last_name }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="id_email">Email</label>
+                    <input type="email" name="email" id="id_email"
+                           class="form-control" value="{{ profile.email }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="id_profile_picture">Profile Picture</label>
+                    <input type="file" name="profile_picture" id="id_profile_picture"
+                           class="form-control">
+                </div>
+
+                <div class="profile-actions">
+                    <a href="{% url 'profile' profile.pk %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
