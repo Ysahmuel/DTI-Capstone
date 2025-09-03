@@ -7,6 +7,12 @@ urlpatterns = [
     path('verify-user/', views.VerifyUserView.as_view(), name='verify-user'),
     path('resend-code/', views.ResendCodeView.as_view(), name='resend-code'),
     path('logout/', views.logout, name="logout"),
+
+    # Profile Detail View
+    path('profile/<int:pk>/', views.ProfileDetailView.as_view(), name='profile'),
+    # Profile Edit View
+    path("profile/<int:pk>/edit/", views.ProfileEditView.as_view(), name="profile_edit"),
+
 ]
 
 htmxpatterns = [

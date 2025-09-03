@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="{% static 'dashboard/css/navbar.css' %}">
     <link rel="stylesheet" href="{% static 'documents/css/documents.css' %}">
 
+    {% block extra_css %}{% endblock %}
+    
     <!-- JS -->
     <script src="{% static 'dashboard/js/scripts.js' %}"></script>
     <script src="{% static 'dashboard/js/searchbar.js' %}"></script>
