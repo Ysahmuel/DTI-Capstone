@@ -1,0 +1,21 @@
+{% extends 'dashboard/layout.html' %}
+
+{% block title %} Sales Promotion Permit Application List {% endblock %}
+
+{% block body %}
+    <div class="document-list-container">
+
+        <header class="document-list-header">
+            <h1>Documents <span class="current-document-type-span"> / Personal Data Sheets</span></h1>
+            {% include 'dashboard/components/searchbar.html' %}
+        </header>
+
+        {% include 'documents/components/list_components/document_type_list.html' %}
+
+        <section class="documents-table-container">
+            {% include 'documents/components/list_components/document_list_header.html' %}
+            {% include 'documents/components/list_components/document_table.html' %}
+        </section>
+
+    </div>
+{% endblock %}

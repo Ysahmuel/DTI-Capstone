@@ -76,3 +76,26 @@ class SalesPromotionListView(UserRoleMixin, DocumentCountMixin, ListView):
         context['documents'] = self.get_queryset()
 
         return context
+    
+class PersonalDataSheetListView(UserRoleMixin, DocumentCountMixin, ListView):
+    model = PersonalDataSheet
+    template_name = 'documents/list_templates/personal_data_sheet_list.html'
+    context_object_name = 'personal_data_sheets'
+
+    def get_queryset(self):
+        user = self.request.user
+
+        personal_data_sheets = self.get_queryset_or_all(PersonalDataSheet, user)
+
+        def get_date(obj):
+            return getattr(obj, 'date_filed', None) or getattr(obj, 'date', None) or datetime.date.min
+
+        documents = sorted(personal_data_sheets, key=get_date, reverse=True)
+        return documents
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['documents'] = self.get_queryset()
+
+        return context

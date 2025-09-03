@@ -29,6 +29,7 @@ urlpatterns = [
     # LIST VIEWS
     path("all-documents", views.AllDocumentListView.as_view(), name='all-documents'),
     path("sales-promotion-permit-applications", views.SalesPromotionListView.as_view(), name='sales-promotion-list'),
+    path("personal-data-sheets", views.PersonalDataSheetListView.as_view(), name='personal-data-sheet-list'),
 
     # EXCEL VIEWS
     path("export-to-excel", views.export_to_excel, name='export-to-excel')
