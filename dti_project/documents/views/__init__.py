@@ -25,7 +25,8 @@ from .update_views import (
 )
 
 from .list_views import (
-    AllDocumentListView
+    AllDocumentListView,
+    SalesPromotionListView
 )
 
 from .excel_views import (

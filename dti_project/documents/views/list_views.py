@@ -1,11 +1,12 @@
 import datetime
 from django.views.generic import ListView
+from ..mixins.counter_mixins import DocumentCountMixin
 from ..mixins.permissions_mixins import UserRoleMixin
 from ..models import ChecklistEvaluationSheet, InspectionValidationReport, OrderOfPayment, PersonalDataSheet, SalesPromotionPermitApplication, ServiceRepairAccreditationApplication
 from itertools import chain
 from operator import attrgetter
 
-class AllDocumentListView(UserRoleMixin, ListView):
+class AllDocumentListView(UserRoleMixin, DocumentCountMixin, ListView):
     template_name = 'documents/list_templates/all_documents_list.html'
     context_object_name = 'documents'
 
@@ -53,5 +54,18 @@ class AllDocumentListView(UserRoleMixin, ListView):
         return context
 
 
-class SalesPromotionListView(ListView):
-    pass
+class SalesPromotionListView(UserRoleMixin, DocumentCountMixin, ListView):
+    model = SalesPromotionPermitApplication
+    template_name = 'documents/list_templates/sales_promotion_list.html'
+    context_object_name = 'sales_promos'
+
+    def get_queryset(self):
+        user = self.request.user
+
+        sales_promos = self.get_queryset_or_all(SalesPromotionPermitApplication, user)
+
+        def get_date(obj):
+            return getattr(obj, 'date_filed', None) or getattr(obj, 'date', None) or datetime.date.min
+
+        documents = sorted(sales_promos, key=get_date, reverse=True)
+        return documents
