@@ -69,3 +69,10 @@ class SalesPromotionListView(UserRoleMixin, DocumentCountMixin, ListView):
 
         documents = sorted(sales_promos, key=get_date, reverse=True)
         return documents
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['documents'] = self.get_queryset()
+
+        return context

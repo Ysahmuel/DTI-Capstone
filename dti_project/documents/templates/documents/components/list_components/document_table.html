@@ -1,0 +1,30 @@
+{% load custom_filters %}
+
+<table class="documents-table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Document Type</th>
+            <th>User</th>
+            <th>Status</th>
+            <th>Date Created</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for document in documents %}
+            <tr class="document-value-row">
+                <td>{{ document }}</td>
+                <td>{{ document.model_verbose_name|titlecase }}</td>
+                <td>{{ document.user }}</td>
+                <td>{{ document.status|titlecase }}</td>
+                <td>
+                    {% if document.date %}
+                        {{ document.date }}
+                    {% else %}
+                        {{ document.date_filed }}
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
