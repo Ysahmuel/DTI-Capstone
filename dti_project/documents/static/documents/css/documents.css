@@ -572,6 +572,11 @@
     background-color: rgb(228, 238, 255); 
 }
 
+#upload-from-excel-btn {
+    background-color: var(--accent);
+    color: white;
+}
+
 #export-excel-btn {
     display: flex;
     align-items: start;
