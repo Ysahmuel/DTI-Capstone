@@ -536,15 +536,15 @@
     transition: 0.1s;
 }
 
-.documents-table-header .actions button i {
+.documents-table-header #filter-btn i {
     transition: 0.1s;
 }
 
-.documents-table-header .actions button:hover {
+.documents-table-header #filter-btn:hover {
     border: solid 1px var(--accent);
 }
 
-.documents-table-header .actions button:hover i {
+.documents-table-header #filter-btn:hover i {
     color: var(--accent);
 }
 
@@ -558,6 +558,7 @@
     font-weight: 400;
     border-bottom: solid 1px var(--border-color);
     padding-bottom: 1rem;
+    padding-left: 1rem;
 }
 
 .document-value-row {
@@ -566,6 +567,7 @@
 
 .document-value-row td {
     padding: 1rem 0;
+    padding-left: 1rem;
 }
 
 .document-value-row:hover td {
