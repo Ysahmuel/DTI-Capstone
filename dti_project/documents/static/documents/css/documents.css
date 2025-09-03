@@ -469,12 +469,16 @@
     transition: 0.15s ease-in;
 }
 
-.document-type-icon:hover {
+.document-type-icon:hover,
+.document-type-icon.active
+{
     background-color: var(--input-focus);
     border: solid 1px var(--accent);
 }
 
-.document-type-icon:hover i {
+.document-type-icon:hover i,
+.document-type-icon.active i
+{
     color: var(--accent);
 }
 

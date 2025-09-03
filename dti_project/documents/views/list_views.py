@@ -74,6 +74,7 @@ class SalesPromotionListView(UserRoleMixin, DocumentCountMixin, ListView):
         context = super().get_context_data(**kwargs)
 
         context['documents'] = self.get_queryset()
+        context['active_doc_type'] = 'sales_promos'
 
         return context
     
@@ -97,5 +98,6 @@ class PersonalDataSheetListView(UserRoleMixin, DocumentCountMixin, ListView):
         context = super().get_context_data(**kwargs)
 
         context['documents'] = self.get_queryset()
+        context['active_doc_type'] = 'personal_data_sheets'
 
         return context

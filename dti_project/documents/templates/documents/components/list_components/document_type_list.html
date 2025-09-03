@@ -1,7 +1,7 @@
 <ul class="document-type-list">
 
     <li class="document-type-card">
-        <a href="{% url 'sales-promotion-list' %}" class="document-type-icon">
+        <a href="{% url 'sales-promotion-list' %}" class="document-type-icon {% if active_doc_type == 'sales_promos' %} active {% endif %}">
             <i class="fas fa-bullhorn"></i>
         </a>
         <strong class="document-type-name">Sales Promotion Permit Applications</strong>
@@ -9,7 +9,7 @@
     </li>
 
     <li class="document-type-card">
-        <a href="{% url 'personal-data-sheet-list' %}" class="document-type-icon">
+        <a href="{% url 'personal-data-sheet-list' %}" class="document-type-icon  {% if active_doc_type == 'personal_data_sheets' %} active {% endif %}">
             <i class="fas fa-id-card"></i>
         </a>
         <strong class="document-type-name">Personal Data Sheets</strong>
