@@ -36,3 +36,12 @@ class UserRoleMixin:
             qs = model.objects.filter(user=user)
             
         return qs.only("pk", "id")  # Add other fields that __str__ methods need
+    
+    @staticmethod    
+    def get_count_or_all(model, user):
+        if user.role == "admin":
+            return model.objects.filter(
+                Q(status="draft", user=user) | ~Q(status="draft")
+            ).count()
+        else:
+            return model.objects.filter(user=user).count()
