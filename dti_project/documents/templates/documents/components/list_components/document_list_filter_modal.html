@@ -2,55 +2,57 @@
     <div class="document-list-filters-modal">
         <header>
             <h2>Additional Filters</h2>
-            <button id="close-list-filters-modal-btn">
+            <button type="button" id="close-list-filters-modal-btn">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </header>
 
-        <div class="filters">
+        <!-- Form -->
+        <form method="get" id="document-filters-form">
 
+            <!-- Date Created Filter -->
             <section id="date-created-filter">
                 <h4>Date Created</h4>
                 <div class="wrapper">
                     <div class="form-group">
-                        <label for="">Start Date</label>
-                        <input type="date" name="" id="">
+                        <label for="start_date">Start Date</label>
+                        <input type="date" name="start_date" id="start_date"
+                            value="{{ request.GET.start_date }}">
                     </div>
                     <div class="form-group">
-                        <label for="">End Date</label>
-                        <input type="date" name="" id="">
+                        <label for="end_date">End Date</label>
+                        <input type="date" name="end_date" id="end_date"
+                            value="{{ request.GET.end_date }}">
                     </div>
                 </div>
             </section>
 
+            <!-- Status Filter -->
             <section id="status-filter">
                 <h4>Status</h4>
                 <ul class="status-filter-list">
-                    <li>
-                        <input type="checkbox" name="" id="">
-                        Draft
+                    <li class="status-filter-item">
+                        <label>
+                            <input type="checkbox" name="status" value="draft"
+                                {% if "draft" in selected_statuses %}checked{% endif %}>
+                            Draft
+                        </label>
                     </li>
-                    <li>
-                        <input type="checkbox" name="" id="">
-                        Submitted
+                    <li class="status-filter-item">
+                        <label>
+                            <input type="checkbox" name="status" value="submitted"
+                                {% if "submitted" in selected_statuses %}checked{% endif %}>
+                            Submitted
+                        </label>
                     </li>
                 </ul>
             </section>
 
-            <section id="created-by-filter">
-                <h4>Created by</h4>
-                <div class="created-by-searchbar">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" name="" id="">
-                </div>
-            </section>
-
-        </div>
-
-        <div class="actions">
-            <button id="clear-btn">Clear</button>
-            <button id="submit-btn">Submit</button>
-        </div>
-
+            <!-- Actions -->
+            <div class="actions">
+                <button type="reset" id="clear-btn">Clear</button>
+                <button type="submit" id="submit-btn">Apply</button>
+            </div>
+        </form>
     </div>
 </div>

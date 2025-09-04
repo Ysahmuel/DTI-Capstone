@@ -1,6 +1,6 @@
 .document-list-filters-container {
     position: fixed;
-    display:flex;
+    display: none;
     align-items: center;
     justify-content: center;
     top: 50%;
@@ -50,7 +50,7 @@
     font-size: clamp(0.65rem, 0.9vw, 1.5rem);
 }
 
-.document-list-filters-modal .filters {
+#document-filters-form {
     display: flex;
     flex-direction: column;
     gap: 2.5rem;
@@ -102,20 +102,27 @@
     gap: 0.5rem;
     font-size: clamp(0.5rem, 0.75vw, 1.5rem);
     border: solid 1px var(--border-color);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-sm);
     padding: 8px 16px;
     cursor: pointer;
     transition: 0.15s;
 }
 
-.status-filter-list li:hover {
+.status-filter-list li:hover,
+.status-filter-list li.active
+{
     background-color: var(--input-focus);
     color: var(--accent);
     border: solid 1px var(--accent);
+    cursor: pointer;
 }
 
 .status-filter-list li input[type="checkbox"] {
     display: none;
+}
+
+.status-filter-list li label {
+    pointer-events: none;
 }
 
 .created-by-searchbar {
