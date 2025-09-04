@@ -284,3 +284,72 @@
     font-weight: 400;
     margin-top: 0.125rem;
 }
+
+@media (max-width: 1024px) {
+    :root {
+        --sidebar-collapsed-width: 4rem;
+        --sidebar-expanded-width: 16rem;
+    }
+    
+    .main-content {
+        margin-left: var(--sidebar-collapsed-width);
+        transition: margin-left var(--transition-duration) ease-in-out;
+    }
+    
+    .side-navbar.extended ~ .main-content {
+        margin-left: var(--sidebar-expanded-width);
+    }
+    
+    .side-navbar {
+        width: var(--sidebar-collapsed-width);
+    }
+    
+    .side-navbar.extended {
+        width: var(--sidebar-expanded-width);
+    }
+    
+    .side-navbar header {
+        padding: 0.75rem;
+        min-height: 4rem;
+    }
+    
+    .side-navbar section {
+        padding: 0 0.75rem;
+    }
+    
+    .nav-link,
+    .nav-dropdown-btn {
+        padding: 0.65rem;
+        font-size: 0.85rem;
+    }
+    
+    .nav-dropdown-list a {
+        padding: 0.65rem;
+        padding-left: 2.5rem;
+        font-size: 0.8rem;
+    }
+    
+    .side-navbar #collapse-nav-btn {
+        width: 2rem;
+        height: 2rem;
+        padding: 1rem;
+        right: -0.75rem;
+    }
+    
+    #account-menu-section #profile-link {
+        padding: 0.65rem;
+    }
+    
+    #account-menu-section #profile-link img {
+        width: 1.75rem;
+        height: 1.75rem;
+    }
+    
+    #account-menu-section #profile-link strong {
+        font-size: 0.85rem;
+    }
+    
+    #account-menu-section #profile-link p {
+        font-size: 0.7rem;
+    }
+}
