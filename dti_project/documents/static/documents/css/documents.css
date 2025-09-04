@@ -1,6 +1,7 @@
 @import url('forms.css');
 @import url('progress-nav.css');
 @import url('alerts.css');
+@import url('filters.css');
 
 /* ========================================
    DOCUMENT DETAILS LAYOUT
@@ -607,3 +608,4 @@
 #export-excel-btn:hover i {
     color: var(--accent);  
 }
+

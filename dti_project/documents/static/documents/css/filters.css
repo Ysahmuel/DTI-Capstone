@@ -1,0 +1,169 @@
+.document-list-filters-container {
+    position: fixed;
+    display:flex;
+    align-items: center;
+    justify-content: center;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100vw;
+    height: 100vh;
+    backdrop-filter: blur(5px);
+    background: rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}
+
+.document-list-filters-modal {
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    border: solid 1px var(--border-color);
+    border-radius: var(--radius-lg);
+    min-width: 30vw;
+    padding: 1.5rem;
+}
+
+.document-list-filters-modal header {
+    position: sticky;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: solid 2px var(--border-color);
+}
+
+.document-list-filters-modal header h2 {
+    color: var(--text-primary);
+    font-size: clamp(1rem, 1vw, 3rem);
+    font-weight: 700;
+}
+
+#close-list-filters-modal-btn {
+    border: none;
+    outline: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: clamp(0.65rem, 0.9vw, 1.5rem);
+}
+
+.document-list-filters-modal .filters {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+    overflow-y: auto;
+    width: 100%;
+}
+
+.document-list-filters-modal .wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.document-list-filters-modal h4 {
+    color: var(--text-primary);
+    font-size: clamp(0.5rem, 0.85vw, 2rem);
+    font-weight: 500;
+    margin-bottom: 1.25rem;
+}
+
+.document-list-filters-modal .form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.document-list-filters-modal label {
+    color: var(--text-secondary);
+    font-size: clamp(0.5rem, 0.75vw, 1.5rem);
+}
+
+.document-list-filters-modal input {
+    border: solid 1px var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 8px;
+}
+
+.status-filter-list {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    list-style-type: none;
+}
+
+.status-filter-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: clamp(0.5rem, 0.75vw, 1.5rem);
+    border: solid 1px var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: 0.15s;
+}
+
+.status-filter-list li:hover {
+    background-color: var(--input-focus);
+    color: var(--accent);
+    border: solid 1px var(--accent);
+}
+
+.status-filter-list li input[type="checkbox"] {
+    display: none;
+}
+
+.created-by-searchbar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border: solid 1px var(--border-color);
+    border-radius: var(--radius-md);
+    margin-top: -0.5rem;
+    width: 100%;
+}
+
+.created-by-searchbar i {
+    position: absolute;
+    top: 50%;
+    left: 0.75rem;
+    transform: translateY(-50%);
+    color: var(--text-light);
+    font-size: clamp(0.25rem, 0.75vw, 1rem);
+}
+
+.created-by-searchbar input {
+    border: none;
+    outline: none;
+    font-size: clamp(0.5rem, 1rem, 1.5rem);
+    padding-left: 2.5rem;
+    padding-right: 3rem;
+    width: 100%;
+}
+
+.document-list-filters-modal .actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 2.5rem;
+    margin-left: auto;
+}
+
+.document-list-filters-modal .actions button {
+    border: solid 1px var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 8px 16px;
+    cursor: pointer;
+}
+
+.document-list-filters-modal #submit-btn {
+    background-color: var(--accent);
+    border: none;
+    color: white;
+}
