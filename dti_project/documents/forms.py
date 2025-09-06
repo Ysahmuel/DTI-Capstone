@@ -45,6 +45,23 @@ class BaseCustomForm(forms.ModelForm):
                 existing_classes = field.widget.attrs.get('class', '')
                 field.widget.attrs['class'] = f"{existing_classes} form-group".strip()
 
+                # Numbers-only fields (TIN, contact/mobile/fax/telephone)
+                numerical_fields = [
+                    'tax_identification_number',
+                    'contact_number',
+                    'mobile_number',
+                    'fax_number',
+                    'telephone_number',
+                ]
+
+                if name in numerical_fields:
+                    # Enforce digits only in UI
+                    field.widget.attrs.update({
+                        'inputmode': 'numeric',
+                        'pattern': r'\d*',
+                        'oninput': "this.value=this.value.replace(/[^0-9]/g,'')",  # JS enforce
+                    })
+
                 # Inject 11-digit validation for contact_number fields
                 if name == 'contact_number' or name == 'mobile_number':
                     field.validators.append(self.validate_contact_number)
