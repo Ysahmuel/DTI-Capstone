@@ -19,12 +19,12 @@ urlpatterns = [
     path("checklist-evaluation-sheets/<int:pk>", views.ChecklistEvaluationSheetDetailView.as_view(), name='checklist-evaluation-sheet'),
 
     # UPDATE VIEWS
-    path("sales-promotion-application/<int:pk>/update", views.UpdateSalesPromotionView.as_view(), name='update-sales-promotion'),
-    path("personal-data-sheet/<int:pk>/update", views.UpdatePersonalDataSheetView.as_view(), name='update-personal-data-sheet'),
-    path("service-repair-accreditation/<int:pk>/update", views.UpdateServiceRepairAccreditationApplicationView.as_view(), name='update-service-repair-accreditation'),
-    path("inspection-validation-report/<int:pk>/update", views.UpdateInspectionValidationReportView.as_view(), name="update-inspection-validation-report"),
-    path("order-of-payment/<int:pk>/update", views.UpdateOrderOfPaymentView.as_view(), name="update-order-of-payment"),
-    path("checklist-evaluation-sheet/<int:pk>/update", views.UpdateChecklistEvaluationSheetView.as_view(), name='update-checklist-evaluation-sheet'),
+    path("sales-promotion-applications/<int:pk>/update", views.UpdateSalesPromotionView.as_view(), name='update-sales-promotion'),
+    path("personal-data-sheets/<int:pk>/update", views.UpdatePersonalDataSheetView.as_view(), name='update-personal-data-sheet'),
+    path("service-repair-accreditations/<int:pk>/update", views.UpdateServiceRepairAccreditationApplicationView.as_view(), name='update-service-repair-accreditation'),
+    path("inspection-validation-reports/<int:pk>/update", views.UpdateInspectionValidationReportView.as_view(), name="update-inspection-validation-report"),
+    path("orders-of-payment/<int:pk>/update", views.UpdateOrderOfPaymentView.as_view(), name="update-order-of-payment"),
+    path("checklist-evaluation-sheets/<int:pk>/update", views.UpdateChecklistEvaluationSheetView.as_view(), name='update-checklist-evaluation-sheet'),
 
     # LIST VIEWS
     path("all-documents", views.AllDocumentListView.as_view(), name='all-documents'),
