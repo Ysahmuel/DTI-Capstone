@@ -1,4 +1,4 @@
-import datetime
+from datetime import date
 import re
 from django import forms
 from .utils.form_helpers import create_inline_formset
@@ -67,9 +67,19 @@ class BaseCustomForm(forms.ModelForm):
                     field.validators.append(self.validate_contact_number)
                     field.widget.attrs['maxlength'] = 11  # Enforce input limit in UI
 
+                # Ensure date_of_birth is not in the future   
+                if name == 'date_of_birth':
+                    field.validators.append(self.validate_date_of_birth)
+                    # Add frontend restriction too
+                    field.widget.attrs['max'] = date.today().isoformat()
+
     def validate_contact_number(self, value):
         if not re.fullmatch(r'\d{11}', str(value)):
             raise forms.ValidationError("Contact/Mobile number must be exactly 11 digits.")
+        
+    def validate_date_of_birth(self, value):
+        if value > date.today():
+            raise forms.ValidationError('Date of birth cannot be in the future.')
 
 
 class SalesPromotionPermitApplicationForm(BaseCustomForm):
