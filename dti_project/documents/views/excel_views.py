@@ -13,6 +13,25 @@ from urllib.parse import quote
 
 class ImportFromExcelView(View):
     pass
+import datetime
+from itertools import chain
+from urllib.parse import quote
+from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment, PatternFill
+from openpyxl.utils import get_column_letter
+from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
+from django.db.models import Q
+
+from ..mixins.permissions_mixins import UserRoleMixin
+from ..models import (
+    ChecklistEvaluationSheet,
+    InspectionValidationReport,
+    OrderOfPayment,
+    PersonalDataSheet,
+    SalesPromotionPermitApplication,
+    ServiceRepairAccreditationApplication,
+)
 
 
 @login_required
@@ -115,6 +134,13 @@ def export_to_excel(request, queryset=None, filename="export.xlsx"):
         headers = [f.verbose_name.title() for f in fields]
         ws.append(headers)
 
+        # Style headers
+        for col_num, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col_num)
+            cell.font = Font(bold=True)
+            cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            cell.fill = PatternFill(start_color="DDDDDD", end_color="DDDDDD", fill_type="solid")
+
         # Rows
         for obj in objs:
             row = []
@@ -122,8 +148,26 @@ def export_to_excel(request, queryset=None, filename="export.xlsx"):
                 val = getattr(obj, f.name, "")
                 if isinstance(val, datetime.datetime):
                     val = val.date()
-                row.append(str(val) if val is not None else "")
+                if val is None:
+                    val = ""
+                row.append(to_title(str(val)))
             ws.append(row)
+
+        # Auto-size columns
+        for col_num, col_cells in enumerate(ws.columns, 1):
+            max_length = 0
+            column = get_column_letter(col_num)
+            for cell in col_cells:
+                try:
+                    if cell.value:
+                        max_length = max(max_length, len(str(cell.value)))
+                except:
+                    pass
+            adjusted_width = min(max_length + 2, 50)  # cap width
+            ws.column_dimensions[column].width = adjusted_width
+
+        # Freeze header row
+        ws.freeze_panes = "A2"
 
     # --- Calculate min/max dates for filename ---
     dates = []
@@ -144,7 +188,7 @@ def export_to_excel(request, queryset=None, filename="export.xlsx"):
         date_part = ""
 
     if doc_type == "all":
-        filename = f"All Documents from {date_part}.xlsx" if date_part else "All Documents.xlsx"
+        filename = f"All_Documents_from_{date_part}.xlsx" if date_part else "All_Documents.xlsx"
     else:
         filename = f"{doc_type}_{date_part}.xlsx" if date_part else f"{doc_type}.xlsx"
 
@@ -156,3 +200,12 @@ def export_to_excel(request, queryset=None, filename="export.xlsx"):
     response["Content-Disposition"] = f"attachment; filename={safe_filename}; filename*=UTF-8''{safe_filename}"
     wb.save(response)
     return response
+
+
+
+
+def to_title(value):
+    """Normalize strings: remove underscores, title-case, handle non-strings gracefully."""
+    if not isinstance(value, str):
+        return value
+    return value.replace("_", " ").title()
