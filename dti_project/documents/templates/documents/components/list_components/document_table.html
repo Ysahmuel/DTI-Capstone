@@ -15,7 +15,13 @@
             <tr class="document-value-row" data-href="{{ document.get_absolute_url }}">
                 <td>{{ document }}</td>
                 <td>{{ document.model_verbose_name|titlecase }}</td>
-                <td>{{ document.user }}</td>
+                <td>
+                    {% if document.user == request.user %}
+                        You
+                    {% else %}
+                        {{ document.user }}
+                    {% endif %}
+                </td>
                 <td>{{ document.status|titlecase }}</td>
                 <td>
                     {% if document.date %}
