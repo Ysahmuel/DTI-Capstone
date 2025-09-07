@@ -1,6 +1,10 @@
+import datetime
+from django.utils import timezone
 from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.core.exceptions import ImproperlyConfigured
+from django.db.models.fields.files import FieldFile
+from django.utils.dateformat import format as date_format
 
 class TabsSectionMixin:
     """
@@ -248,11 +252,21 @@ class PreviewContextMixin:
         if not form.is_valid():
             return {"preview_errors": form.errors}
 
-        cleaned = form.cleaned_data
+        instance = form.instance
+
+        # Set default values for preview
+        if not getattr(instance, "user", None):
+            instance.user = getattr(self.request, "user", None)
+
+        if hasattr(instance, "date_filed") and not instance.date_filed:
+            instance.date_filed = timezone.now().date()
+
+        if hasattr(instance, "date") and not instance.date:
+            instance.date = timezone.now().date()
+
         groups = []
 
         for group in (self.detail_groups or []):
-            # Some groups may have 2 or 3 tuple forms depending on your constants
             if len(group) == 3:
                 group_name, fields, _ = group
             else:
@@ -260,9 +274,22 @@ class PreviewContextMixin:
 
             group_fields = []
             for label, field in fields:
+                raw_value = form.cleaned_data.get(field) or getattr(instance, field, None)
+
+                # Handle file fields: show filename
+                if isinstance(raw_value, FieldFile):
+                    value = raw_value.name if raw_value.name else "-"
+                elif isinstance(raw_value, (datetime.datetime, datetime.date)):
+                    value = date_format(raw_value, "M j, Y")
+                # Handle empty or null values
+                elif raw_value in [None, ""]:
+                    value = "-"
+                else:
+                    value = str(raw_value)
+
                 group_fields.append({
                     "label": label,
-                    "value": cleaned.get(field, "") or "-"
+                    "value": value
                 })
 
             groups.append({

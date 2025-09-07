@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Helper function to show errors in the alerts container
     function showErrorInContainer(errorMessage) {
-        const messagesBox = document.querySelector(".messages");
+        const messagesBox = document.querySelector(".alerts-container");
         if (messagesBox) {
             messagesBox.innerHTML = `
                 <div class="alerts-container error">
