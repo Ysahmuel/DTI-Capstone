@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const additionalFiltersBtn = document.getElementById('filter-btn');
-    const filterModalContainer = document.querySelector('.document-list-filters-container');
-    const closeFilterModalBtn = document.getElementById('close-list-filters-modal-btn');
+    const filterModalContainer = document.getElementById('document-list-filters-container');
+    const closeFilterModalBtn = document.querySelector('.close-modal-btn');
     
     if (additionalFiltersBtn && filterModalContainer && closeFilterModalBtn) {
         additionalFiltersBtn.addEventListener('click', function() {

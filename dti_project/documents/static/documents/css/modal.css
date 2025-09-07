@@ -1,4 +1,4 @@
-.document-list-filters-container {
+.modal-container {
     position: fixed;
     display: none;
     align-items: center;
@@ -13,7 +13,7 @@
     z-index: 1000;
 }
 
-.document-list-filters-modal {
+.modal {
     display: flex;
     flex-direction: column;
     background-color: white;
@@ -23,7 +23,7 @@
     padding: 1.5rem;
 }
 
-.document-list-filters-modal header {
+.modal header {
     position: sticky;
     top: 0;
     left: 0;
@@ -36,13 +36,13 @@
     border-bottom: solid 2px var(--border-color);
 }
 
-.document-list-filters-modal header h2 {
+.modal header h2 {
     color: var(--text-primary);
     font-size: clamp(1rem, 1vw, 3rem);
     font-weight: 700;
 }
 
-#close-list-filters-modal-btn {
+.close-modal-btn {
     border: none;
     outline: none;
     color: var(--text-secondary);
@@ -58,32 +58,32 @@
     width: 100%;
 }
 
-.document-list-filters-modal .wrapper {
+.modal .wrapper {
     display: flex;
     align-items: center;
     gap: 1rem;
 }
 
-.document-list-filters-modal h4 {
+.modal h4 {
     color: var(--text-primary);
     font-size: clamp(0.5rem, 0.85vw, 2rem);
     font-weight: 500;
     margin-bottom: 1.25rem;
 }
 
-.document-list-filters-modal .form-group {
+.modal .form-group {
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
 }
 
-.document-list-filters-modal label {
+.modal label {
     color: var(--text-secondary);
     font-size: clamp(0.5rem, 0.75vw, 1.5rem);
 }
 
-.document-list-filters-modal input {
+.modal input {
     border: solid 1px var(--border-color);
     border-radius: var(--radius-sm);
     padding: 8px;
@@ -154,7 +154,7 @@
     width: 100%;
 }
 
-.document-list-filters-modal .actions {
+.modal .actions {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -162,14 +162,14 @@
     margin-left: auto;
 }
 
-.document-list-filters-modal .actions button {
+.modal .actions button {
     border: solid 1px var(--border-color);
     border-radius: var(--radius-sm);
     padding: 8px 16px;
     cursor: pointer;
 }
 
-.document-list-filters-modal #submit-btn {
+.modal #submit-btn {
     background-color: var(--accent);
     border: none;
     color: white;
