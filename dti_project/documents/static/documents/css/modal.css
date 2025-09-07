@@ -1,6 +1,6 @@
 .modal-container {
     position: fixed;
-    display: none;
+    display: flex;
     align-items: center;
     justify-content: center;
     top: 50%;
@@ -30,7 +30,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 2rem;
+    gap: 4rem;
     padding-bottom: 1rem;
     margin-bottom: 1rem;
     border-bottom: solid 2px var(--border-color);

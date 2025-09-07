@@ -3,6 +3,9 @@
 {% block title %} Create Inspection Validation Report {% endblock %}
 
 {% block body %}
+
+{% include 'documents/components/preview_modal.html' with document="Sales Promotion Permit Application" %}
+
 <div class="form-container">
 
     {% include 'documents/components/document_form_header.html' with title="Inspection Validation Report Form" %}

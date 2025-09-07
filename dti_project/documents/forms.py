@@ -199,7 +199,7 @@ class ChecklistEvaluationSheetForm(BaseCustomForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        current_year = datetime.date.today().year
+        current_year = date.today().year
         self.fields['renewal_year'].max_value = current_year
         self.fields['renewal_year'].initial = current_year - 1
 
@@ -207,7 +207,7 @@ class ChecklistEvaluationSheetForm(BaseCustomForm):
         cleaned_data = super().clean()
         year = cleaned_data.get('renewal_year')
         if year:
-            cleaned_data['renewal_due_date'] = datetime.date(year, 12, 31)
+            cleaned_data['renewal_due_date'] = date(year, 12, 31)
         return cleaned_data
 
 # Formset configurations

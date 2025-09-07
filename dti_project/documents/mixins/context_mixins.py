@@ -239,3 +239,35 @@ class TabsSectionMixin:
             'count': tab_data['count'],
             'has_data': tab_data['has_data']
         })
+    
+class PreviewContextMixin:
+    detail_groups = None  # each view must set this
+
+    def get_preview_context(self, form):
+        """Builds preview context using configured detail groups"""
+        if not form.is_valid():
+            return {"preview_errors": form.errors}
+
+        cleaned = form.cleaned_data
+        groups = []
+
+        for group in (self.detail_groups or []):
+            # Some groups may have 2 or 3 tuple forms depending on your constants
+            if len(group) == 3:
+                group_name, fields, _ = group
+            else:
+                group_name, fields = group
+
+            group_fields = []
+            for label, field in fields:
+                group_fields.append({
+                    "label": label,
+                    "value": cleaned.get(field, "") or "-"
+                })
+
+            groups.append({
+                "name": group_name,
+                "fields": group_fields
+            })
+
+        return {"preview_groups": groups}

@@ -54,6 +54,23 @@ class FormSubmissionMixin:
         # Use form bound to self.object
         form = self.get_form(self.get_form_class())
 
+        # === PREVIEW MODE (for validation only - don't save) ===
+        if action == "preview":
+            if form.is_valid():
+                # Don't save, just validate formsets
+                temp_obj = form.save(commit=False)
+                temp_obj.user = request.user
+                
+                formsets = self.get_formsets(instance=temp_obj)
+                if self.formsets_valid(formsets):
+                    # All validation passed - this should be handled by the child class
+                    # for preview display
+                    return self.form_valid(form)
+                else:
+                    return self.form_invalid(form, action="preview")
+            else:
+                return self.form_invalid(form, action="preview")
+
         # === DRAFT MODE ===
         if action == "draft":
             obj = self.object or self.model()
