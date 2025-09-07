@@ -1,15 +1,18 @@
 document.addEventListener('DOMContentLoaded', function() {
     const additionalFiltersBtn = document.getElementById('filter-btn');
-    const filterModalContainer = document.getElementById('document-list-filters-container');
-    const closeFilterModalBtn = document.querySelector('.close-modal-btn');
+    const modalContainer = document.querySelector('.modal-container');
+    const closemodalBtn = document.querySelector('.close-modal-btn');
     
-    if (additionalFiltersBtn && filterModalContainer && closeFilterModalBtn) {
+    if (additionalFiltersBtn && modalContainer && closemodalBtn) {
         additionalFiltersBtn.addEventListener('click', function() {
-            filterModalContainer.style.display = 'flex';
+            modalContainer.style.display = 'flex';
         });
+    }
 
-        closeFilterModalBtn.addEventListener('click', function() {
-            filterModalContainer.style.display = 'none';
+
+    if (modalContainer && closemodalBtn) {
+        closemodalBtn.addEventListener('click', function() {
+            modalContainer.style.display = 'none';
         });
     }
 
