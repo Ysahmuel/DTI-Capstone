@@ -95,9 +95,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     console.log("Showing preview modal");
                     let html = "";
                     data.preview_groups.forEach(group => {
-                        html += `<h3>${group.name}</h3><ul>`;
+                        html += `<h3 class="preview-group-name">${group.name}</h3><ul class="preview-group-list">`;
                         group.fields.forEach(field => {
-                            html += `<li><strong>${field.label}:</strong> ${field.value}</li>`;
+                            html += `<li class="preview-list-item">
+                                        <strong>${field.label}:</strong> 
+                                        <p>${field.value}</p>
+                                    </li>`;
                         });
                         html += "</ul>";
                     });

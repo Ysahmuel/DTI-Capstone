@@ -11,6 +11,7 @@
     backdrop-filter: blur(5px);
     background: rgba(0, 0, 0, 0.2);
     z-index: 1000;
+    overflow: hidden;
 }
 
 .modal {
@@ -20,6 +21,7 @@
     border: solid 1px var(--border-color);
     border-radius: var(--radius-lg);
     min-width: 30vw;
+    max-height: 60%;
     padding: 1.5rem;
 }
 
@@ -169,8 +171,51 @@
     cursor: pointer;
 }
 
-.modal #submit-btn {
+.modal #submit-btn,
+.modal #confirm-btn
+{
     background-color: var(--accent);
     border: none;
     color: white;
+}
+
+.modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-height: 75%;
+    overflow-y: auto;
+    padding-right: 1.5rem;
+}
+
+.preview-group-name {
+    font-size: clamp(1rem, 1vw, 2rem);
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    width: 100%;
+}
+
+.preview-group-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    list-style-type: none;
+}
+
+.preview-list-item {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 1rem;
+    font-size: clamp(0.75rem, 0.85vw, 1.5rem);
+}
+
+.preview-list-item strong {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.preview-list-item p {
+    color: var(--text-secondary);
+    font-weight: 400;
 }
