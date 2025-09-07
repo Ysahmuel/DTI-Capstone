@@ -25,12 +25,13 @@ class ProfileDetailView(DetailView):
 
 class ProfileEditView(UpdateView):
     model = User
-    fields = ['first_name', 'last_name', 'email', 'profile_picture']
+    fields = ['first_name', 'last_name', 'email', 'profile_picture', 'default_address', 'default_phone']
     template_name = "users/profile_edit.html"
     context_object_name = "profile"  # make `profile` available in template
 
     def get_success_url(self):
         return reverse_lazy('profile', kwargs={'pk': self.object.pk})
+
 
 class CustomLoginView(FormSubmissionMixin, LoginView):
     template_name = 'users/login.html'
