@@ -154,6 +154,7 @@ class SearchSuggestionsView(View):
                     if u.profile_picture
                     else "",
                     "role": u.role.replace("_", " ").title(),
+                    "link": '/users/profile',
                 }
                 for u in users_qs
             ]
@@ -189,6 +190,7 @@ class SearchSuggestionsView(View):
                     if u.profile_picture
                     else "",
                     "role": u.role.replace("_", " ").title(),
+                    "link": '/users/profile',
                 }
                 for u in users_qs
             ]
