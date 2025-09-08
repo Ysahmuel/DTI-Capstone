@@ -423,10 +423,10 @@ PERSONAL_DATA_SHEET_TAB_SECTIONS = [
 ]
 
 MODEL_URLS = {
-    'SalesPromotionPermitApplication': 'sales-promotion-application',
-    'PersonalDataSheet': 'personal-data-sheet',
-    'ServiceRepairAccreditationApplication': 'service-repair-accreditation',
-    'InspectionValidationReport': 'inspection-validation-report',
-    'OrderOfPayment': 'order-of-payment',
-    'ChecklistEvaluationSheet': 'checklist-evaluation-sheet',
+    'SalesPromotionPermitApplication': 'sales-promotion-applications',
+    'PersonalDataSheet': 'personal-data-sheets',
+    'ServiceRepairAccreditationApplication': 'service-repair-accreditations',
+    'InspectionValidationReport': 'inspection-validation-reports',
+    'OrderOfPayment': 'order-of-payments',
+    'ChecklistEvaluationSheet': 'checklist-evaluation-sheets',
 }
