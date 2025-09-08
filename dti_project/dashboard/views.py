@@ -137,13 +137,13 @@ class SearchSuggestionsView(View):
         ]
 
         # --- ADMIN: search users + all documents ---
-        if user.role == "admin":
+        if user.role == "collection_agent":
             users_qs = (
                 User.objects.annotate(
                     full_name=Concat(F("first_name"), Value(" "), F("last_name"))
                 )
                 .filter(full_name__icontains=query)
-                .exclude(role="admin")
+                .exclude(role="collection_agent")
             )
 
             response_data["users"] = [
@@ -171,6 +171,35 @@ class SearchSuggestionsView(View):
                 self._search_documents(
                     model, query, response_data, restrict_to_user=True, user=user
                 )
+
+        elif user.role == 'admin':
+            # Admin can search users (like collection_agent)
+            users_qs = (
+                User.objects.annotate(
+                    full_name=Concat(F("first_name"), Value(" "), F("last_name"))
+                )
+                .filter(full_name__icontains=query)
+            )
+
+            response_data["users"] = [
+                {
+                    "id": u.id,
+                    "full_name": u.full_name,
+                    "profile_picture": u.profile_picture.url
+                    if u.profile_picture
+                    else "",
+                    "role": u.role.replace("_", " ").title(),
+                }
+                for u in users_qs
+            ]
+            response_data["user_count"] = users_qs.count()
+
+            # Admin can search all documents (no user restriction)
+            for model in document_models:
+                self._search_documents(
+                    model, query, response_data, restrict_to_user=False
+                )
+            
 
         return JsonResponse(response_data)
 
