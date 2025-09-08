@@ -28,18 +28,20 @@ class OwnershipDraftMixin:
 class UserRoleMixin:
     @staticmethod
     def get_queryset_or_all(model, user):
-        if user.role == "admin":
+        if user.role == "collection_agent":
             qs = model.objects.filter(
                 Q(status="draft", user=user) | ~Q(status="draft")
             )
-        else:
+        elif user.role == 'business_owner':
             qs = model.objects.filter(user=user)
+        elif user.role == 'admin':
+            qs = model.objects.all()
             
         return qs.only("pk", "id")  # Add other fields that __str__ methods need
     
     @staticmethod    
     def get_count_or_all(model, user):
-        if user.role == "admin":
+        if user.role == "collection_agent":
             return model.objects.filter(
                 Q(status="draft", user=user) | ~Q(status="draft")
             ).count()
