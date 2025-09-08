@@ -9,6 +9,7 @@ class User(AbstractUser):
     class Roles(models.TextChoices):
         BUSINESS_OWNER = "business_owner", "Business Owner"
         ADMIN = "admin", "Admin"
+        COLLECTION_AGENT = "collection_agent", "Collection Agent"
 
     profile_picture = models.ImageField(
         upload_to='profile_pictures/',
