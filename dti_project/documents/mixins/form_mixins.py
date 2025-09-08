@@ -2,6 +2,16 @@ from django.contrib import messages
 from django.shortcuts import redirect
 from django.views.generic import CreateView
 from django.db import transaction
+from documents.utils.form_helpers import get_previous_instance
+
+class PrefillFromPreviousSubmissionMixin:
+    def get_initial(self):
+        previous = super().get_previous()
+        previous_instance = get_previous_instance(self.model, self.request.user)
+        if previous_instance:
+            for field in self.prefill_fields:
+                previous[field] = getattr(previous_instance, field, '')
+        return previous
 
 class MessagesMixin:
     """Mixin for handling form success and error messages."""
