@@ -18,13 +18,11 @@
             <div class="profile-header-content">
                 <div class="profile-picture-wrapper">
                     {% if profile.profile_picture %}
-                        <img src="{{ profile.profile_picture.url }}" 
-                             alt="{{ profile.username }}" 
-                             class="profile-picture">
+                    <img src="{{ profile.profile_picture.url }}" alt="{{ profile.username }}" class="profile-picture">
                     {% else %}
-                        <div class="profile-avatar">
-                            {{ profile.get_full_name|slice:":1" }}
-                        </div>
+                    <div class="profile-avatar">
+                        {{ profile.get_full_name|slice:":1" }}
+                    </div>
                     {% endif %}
                 </div>
 
@@ -41,10 +39,15 @@
         <!-- Contact Information -->
         <div class="profile-body">
             <h2>Contact Information</h2>
-            <p><strong>Email:</strong> 
-                <a href="mailto:{{ profile.email }}">{{ profile.email }}</a>
+            <p><strong>Email:</strong>
+                <a href="mailto:{{ profile.email }}">{{ profile.email|default:"Not provided" }}</a>
             </p>
+
+            <p><strong>Phone:</strong> {{ profile.default_phone|default:"Not provided" }}</p>
+
+            <p><strong>Address:</strong> {{ profile.default_address|default:"Not provided" }}</p>
         </div>
+
 
         <!-- Activity Section -->
         <div class="profile-section">
