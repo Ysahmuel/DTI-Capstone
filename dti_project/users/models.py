@@ -3,23 +3,8 @@ import secrets
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.utils import timezone
-from django.db import models
-from django.conf import settings
 
 # Create your models here.
-
-class Activity(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="activities")
-    action = models.CharField(max_length=255)
-    timestamp = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ['-timestamp']
-
-    def __str__(self):
-        return f"{self.user} - {self.action}"
-
-
 class User(AbstractUser):
     class Roles(models.TextChoices):
         BUSINESS_OWNER = "business_owner", "Business Owner"
