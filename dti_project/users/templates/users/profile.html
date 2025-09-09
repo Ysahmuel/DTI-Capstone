@@ -50,12 +50,18 @@
 
 
         <!-- Activity Section -->
-        <div class="profile-section">
+        <div class="profile-section activity-section">
             <h2>Recent Activity</h2>
             <ul class="activity-list">
-                <li><i class="fas fa-check-circle"></i> Submitted a new document</li>
-                <li><i class="fas fa-user-edit"></i> Updated profile information</li>
-                <li><i class="fas fa-clock"></i> Last login: {{ profile.last_login|date:"M d, Y H:i" }}</li>
+                {% for activity in activities %}
+                <li>
+                    <i class="fas fa-clock"></i>
+                    {{ activity.action }}
+                    <span class="time">({{ activity.timestamp|date:"M d, Y H:i" }})</span>
+                </li>
+                {% empty %}
+                <li>No recent activity</li>
+                {% endfor %}
             </ul>
         </div>
 

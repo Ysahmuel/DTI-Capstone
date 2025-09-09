@@ -13,10 +13,38 @@ from django.contrib import messages
 import logging
 from django.views.generic import TemplateView, View, DetailView, UpdateView
 from users.models import User
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Activity
 
 logger = logging.getLogger(__name__)
 
 # Create your views here.
+
+#recent activities view
+@login_required
+def profile_view(request):
+    # Fetch last 5 activities of the logged-in user
+    activities = request.user.activities.all()[:5]
+
+    return render(request, "profile.html", {
+        "profile": request.user,
+        "activities": activities,
+    })
+
+
+@login_required
+def upload_document(request):
+    if request.method == "POST":
+        # handle your file upload logic here
+
+        # Log the activity
+        Activity.objects.create(user=request.user, action="Uploaded a new document")
+
+        return redirect("profile")  # go back to profile or wherever
+    return render(request, "upload_document.html")
+
+
 #Profile Detail and Edit Views
 class ProfileDetailView(DetailView):
     model = User
