@@ -1,36 +1,45 @@
 {% load custom_filters %}
 
-<table class="documents-table">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Document Type</th>
-            <th>User</th>
-            <th>Status</th>
-            <th>Date Created</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for document in documents %}
-            <tr class="document-value-row" data-href="{{ document.get_absolute_url }}">
-                <td>{{ document }}</td>
-                <td>{{ document.model_verbose_name|titlecase }}</td>
-                <td>
-                    {% if document.user == request.user %}
-                        You
-                    {% else %}
-                        {{ document.user }}
-                    {% endif %}
-                </td>
-                <td>{{ document.status|titlecase }}</td>
-                <td>
-                    {% if document.date %}
-                        {{ document.date }}
-                    {% else %}
-                        {{ document.date_filed }}
-                    {% endif %}
-                </td>
+<form method="POST" action="{% url 'approve-documents' %}" id="documents-table-form">
+    {% csrf_token %}
+    <table class="documents-table">
+        <thead>
+            <tr>
+                <th>
+                    <input type="checkbox" id="select-all-checkbox">
+                </th>
+                <th>Name</th>
+                <th>Document Type</th>
+                <th>User</th>
+                <th>Status</th>
+                <th>Date Created</th>
             </tr>
-        {% endfor %}
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            {% for document in documents %}
+                <tr class="document-value-row" data-href="{{ document.get_absolute_url }}">
+                    <td>
+                        <input type="checkbox" name="documents" id="" value="{{ document.model_name }}:{{ document.id }}">
+                    </td>
+                    <td>{{ document }}</td>
+                    <td>{{ document.model_verbose_name|titlecase }}</td>
+                    <td>
+                        {% if document.user == request.user %}
+                            You
+                        {% else %}
+                            {{ document.user }}
+                        {% endif %}
+                    </td>
+                    <td>{{ document.status|titlecase }}</td>
+                    <td>
+                        {% if document.date %}
+                            {{ document.date }}
+                        {% else %}
+                            {{ document.date_filed }}
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</form>

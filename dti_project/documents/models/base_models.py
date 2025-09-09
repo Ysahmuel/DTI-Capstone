@@ -43,6 +43,10 @@ class DraftModel(models.Model):
         abstract = True
 
     @property
+    def model_name(self):
+        return self._meta.model_name
+
+    @property
     def model_verbose_name(self):
         return self._meta.verbose_name
 
