@@ -45,5 +45,7 @@ class UserRoleMixin:
             return model.objects.filter(
                 Q(status="draft", user=user) | ~Q(status="draft")
             ).count()
+        elif user.role == 'admin':
+            return model.objects.count()
         else:
             return model.objects.filter(user=user).count()
