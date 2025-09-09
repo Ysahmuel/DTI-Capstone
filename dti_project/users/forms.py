@@ -27,18 +27,31 @@ class CustomUserCreationForm(UserCreationForm):
     first_name = forms.CharField(required=True)
     last_name = forms.CharField(required=True)
     email = forms.EmailField(required=True)
+    default_phone = forms.CharField(required=True, label="Phone Number")
+    default_address = forms.CharField(required=True, label="Address")
 
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email', 'password1', 'password2', 'role']
+        fields = [
+            'first_name',
+            'last_name',
+            'email',
+            'default_phone',
+            'default_address',
+            'password1',
+            'password2',
+            'role',
+        ]
 
     def save(self, commit=True):
         user = super().save(commit=False)
         user.first_name = self.cleaned_data['first_name']
         user.last_name = self.cleaned_data['last_name']
         user.email = self.cleaned_data['email']
+        user.default_phone = self.cleaned_data['default_phone']
+        user.default_address = self.cleaned_data['default_address']
 
-        # Generate a unique username from first and last name
+        # Generate unique username
         base_username = slugify(f"{user.first_name}.{user.last_name}")
         username = base_username
         counter = 1

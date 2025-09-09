@@ -40,17 +40,14 @@
         <div class="profile-body">
             <h2>Contact Information</h2>
             <p><strong>Email:</strong>
-                <a href="mailto:{{ profile.email }}">{{ profile.email }}</a>
+                <a href="mailto:{{ profile.email }}">{{ profile.email|default:"Not provided" }}</a>
             </p>
 
-            {% if profile.default_phone %}
-            <p><strong>Phone:</strong> {{ profile.default_phone }}</p>
-            {% endif %}
+            <p><strong>Phone:</strong> {{ profile.default_phone|default:"Not provided" }}</p>
 
-            {% if profile.default_address %}
-            <p><strong>Address:</strong> {{ profile.default_address }}</p>
-            {% endif %}
+            <p><strong>Address:</strong> {{ profile.default_address|default:"Not provided" }}</p>
         </div>
+
 
         <!-- Activity Section -->
         <div class="profile-section">
