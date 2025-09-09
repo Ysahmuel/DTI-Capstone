@@ -6,7 +6,7 @@
     </button>
     <nav>
         <header>
-            <h1>Collapse Navbar</h1>
+            <h1>DTI</h1>
         </header>
         <section aria-labelledby="main-menu-heading">
             <h2 class="nav-section-heading">Main</h2>
@@ -17,7 +17,7 @@
                         <span>Dashboard</span>
                     </a>
                 </li>
-                <li class="nav-item dropdown active">
+                <li class="nav-item dropdown">
                     <button class="nav-dropdown-btn">
                         <i class="fa-solid fa-plus"></i>
                         <span>Create</span>
@@ -32,53 +32,63 @@
                             <a href="{% url 'create-checklist-evaluation-sheet' %}">Requirement Checklist</a>
                     </div>
                 </li>
-                <li class="nav-item">
-                    <a href="{% url 'all-documents' %}" class="nav-link">
-                        <i class="fa-solid fa-file"></i>
-                        <span>Documents</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="" class="nav-link">
-                        <i class="fa-solid fa-file-excel"></i>
-                        <span>Upload Excel</span>
-                    </a>
-                </li>
-            </ul>
-        </section>
+                <li class="nav-item dropdown">
+    <button class="nav-dropdown-btn">
+        <i class="fa-solid fa-file"></i>
+        <span>Documents</span>
+        <i class="fa-solid fa-angle-down"></i>
+    </button>
+    <div class="nav-dropdown-list">
+        <a href="{% url 'all-documents' %}">
+            <i class="fa-solid fa-file"></i>
+            <span>All Documents</span>
+        </a>
+        <a href="" class="nav">
+            <i class="fa-solid fa-file-excel"></i>
+            <span>Upload Excel</span>
+        </a>
+    </div>
+</li>
 
-        <section aria-label="others-menu-heading">
-            <h2 class="nav-section-heading">Others</h2>
-            <ul class="side-nav-list">
-                <li class="nav-item">
-                    <a href="" class="nav-link">
-                        <i class="fa-solid fa-gear"></i>
-                        <span>Settings</span>
-                    </a>
-                </li>
             </ul>
         </section>
 
         <section aria-labelledby="account-menu-heading" id="account-menu-section">
-            <ul class="side-nav-list">
-                <li class="nav-item">
-                    <a href="{% url 'profile' user.id %}" id="profile-link">
-                        <img src="{{ user.profile_picture.url }}" alt="">
-                        <div id="logged-in-user-details">
-                            <strong>{% if user.is_authenticated %}{{ user.get_full_name|default:user.username }}
-                                {% endif%}</strong>
-                            <p>{{ user.role|titlecase }}</p>
-                        </div>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{% url 'logout' %}" class="nav-link">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                        <span>Logout</span>
-                    </a>
-                </li>
-            </ul>
-        </section>
+    <h2 class="nav-section-heading">Others</h2>
+    <ul class="side-nav-list">
+        <!-- Settings -->
+        <li class="nav-item">
+            <a href="" class="nav-link">
+                <i class="fa-solid fa-gear"></i>
+                <span>Settings</span>
+            </a>
+        </li>
+
+        <!-- User Profile -->
+        <li class="nav-item">
+            <a href="{% url 'profile' user.id %}" id="profile-link">
+                <img src="{{ user.profile_picture.url }}" alt="">
+                <div id="logged-in-user-details">
+                    <strong>
+                        {% if user.is_authenticated %}
+                            {{ user.get_full_name|default:user.username }}
+                        {% endif %}
+                    </strong>
+                    <p>{{ user.role|titlecase }}</p>
+                </div>
+            </a>
+        </li>
+
+        <!-- Logout -->
+        <li class="nav-item">
+            <a href="{% url 'logout' %}" class="nav-link">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Logout</span>
+            </a>
+        </li>
+    </ul>
+</section>
+
 
     </nav>
 </aside>

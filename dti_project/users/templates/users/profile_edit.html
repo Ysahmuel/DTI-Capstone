@@ -21,7 +21,8 @@
                 <!-- Profile Picture -->
                 <div class="profile-picture-wrapper">
                     {% if profile.profile_picture %}
-                    <img id="profile-picture-preview" src="{{ profile.profile_picture.url }}" alt="{{ profile.username }}" class="profile-picture">
+                    <img id="profile-picture-preview" src="{{ profile.profile_picture.url }}"
+                        alt="{{ profile.username }}" class="profile-picture">
                     {% else %}
                     <div id="profile-avatar-preview" class="profile-avatar">
                         {{ profile.get_full_name|slice:":1" }}
@@ -67,8 +68,23 @@
                     <input type="email" name="email" id="id_email" class="form-control" value="{{ profile.email }}">
                 </div>
 
+                <div class="form-group">
+                    <label for="id_default_address">Default Address</label>
+                    <input type="text" name="default_address" id="id_default_address" class="form-control"
+                        value="{{ profile.default_address|default_if_none:'' }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="id_default_phone">Default Phone</label>
+                    <input type="text" name="default_phone" id="id_default_phone" class="form-control"
+                        value="{{ profile.default_phone|default_if_none:'' }}">
+                </div>
+
+
+
                 <div class="form-group" style="display:none;">
-                    <input type="file" name="profile_picture" id="id_profile_picture" class="form-control" accept="image/*">
+                    <input type="file" name="profile_picture" id="id_profile_picture" class="form-control"
+                        accept="image/*">
                 </div>
 
                 <div class="profile-actions">
@@ -86,32 +102,32 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const fileInput = document.getElementById('id_profile_picture');
-    const imgPreview = document.getElementById('profile-picture-preview');
-    const avatarPreview = document.getElementById('profile-avatar-preview');
+    document.addEventListener('DOMContentLoaded', function () {
+        const fileInput = document.getElementById('id_profile_picture');
+        const imgPreview = document.getElementById('profile-picture-preview');
+        const avatarPreview = document.getElementById('profile-avatar-preview');
 
-    fileInput.addEventListener('change', function(event) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
+        fileInput.addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
 
-            reader.onload = function(e) {
-                if (imgPreview) {
-                    imgPreview.src = e.target.result;
-                } else if (avatarPreview) {
-                    // Replace avatar div with an img element
-                    const img = document.createElement('img');
-                    img.id = 'profile-picture-preview';
-                    img.className = 'profile-picture';
-                    img.src = e.target.result;
-                    avatarPreview.replaceWith(img);
-                }
-            };
+                reader.onload = function (e) {
+                    if (imgPreview) {
+                        imgPreview.src = e.target.result;
+                    } else if (avatarPreview) {
+                        // Replace avatar div with an img element
+                        const img = document.createElement('img');
+                        img.id = 'profile-picture-preview';
+                        img.className = 'profile-picture';
+                        img.src = e.target.result;
+                        avatarPreview.replaceWith(img);
+                    }
+                };
 
-            reader.readAsDataURL(file);
-        }
+                reader.readAsDataURL(file);
+            }
+        });
     });
-});
 </script>
 {% endblock %}

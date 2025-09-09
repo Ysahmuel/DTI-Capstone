@@ -25,8 +25,13 @@ class User(AbstractUser):
     verification_code = models.CharField(max_length=6, blank=True, null=True)
     verification_code_expiration_date = models.DateTimeField(blank=True, null=True)
 
+    
+    default_address = models.CharField(max_length=255, blank=True, null=True)
+    default_phone = models.CharField(max_length=11, blank=True, null=True)
+
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+
     
     def generate_secure_otp_code(self):
         """Generate cryptographically secure 6-digit OTP and save to user"""
