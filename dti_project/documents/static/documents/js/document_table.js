@@ -1,7 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".document-value-row").forEach(row => {
-        row.addEventListener("click", () => {
-            window.location = row.dataset.href;
+        row.addEventListener("click", (e) => {
+            if (e.target.type == 'checkbox') {
+                e.stopPropagation();
+                return
+            } else {
+                window.location = row.dataset.href;
+            }
         });
     });
 
