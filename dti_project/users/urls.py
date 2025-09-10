@@ -11,7 +11,10 @@ urlpatterns = [
     # Profile Detail View
     path('profile/<int:pk>/', views.ProfileDetailView.as_view(), name='profile'),
     # Profile Edit View
-    path("profile/<int:pk>/edit/", views.ProfileEditView.as_view(), name="profile_edit"),
+    path("settings/<int:pk>/profile-edit/", views.ProfileEditView.as_view(), name="profile_edit"),
+    # Settings page
+    path('settings/', views.SettingsView.as_view(), name='settings'),
+
 
 ]
 

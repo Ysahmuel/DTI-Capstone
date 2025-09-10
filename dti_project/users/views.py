@@ -13,10 +13,17 @@ from django.contrib import messages
 import logging
 from django.views.generic import TemplateView, View, DetailView, UpdateView
 from users.models import User
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import TemplateView
 
 logger = logging.getLogger(__name__)
 
 # Create your views here.
+
+#Settings View
+class SettingsView(LoginRequiredMixin, TemplateView):
+    template_name = "users/settings.html"
+
 #Profile Detail and Edit Views
 class ProfileDetailView(DetailView):
     model = User

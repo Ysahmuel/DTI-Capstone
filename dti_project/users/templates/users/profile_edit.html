@@ -88,9 +88,12 @@
                 </div>
 
                 <div class="profile-actions">
-                    <a href="{% url 'profile' profile.pk %}" class="btn btn-secondary">
+                    <!-- Cancel goes back to settings -->
+                    <a href="{% url 'settings' %}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Cancel
                     </a>
+
+                    <!-- Save Changes submits the form as before -->
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save"></i> Save Changes
                     </button>
