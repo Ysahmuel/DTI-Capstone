@@ -19,33 +19,32 @@ class SortForm(forms.Form):
 
 class BaseCustomForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)  # Extract user if passed
         super().__init__(*args, **kwargs)
 
+        # --- Field formatting ---
         if hasattr(self, 'fields'):
             for name, field in self.fields.items():
-                # Convert field name to title and replace underscores
                 label_text = field.label if field.label else name.replace('_', ' ').title()
-
-                # Add 'Required' to required fields' labels
                 if field.required:
                     field.label = f"{label_text} <span class='required-label'>*</span>"
                     field.widget.attrs['placeholder'] = f"Enter {label_text}"
                 else:
                     field.label = label_text
 
-                # Force DateInput for DateFields
+                # Date fields
                 if isinstance(field, forms.DateField):
                     field.widget = forms.DateInput(attrs={'type': 'date'})
 
-                # Decrease height for textareas
+                # Textarea rows
                 if isinstance(field.widget, forms.Textarea):
                     field.widget.attrs['rows'] = 4
 
-                # Add 'form-group' class to each widget
+                # Add common class
                 existing_classes = field.widget.attrs.get('class', '')
                 field.widget.attrs['class'] = f"{existing_classes} form-group".strip()
 
-                # Numbers-only fields (TIN, contact/mobile/fax/telephone)
+                # Numeric fields
                 numerical_fields = [
                     'tax_identification_number',
                     'contact_number',
@@ -53,25 +52,46 @@ class BaseCustomForm(forms.ModelForm):
                     'fax_number',
                     'telephone_number',
                 ]
-
                 if name in numerical_fields:
-                    # Enforce digits only in UI
                     field.widget.attrs.update({
                         'inputmode': 'numeric',
                         'pattern': r'\d*',
-                        'oninput': "this.value=this.value.replace(/[^0-9]/g,'')",  # JS enforce
+                        'oninput': "this.value=this.value.replace(/[^0-9]/g,'')",
                     })
 
-                # Inject 11-digit validation for contact_number fields
-                if name == 'contact_number' or name == 'mobile_number':
+                if name in ['contact_number', 'mobile_number']:
                     field.validators.append(self.validate_contact_number)
-                    field.widget.attrs['maxlength'] = 11  # Enforce input limit in UI
+                    field.widget.attrs['maxlength'] = 11
 
-                # Ensure date_of_birth is not in the future   
                 if name == 'date_of_birth':
                     field.validators.append(self.validate_date_of_birth)
-                    # Add frontend restriction too
                     field.widget.attrs['max'] = date.today().isoformat()
+
+        # --- Auto-fill user fields ---
+        if user:
+            # Check if extra fields exist on a profile
+            profile = getattr(user, 'profile', None)
+
+            user_field_map = {
+                'first_name': 'first_name',
+                'last_name': 'last_name',
+                'email': 'email',
+                'email_address': 'email',               # alias
+                'mobile_number': 'default_phone',     # profile field
+                'contact_number': 'default_phone',    # alias
+                'current_address': 'default_address',         # profile field
+                'address': 'default_address',                 # alias
+            }
+
+            for field_name, attr_name in user_field_map.items():
+                if field_name in self.fields and not self.initial.get(field_name):
+                    # First try profile, fallback to user
+                    value = ''
+                    if profile and hasattr(profile, attr_name):
+                        value = getattr(profile, attr_name, '')
+                    elif hasattr(user, attr_name):
+                        value = getattr(user, attr_name, '')
+                    self.fields[field_name].initial = value
 
     def validate_contact_number(self, value):
         if not re.fullmatch(r'\d{11}', str(value)):
@@ -80,6 +100,8 @@ class BaseCustomForm(forms.ModelForm):
     def validate_date_of_birth(self, value):
         if value > date.today():
             raise forms.ValidationError('Date of birth cannot be in the future.')
+
+
 
 
 class SalesPromotionPermitApplicationForm(BaseCustomForm):
