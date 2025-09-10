@@ -1,0 +1,55 @@
+{% extends "dashboard/layout.html" %}
+{% load static %}
+
+{% block title %}Settings - {{ user.get_full_name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'users/css/settings.css' %}">
+{% endblock %}
+
+{% block body %}
+<div class="settings-wrapper">
+    <div class="settings-card">
+
+        <!-- Header -->
+        <div class="settings-header">
+
+        </div>
+
+        <div class="profile-header-content">
+            <div class="profile-picture-wrapper">
+                {% if user.profile_picture %}
+                <img src="{{ user.profile_picture.url }}" alt="{{ user.username }}" class="profile-picture">
+                {% else %}
+                <div class="profile-avatar">{{ user.get_full_name|slice:":1" }}</div>
+                {% endif %}
+            </div>
+            <div class="profile-info">
+                <h1 class="profile-name">{{ profile.get_full_name }}</h1>
+                <p class="profile-username">@{{ profile.username }}</p>
+                <span class="role-badge role-{{ profile.role }}">
+                    {{ profile.role|title }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Settings Options -->
+        <div class="settings-body">
+            <h2>Account Settings</h2>
+            <ul class="settings-list">
+                <li>
+                    <a href="{% url 'profile_edit' user.pk %}" class="btn btn-primary">
+                        <i class="fas fa-user-edit"></i> Edit Profile
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="btn btn-secondary disabled">
+                        <i class="fas fa-shield-alt"></i> Privacy Settings (Coming Soon)
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

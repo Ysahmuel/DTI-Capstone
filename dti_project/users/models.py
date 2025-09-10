@@ -5,6 +5,7 @@ from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.utils import timezone
 
 # Create your models here.
+
 class User(AbstractUser):
     class Roles(models.TextChoices):
         BUSINESS_OWNER = "business_owner", "Business Owner"
@@ -48,3 +49,10 @@ class User(AbstractUser):
             self.verification_code_expiration_date and
             timezone.now() < self.verification_code_expiration_date  # Fixed: now() and < instead of >
         )
+
+    def get_full_name(self):
+        parts = [self.first_name]
+        if getattr(self, 'middle_name', None):  # safe check
+            parts.append(self.middle_name)
+        parts.append(self.last_name)
+        return " ".join(filter(None, parts))

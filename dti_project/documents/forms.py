@@ -73,6 +73,7 @@ class BaseCustomForm(forms.ModelForm):
             profile = getattr(user, 'profile', None)
 
             user_field_map = {
+                'full_name': 'get_full_name',  # method 
                 'first_name': 'first_name',
                 'last_name': 'last_name',
                 'email': 'email',
