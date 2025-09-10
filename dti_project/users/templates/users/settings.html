@@ -25,11 +25,12 @@
                 {% endif %}
             </div>
             <div class="profile-info">
-                <h1 class="profile-name">{{ profile.get_full_name }}</h1>
-                <p class="profile-username">@{{ profile.username }}</p>
-                <span class="role-badge role-{{ profile.role }}">
-                    {{ profile.role|title }}
+                <h1 class="profile-name">{{ user.get_full_name }}</h1>
+                <p class="profile-username">@{{ user.username }}</p>
+                <span class="role-badge role-{{ user.role }}">
+                    {{ user.role|title }}
                 </span>
+
             </div>
         </div>
 
