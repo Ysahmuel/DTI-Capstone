@@ -45,6 +45,27 @@
                             Submitted
                         </label>
                     </li>
+                    <li class="status-filter-item">
+                        <label>
+                            <input type="checkbox" name="status" value="submitted_unpaid"
+                                {% if "submitted_unpaid" in selected_statuses %}checked{% endif %}>
+                            Submitted (Unpaid)
+                        </label>
+                    </li>
+                    <li class="status-filter-item">
+                        <label>
+                            <input type="checkbox" name="status" value="submitted_paid"
+                                {% if "submitted_paid" in selected_statuses %}checked{% endif %}>
+                            Submitted (Paid)
+                        </label>
+                    </li>
+                    <li class="status-filter-item">
+                        <label>
+                            <input type="checkbox" name="status" value="approved"
+                                {% if "completed" in selected_statuses %}checked{% endif %}>
+                            Approved
+                        </label>
+                    </li>
                 </ul>
             </section>
 
