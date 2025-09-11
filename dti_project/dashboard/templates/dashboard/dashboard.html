@@ -4,7 +4,7 @@
 
 {% block body %}
 <header class="dashboard-header">
-    <h1>Welcome, {{ user }}</h1>
+    <h1>Welcome, {{ user }}. You have {{ user.new_notifications }} Notifications</h1>
     {% include 'dashboard/components/searchbar.html' %}
 </header>
 

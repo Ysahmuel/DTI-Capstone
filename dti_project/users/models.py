@@ -56,6 +56,9 @@ class User(AbstractUser):
             parts.append(self.middle_name)
         parts.append(self.last_name)
         return " ".join(filter(None, parts))
+    
+    def new_notifications(self):
+        return self.notifications.filter(is_read=True).count()
 
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
