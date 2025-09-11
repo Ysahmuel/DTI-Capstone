@@ -35,9 +35,9 @@ from .list_views import (
 )
 
 from .excel_views import (
-    export_to_excel
+    ExportDocumentsExcelView
 )
 
 from .action_views import (
-    approve_documents
+    ApproveDocumentsView
 )
