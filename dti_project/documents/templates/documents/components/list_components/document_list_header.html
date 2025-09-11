@@ -4,12 +4,11 @@
         <button id="upload-from-excel-btn">
             Upload Excel File
         </button>
-        <a href="{% url 'export-to-excel' %}" id="export-excel-btn">
-            Convert to Excel file
-            <i class="fa-solid fa-file-excel"></i>
-        </a>
+        <button type="submit" form="documents-table-form" formaction="{% url 'export-to-excel' %}" id="export-excel-btn">
+            Convert to Excel File
+        </button>
         {% if request.user.role != 'business_owner' %}
-            <button type="submit" form="documents-table-form" id="approve-btn">
+            <button type="submit" form="documents-table-form" formaction="{% url 'approve-documents' %}" id="approve-btn">
                 Approve
             </button>
         {% endif %}
