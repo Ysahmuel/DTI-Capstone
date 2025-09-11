@@ -20,37 +20,36 @@
     padding: 1rem 2rem;
 }
 
-.dashboard-header .wrapper {
+.dashboard-actions-wrapper {
     display: flex;
     align-items: center;
     gap: 1rem;
 }
 
-.dashboard-header .fa-bell {
+.dashboard-actions-wrapper .fa-bell {
     position: relative;
     color: var(--text-light);
     cursor: pointer;
 }
 
-.dashboard-header .fa-bell::after {
+.dashboard-actions-wrapper .fa-bell::after {
     position: absolute;
     display: flex;
     align-items: center;
     justify-content: center;
     transform: translate(-50%, -50%);
     left: 20px;
-    top: -5px;
+    top: -7px;
     content: '1';
     background-color: var(--primary);
     color: white;
     font-size: 10px;
     font-weight: 500;
     border-radius: 50%;
-    padding: 6px;
-    width: 10px;
-    height: 10px;
+    padding: 8px;
+    width: 8px;
+    height: 8px;
 }
-
 
 .dashboard-container {
   padding: 20px;
