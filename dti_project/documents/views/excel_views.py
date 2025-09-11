@@ -1,28 +1,16 @@
 import datetime
 from itertools import chain
-from openpyxl import Workbook
-from django.http import HttpResponse
-from django.contrib.auth.mixins import LoginRequiredMixin
+from urllib.parse import quote
 from django.views import View
-from django.contrib.auth.decorators import login_required
-from ..mixins.permissions_mixins import UserRoleMixin
-from ..models import ChecklistEvaluationSheet, InspectionValidationReport, OrderOfPayment, PersonalDataSheet, SalesPromotionPermitApplication, ServiceRepairAccreditationApplication
-from ..views.list_views import AllDocumentListView
-from django.db.models import Q, Min, Max
-from urllib.parse import quote
-
-class ImportFromExcelView(View):
-    pass
-import datetime
-from itertools import chain
-from urllib.parse import quote
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill
 from openpyxl.utils import get_column_letter
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-
+from django.apps import apps
+from ..models.base_models import DraftModel
+from django.contrib.auth.mixins import LoginRequiredMixin
 from ..mixins.permissions_mixins import UserRoleMixin
 from ..models import (
     ChecklistEvaluationSheet,
@@ -33,176 +21,121 @@ from ..models import (
     ServiceRepairAccreditationApplication,
 )
 
+MODEL_MAP = {
+    model._meta.model_name: model
+    for model in apps.get_models()
+    if issubclass(model, DraftModel) and not model._meta.abstract
+}
 
-@login_required
-def export_to_excel(request, queryset=None, filename="export.xlsx"):
+EXPORT_MODEL_MAP = {
+    "salespromotionpermitapplication": SalesPromotionPermitApplication,
+    "personaldatasheet": PersonalDataSheet,
+    "servicerepairaccreditationapplication": ServiceRepairAccreditationApplication,
+    "inspectionvalidationreport": InspectionValidationReport,
+    "orderofpayment": OrderOfPayment,
+    "checklistevaluationsheet": ChecklistEvaluationSheet,
+}
+
+class ExportDocumentsExcelView(LoginRequiredMixin, View):
     """
-    Reusable export function that:
-    1. Can be called as a Django view (request, queryset=None).
-    2. Can be called as a helper with your own queryset.
-    3. Dynamically groups rows by document type and exports all fields.
+    Export selected documents (via checkboxes) or all filtered documents to Excel.
+    Preserves grouped formatting, headers, styling, and filename date ranges.
     """
 
-    user = request.user
-    doc_type = "all"
-    date_from = request.GET.get("date_from", "")
-    date_to = request.GET.get("date_to", "")
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        selected_docs = request.POST.getlist("documents")
 
-    # --- Detect doc_type ---
-    if queryset is None:
-        doc_type = request.GET.get("doc_type", "all")
-        if doc_type == "all" and "HTTP_REFERER" in request.META:
-            referer_path = request.META["HTTP_REFERER"]
-            mapping = {
-                "sales-promotion": "sales_promos",
-                "personal-data-sheet": "personal_data_sheets",
-                "service-repair": "service_accreditations",
-                "inspection-validation": "inspection_reports",
-                "order-of-payment": "orders_of_payment",
-                "checklist-evaluation": "checklist_evaluation_sheets",
-            }
-            for key, value in mapping.items():
-                if key in referer_path:
-                    doc_type = value
-                    break
-
-        # --- Convert date strings ---
-        date_from_obj, date_to_obj = None, None
-        if date_from:
-            try:
-                date_from_obj = datetime.datetime.strptime(date_from, "%Y-%m-%d").date()
-            except ValueError:
-                pass
-        if date_to:
-            try:
-                date_to_obj = datetime.datetime.strptime(date_to, "%Y-%m-%d").date()
-            except ValueError:
-                pass
-
-        def apply_filters(qs):
-            search = request.GET.get("search", "")
-            if search:
-                qs = qs.filter(
-                    Q(user__username__icontains=search) |
-                    Q(id__icontains=search)
-                )
-            if date_from_obj:
-                qs = qs.filter(Q(date_filed__gte=date_from_obj) | Q(date__gte=date_from_obj))
-            if date_to_obj:
-                qs = qs.filter(Q(date_filed__lte=date_to_obj) | Q(date__lte=date_to_obj))
-            return qs
-
-        # --- Map doc_type to models ---
-        model_map = {
-            "sales_promos": SalesPromotionPermitApplication,
-            "personal_data_sheets": PersonalDataSheet,
-            "service_accreditations": ServiceRepairAccreditationApplication,
-            "inspection_reports": InspectionValidationReport,
-            "orders_of_payment": OrderOfPayment,
-            "checklist_evaluation_sheets": ChecklistEvaluationSheet,
-        }
-
-        if doc_type in model_map:
-            queryset = apply_filters(UserRoleMixin.get_queryset_or_all(model_map[doc_type], user))
-        else:
-            queryset = chain(*[
-                apply_filters(UserRoleMixin.get_queryset_or_all(m, user))
-                for m in model_map.values()
-            ])
-
-    # --- Group documents by model ---
-    grouped = {}
-    if hasattr(queryset, "__iter__") and not hasattr(queryset, "model"):
-        for obj in queryset:
-            model_name = obj._meta.verbose_name_plural.title()
-            grouped.setdefault(model_name, []).append(obj)
-    else:
-        model_name = queryset.model._meta.verbose_name_plural.title()
-        grouped[model_name] = list(queryset)
-
-    # --- Create Excel workbook ---
-    wb = Workbook()
-    wb.remove(wb.active)  # remove default sheet
-
-    for model_name, objs in grouped.items():
-        if not objs:
-            continue
-        ws = wb.create_sheet(title=model_name[:31])  # Excel sheet name limit
-
-        # Dynamic headers
-        fields = objs[0]._meta.fields
-        headers = [f.verbose_name.title() for f in fields]
-        ws.append(headers)
-
-        # Style headers
-        for col_num, header in enumerate(headers, 1):
-            cell = ws.cell(row=1, column=col_num)
-            cell.font = Font(bold=True)
-            cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-            cell.fill = PatternFill(start_color="DDDDDD", end_color="DDDDDD", fill_type="solid")
-
-        # Rows
-        for obj in objs:
-            row = []
-            for f in fields:
-                val = getattr(obj, f.name, "")
-                if isinstance(val, datetime.datetime):
-                    val = val.date()
-                if val is None:
-                    val = ""
-                row.append(to_title(str(val)))
-            ws.append(row)
-
-        # Auto-size columns
-        for col_num, col_cells in enumerate(ws.columns, 1):
-            max_length = 0
-            column = get_column_letter(col_num)
-            for cell in col_cells:
+        # --- Collect documents by model ---
+        grouped = {}
+        if selected_docs:
+            # Use checkbox selection
+            grouped_ids = {}
+            for doc in selected_docs:
                 try:
+                    model_name, pk = doc.split(":")
+                    grouped_ids.setdefault(model_name.lower(), []).append(pk)
+                except ValueError:
+                    continue
+
+            for model_name, ids in grouped_ids.items():
+                model = EXPORT_MODEL_MAP.get(model_name)
+                if not model:
+                    continue
+                qs = UserRoleMixin.get_queryset_or_all(model, user).filter(pk__in=ids)
+                if qs.exists():
+                    grouped[model._meta.verbose_name_plural.title()] = list(qs)
+        else:
+            # If no checkboxes, export all (apply UserRoleMixin)
+            for model in EXPORT_MODEL_MAP.values():
+                qs = UserRoleMixin.get_queryset_or_all(model, user)
+                if qs.exists():
+                    grouped[model._meta.verbose_name_plural.title()] = list(qs)
+
+        # --- Create workbook ---
+        wb = Workbook()
+        wb.remove(wb.active)
+
+        for model_name, objs in grouped.items():
+            if not objs:
+                continue
+            ws = wb.create_sheet(title=model_name[:31])
+            fields = objs[0]._meta.fields
+            headers = [f.verbose_name.title() for f in fields]
+            ws.append(headers)
+
+            # Style headers
+            for col_num, header in enumerate(headers, 1):
+                cell = ws.cell(row=1, column=col_num)
+                cell.font = Font(bold=True)
+                cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+                cell.fill = PatternFill(start_color="DDDDDD", end_color="DDDDDD", fill_type="solid")
+
+            # Rows
+            for obj in objs:
+                row = []
+                for f in fields:
+                    val = getattr(obj, f.name, "")
+                    if isinstance(val, datetime.datetime):
+                        val = val.date()
+                    if val is None:
+                        val = ""
+                    row.append(to_title(str(val)))
+                ws.append(row)
+
+            # Auto-size columns
+            for col_num, col_cells in enumerate(ws.columns, 1):
+                max_length = 0
+                column = get_column_letter(col_num)
+                for cell in col_cells:
                     if cell.value:
                         max_length = max(max_length, len(str(cell.value)))
-                except:
-                    pass
-            adjusted_width = min(max_length + 2, 50)  # cap width
-            ws.column_dimensions[column].width = adjusted_width
+                ws.column_dimensions[column].width = min(max_length + 2, 50)
 
-        # Freeze header row
-        ws.freeze_panes = "A2"
+            # Freeze header
+            ws.freeze_panes = "A2"
 
-    # --- Calculate min/max dates for filename ---
-    dates = []
-    for objs in grouped.values():
-        for doc in objs:
-            d = getattr(doc, "date_filed", None) or getattr(doc, "date", None)
-            if d:
-                if isinstance(d, datetime.datetime):
-                    d = d.date()
-                dates.append(d)
+        # --- Filename with date range ---
+        dates = []
+        for objs in grouped.values():
+            for doc in objs:
+                d = getattr(doc, "date_filed", None) or getattr(doc, "date", None)
+                if d:
+                    if isinstance(d, datetime.datetime):
+                        d = d.date()
+                    dates.append(d)
+        min_date, max_date = (min(dates), max(dates)) if dates else (None, None)
+        date_part = f"{min_date}_{max_date}" if min_date and max_date else ""
 
-    min_date, max_date = (min(dates), max(dates)) if dates else (None, None)
+        filename = f"Documents_{date_part}.xlsx" if date_part else "Documents.xlsx"
 
-    # --- Build filename ---
-    if min_date and max_date:
-        date_part = f"{min_date.strftime('%Y-%m-%d')}_to_{max_date.strftime('%Y-%m-%d')}"
-    else:
-        date_part = ""
-
-    if doc_type == "all":
-        filename = f"All_Documents_from_{date_part}.xlsx" if date_part else "All_Documents.xlsx"
-    else:
-        filename = f"{doc_type}_{date_part}.xlsx" if date_part else f"{doc_type}.xlsx"
-
-    # --- Build response ---
-    response = HttpResponse(
-        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
-    safe_filename = quote(filename)
-    response["Content-Disposition"] = f"attachment; filename={safe_filename}; filename*=UTF-8''{safe_filename}"
-    wb.save(response)
-    return response
-
-
-
+        response = HttpResponse(
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        safe_filename = quote(filename)
+        response["Content-Disposition"] = f"attachment; filename={safe_filename}; filename*=UTF-8''{safe_filename}"
+        wb.save(response)
+        return response
 
 def to_title(value):
     """Normalize strings: remove underscores, title-case, handle non-strings gracefully."""
