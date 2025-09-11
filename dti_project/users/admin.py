@@ -3,7 +3,6 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import Notification, User
 
-admin.site.register(User, 'UserAdmin')
 
 class UserAdmin(BaseUserAdmin):
     list_display = ('first_name', 'last_name', 'role', 'email', 'is_staff')
@@ -39,3 +38,5 @@ class UserAdmin(BaseUserAdmin):
 class NotificationAdmin(admin.ModelAdmin):
     list_display = ('user', 'message', 'date')
     search_fields = ('user', ) 
+
+admin.site.register(User, UserAdmin)
