@@ -56,6 +56,8 @@
 }
 
 .side-navbar header h1 {
+    flex: 1;              /* take up full width */
+    text-align: center;
     font-size: 1.2rem;
     font-weight: 600;
     white-space: nowrap;
