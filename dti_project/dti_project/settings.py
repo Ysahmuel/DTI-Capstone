@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'dashboard',
     'documents',
     'users',
+    'notifications',
+    'channels',
     'django_browser_reload',
     'crispy_forms',
     'crispy_bootstrap5',
@@ -147,3 +149,19 @@ AUTHENTICATION_BACKENDS = [
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+# ASGI application (needed for Django Channels)
+ASGI_APPLICATION = "dti_project.asgi.application"
+
+# Channels / Redis setup
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('127.0.0.1', 6379)] # Redis default port
+        }
+    }
+}
+
+TIME_ZONE = "Asia/Manila"
+USE_TZ = True

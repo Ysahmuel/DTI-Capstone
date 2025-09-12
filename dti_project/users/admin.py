@@ -1,7 +1,7 @@
 # admin.py
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import Notification, User
+from .models import User
 
 class UserAdmin(BaseUserAdmin):
     list_display = ('first_name', 'last_name', 'role', 'email', 'is_staff')
@@ -32,10 +32,5 @@ class UserAdmin(BaseUserAdmin):
             obj.is_staff = True
 
         super().save_model(request, obj, form, change)
-
-@admin.register(Notification)
-class NotificationAdmin(admin.ModelAdmin):
-    list_display = ('user', 'message', 'date')
-    search_fields = ('user', ) 
 
 admin.site.register(User, UserAdmin)
