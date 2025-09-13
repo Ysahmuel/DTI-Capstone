@@ -1,4 +1,5 @@
 @import url('searchbar.css');
+@import url('notifications.css');
 
 .main-content {
     background-color: rgba(250, 250, 250);
@@ -24,31 +25,6 @@
     display: flex;
     align-items: center;
     gap: 1rem;
-}
-
-.dashboard-actions-wrapper .fa-bell {
-    position: relative;
-    color: var(--text-light);
-    cursor: pointer;
-}
-
-.dashboard-actions-wrapper .fa-bell::after {
-    position: absolute;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transform: translate(-50%, -50%);
-    left: 20px;
-    top: -7px;
-    content: '1';
-    background-color: var(--primary);
-    color: white;
-    font-size: 10px;
-    font-weight: 500;
-    border-radius: 50%;
-    padding: 8px;
-    width: 8px;
-    height: 8px;
 }
 
 .dashboard-container {
