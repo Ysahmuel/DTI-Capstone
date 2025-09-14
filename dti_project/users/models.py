@@ -58,4 +58,4 @@ class User(AbstractUser):
         return " ".join(filter(None, parts))
     
     def new_notifications(self):
-        return self.notifications.filter(is_read=True).count()
+        return self.notifications.filter(is_read=False)
