@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     const bellIcon = document.querySelector('.header-notifications .fa-bell');
-    const notificationsList = document.querySelector('.notifications-list');
+    const notificationsList = document.querySelector('.notifications-container');
     const suggestionsBox = document.getElementById('suggestions-box');
 
     if (bellIcon && notificationsList) {

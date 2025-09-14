@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const searchInput = document.querySelector('input[name="query"]');
     const suggestionsBox = document.getElementById('suggestions-box');
-    const notificationsList = document.querySelector('.notifications-list');
+    const notificationsList = document.querySelector('.notifications-container');
 
     if (searchInput && suggestionsBox) {
         searchInput.addEventListener('input', function () {
