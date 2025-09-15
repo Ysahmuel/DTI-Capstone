@@ -1,1 +1,11 @@
+# Virtual environments
+venv/
+env/
+.venv/
+
+# DB
 db.sqlite3
+
+# Env files
+.env
+*.env
