@@ -24,6 +24,12 @@
                                 {{ notification.display_message }}
                             </div>
                             <p class="time-since">{{ notification.time_display }}</p>
+                            {% if notification.type == 'update_request' %}
+                                <div class="decision-choices">
+                                    <button id="accept-btn">Accept</button>
+                                    <button id="deny-btn">Deny</button>
+                                </div>
+                            {% endif %}
                         </div>
                     </li>
                 {% endfor %}

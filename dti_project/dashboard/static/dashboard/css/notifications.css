@@ -20,7 +20,7 @@
     left: 20px;
     top: -7px;
     content: attr(data-count);
-    background-color: var(--primary);
+    background-color: var(--accent);
     color: white;
     font-size: 10px;
     font-weight: 500;
@@ -86,6 +86,12 @@
 .notifications-list li {
     display: flex;
     align-items: start;
+    cursor: pointer;
+}
+
+.notifications-list li:not(:last-of-type) {
+    border-bottom: solid 1px var(--border-color);
+    padding-bottom: 1rem;
 }
 
 .notifications-list .sender-profile-pic {
@@ -137,4 +143,31 @@
     color: var(--text-light);
     font-size: clamp(0.5rem, 0.75vw, 1.5rem);
     font-weight: 400;
+}
+
+.decision-choices {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+}
+
+.decision-choices button {
+    border-radius: var(--radius-sm);
+    border: none;
+    outline: none;
+    font-size: clamp(0.5rem, 0.75vw, 2rem);
+    font-weight: 400;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.decision-choices #accept-btn {
+    background-color: var(--accent);
+    color: white;
+}
+
+.decision-choices #deny-btn {
+    color: var(--text-secondary);
+    outline: solid 1px var(--border-color);
 }
