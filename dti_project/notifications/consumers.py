@@ -1,5 +1,7 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
 class NotificationConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -20,7 +22,12 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         # Optional: echo back
         await self.send(text_data=json.dumps({'message': data.get('message')}))
 
-    async def send_notification(self, event):
-        await self.send(text_data=json.dumps({
-            'message': event['message']
-        }))
+    def send_user_notification(user_id, message):
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f"notifications_{user_id}",  # match consumer!
+            {
+                'type': 'send_notification',
+                'message': message,
+            }
+        )
