@@ -218,82 +218,53 @@
     cursor: not-allowed;
 }
 
-/* Actions */
+/* Button container */
 .profile-actions {
     display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
+    justify-content: flex-end; /* keep them on the right */
+    align-items: center;
+    gap: 0;                    /* remove flexbox gap */
     padding: 1.5rem;
-    /* changed from margin-top to padding */
     border-top: 1px solid #f0f0f0;
-    /* added border-top */
 }
 
+.profile-actions .btn + .btn {
+    margin-left: 0.5rem; /* small space only between buttons */
+}
+
+
+/* Base button */
 .btn {
-    background: var(--primary, #0f0853);
-    color: #fff;
-    border: none;
-    /* remove default border */
-    box-shadow: none;
-    /* remove any shadow */
-    appearance: none;
-    /* remove native styling */
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    cursor: pointer;
+    min-width: 130px;          /* same width for all buttons */
+    min-height: 44px;          /* same height */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;   /* center text & icon */
+    gap: 0.5rem;
     padding: 0.6rem 1.2rem;
     border-radius: 0.5rem;
     font-size: 0.9rem;
     font-weight: 600;
+    cursor: pointer;
+    border: none;
     text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
     transition: background 0.3s;
 }
 
+/* Primary (Save) */
 .btn-primary {
     background: var(--primary, #0f0853);
     color: #fff;
 }
-
 .btn-primary:hover {
     background: #1e1b6b;
 }
 
+/* Secondary (Cancel) */
 .btn-secondary {
     background: #e5e7eb;
     color: #111827;
 }
-
 .btn-secondary:hover {
     background: #d1d5db;
-}
-
-/* Responsive */
-@media (max-width: 600px) {
-    .profile-header-content {
-        flex-direction: column;
-        align-items: center;
-        bottom: -50px;
-    }
-
-    .profile-picture,
-    .profile-avatar {
-        width: 120px;
-        height: 120px;
-    }
-}
-
-/* Animations */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
