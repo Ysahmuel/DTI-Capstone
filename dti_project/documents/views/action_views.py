@@ -55,12 +55,14 @@ class ApproveDocumentsView(LoginRequiredMixin, View):
                     # Send it to the web socket group
                     channel_layer = get_channel_layer()
                     async_to_sync(channel_layer.group_send)(
-                        f"notifications_{document.user.id}",  # each user has their own group
+                        f"notifications_{document.user.id}",
                         {
-                            'type': 'send_notification',
-                            'message': notification.message,
-                            'id': notification.id,
-                            'type_name': notification.type
+                            'type': 'notification.message',  
+                            'content': {
+                                'message': notification.message,
+                                'id': notification.id,
+                                'type_name': notification.type,
+                            }
                         }
                     )
 

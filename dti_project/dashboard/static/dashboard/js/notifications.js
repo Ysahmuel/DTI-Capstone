@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const notificationsList = document.querySelector('.notifications-list');
 
     // --- Notification sound setup ---
-    const notificationSound = new Audio("/static/dashboard/sounds/What%20The%20Hell%20Meme%20Sound%20Effect.mp3");
+    const notificationSound = new Audio("/static/dashboard/sounds/Ding%20Sound%20Effect.mp3");
     notificationSound.volume = 0.3; // subtle volume
     let audioUnlocked = false;
     let queuedNotifications = 0;
