@@ -1,6 +1,7 @@
 from django.contrib import admin
+
 from .utils.admin_helpers import get_full_name_from_personal_data
-from .models import CharacterReference, ChecklistEvaluationSheet, EducationalAttainment, EmployeeBackground, InspectionValidationReport, OrderOfPayment, PersonalDataSheet, ProductCovered, SalesPromotionPermitApplication, Service, ServiceCategory, ServiceRepairAccreditationApplication, TrainingsAttended
+from .models import CharacterReference, ChecklistEvaluationSheet, EducationalAttainment, EmployeeBackground, InspectionValidationReport, OrderOfPayment, PersonalDataSheet, ProductCovered, SalesPromotionPermitApplication, Service, ServiceCategory, ServiceRepairAccreditationApplication, TrainingsAttended, ChangeRequest
 
 
 # Register your models here.
@@ -135,3 +136,9 @@ class ChecklistEvaluationSheetAdmin(StatusModelAdmin):
     list_display = ("name_of_business", "type_of_application", "renewal_due_date", "star_rating")
     list_filter = ("type_of_application", "star_rating")
     search_fields = ("name_of_business",)
+
+@admin.register(ChangeRequest)
+class ChangeRequestAdmin(admin.ModelAdmin):
+    list_display = ('user', 'is_approved', 'approved_by', 'date')
+    list_filter = ('is_approved', )
+    search_fields = ('user', 'approved_by')

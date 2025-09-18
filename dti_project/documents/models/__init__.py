@@ -7,6 +7,7 @@ from .order_of_payment_model import OrderOfPayment
 from .personal_data_sheet_model import PersonalDataSheet, EmployeeBackground, TrainingsAttended, EducationalAttainment, CharacterReference
 from .sales_promotion_model import SalesPromotionPermitApplication, ProductCovered
 from .service_repair_accreditation_model import ServiceRepairAccreditationApplication, Service, ServiceCategory
+from .change_request_models import ChangeRequest
 
 __all__ = [
     # Base models
@@ -39,4 +40,7 @@ __all__ = [
     'ServiceRepairAccreditationApplication',
     'Service',
     'ServiceCategory',
+
+    # Change request
+    'ChangeRequest'
 ]

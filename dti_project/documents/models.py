@@ -32,7 +32,11 @@ from .models import (
     ServiceRepairAccreditationApplication,
     Service,
     ServiceCategory,
+    
+    # Change requests
+    ChangeRequest,
 )
+
 
 # This makes all your models available when other files import from this module
 # Example: from myapp.models import ChecklistEvaluationSheet will still work
