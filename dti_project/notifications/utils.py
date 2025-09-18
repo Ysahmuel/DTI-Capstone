@@ -12,11 +12,16 @@ def send_user_notification(user_id, notification):
             "url": str(notification.url) if notification.url else "",
             "type": str(notification.type),
             "is_read": bool(notification.is_read),
-            "sender_image": (
-                str(notification.sender.profile_picture.url)
-                if notification.sender and getattr(notification.sender, "profile_picture", None)
-                else None
-            ),
+            "sender": {
+                "id": notification.sender.id if notification.sender else None,
+                "username": notification.sender.username if notification.sender else "System",
+                "full_name": notification.sender.get_full_name() if notification.sender else "System",
+                "profile_picture": (
+                    str(notification.sender.profile_picture.url)
+                    if notification.sender and getattr(notification.sender, "profile_picture", None)
+                    else None
+                )
+            }
         }
     else:
         payload = notification
