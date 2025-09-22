@@ -1,20 +1,26 @@
 import datetime
 from itertools import chain
 from urllib.parse import quote
+from django.urls import reverse
 from django.views import View
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill
 from openpyxl.utils import get_column_letter
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.apps import apps
+from ..utils.excel_view_helpers import normalize_sheet_name, to_title
 from ..models.base_models import DraftModel
 from django.contrib.auth.mixins import LoginRequiredMixin
 from ..mixins.permissions_mixins import UserRoleMixin
 from django.shortcuts import render
+from django.contrib import messages
 from django.db import transaction
 import pandas as pd
+from openpyxl import load_workbook
+
+import os
 from ..models import (
     ChecklistEvaluationSheet,
     InspectionValidationReport,
@@ -140,50 +146,81 @@ class ExportDocumentsExcelView(LoginRequiredMixin, View):
         wb.save(response)
         return response
 
-def to_title(value):
-    """Normalize strings: remove underscores, title-case, handle non-strings gracefully."""
-    if not isinstance(value, str):
-        return value
-    return value.replace("_", " ").title()
 
 class UploadExcelView(LoginRequiredMixin, View):
     """
-    Upload an Excel file and import rows into a model.
+    Upload an Excel file and import rows into Django models.
+    Only allows .xlsx/.xls files.
     """
+
     template_name = "documents/excel_templates/excel_upload.html"
 
     def get(self, request, *args, **kwargs):
         return render(request, self.template_name)
 
+    @transaction.atomic
     def post(self, request, *args, **kwargs):
-        excel_file = request.FILES.get("excel_file")
-        if not excel_file:
-            return render(request, self.template_name, {"error": "Please choose a file."})
+        file = request.FILES.get("file")
+        if not file:
+            messages.error(request, "No file uploaded.")
+            return HttpResponseRedirect(reverse("documents:upload_excel"))
+
+        # --- Validate if file extension is xlsx (excel file) ---
+        ext = os.path.splitext(file.name)[1].lower()
+        if ext not in [".xlsx", ".xls"]:
+            messages.error(request, "Invalid file type. Please upload an Excel file (.xlsx or .xls).")
+            return HttpResponseRedirect(reverse("documents:upload_excel"))
 
         try:
-            df = pd.read_excel(excel_file)  # or pd.read_csv for CSV
+            wb = load_workbook(file)
         except Exception as e:
-            return render(request, self.template_name, {"error": f"Could not read file: {e}"})
+            messages.error(request, f"Invalid Excel file: {e}")
+            return HttpResponseRedirect(reverse("documents:upload_excel"))
 
-        # Example: import into ChecklistEvaluationSheet model
-        imported = 0
-        from ..models import ChecklistEvaluationSheet  # import your model here
+        imported_count = 0
+        skipped_count = 0
 
-        # Wrap in transaction for speed and rollback safety
-        with transaction.atomic():
-            for _, row in df.iterrows():
-                # Map Excel columns to model fields. Example:
-                ChecklistEvaluationSheet.objects.create(
-                    # field_name_in_model = row['ColumnNameInExcel'],
-                    # fill out according to your sheet’s columns:
-                    name=row.get("Name", ""),
-                    description=row.get("Description", ""),
-                    # … other fields …
-                )
-                imported += 1
+        for sheetname in wb.sheetnames:
+            model = EXPORT_MODEL_MAP.get(normalize_sheet_name(sheetname))
+            if not model:
+                continue
 
-        return render(
+            ws = wb[sheetname]
+            headers = [str(cell.value).strip().lower() for cell in ws[1]]
+
+            for row in ws.iter_rows(min_row=2, values_only=True):
+                if not any(row):
+                    continue
+
+                data = {}
+                for header, value in zip(headers, row):
+                    if not header:
+                        continue
+
+                    field = next(
+                        (f for f in model._meta.fields if f.verbose_name.lower() == header),
+                        None,
+                    )
+                    if not field:
+                        continue
+
+                    if isinstance(value, datetime.datetime):
+                        value = value.date()
+                    if value in ("", None):
+                        value = None
+
+                    data[field.name] = value
+
+                try:
+                    obj = model(**data)
+                    obj.save()
+                    imported_count += 1
+                except Exception:
+                    skipped_count += 1
+                    continue
+
+        messages.success(
             request,
-            self.template_name,
-            {"success": f"Successfully imported {imported} records."},
+            f"Imported {imported_count} records. Skipped {skipped_count} invalid rows."
         )
+        return HttpResponseRedirect(reverse("documents:upload_excel"))
