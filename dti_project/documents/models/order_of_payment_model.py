@@ -34,7 +34,7 @@ class OrderOfPayment(DraftModel, models.Model):
     doc_stamp_amount = models.DecimalField(max_digits=10, decimal_places=2, default=30.00)
 
     special_collecting_officer_date = models.DateField(null=True, blank=True)
-    special_collecting_officer_or_number = models.CharField(max_length=50, blank=True)
+    special_collecting_officer_or_number = models.CharField(max_length=50, blank=True, null=True)
     special_collecting_officer_signature = models.ImageField(upload_to='signatures/', null=True, blank=True)
 
     class Meta:

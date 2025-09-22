@@ -23,6 +23,7 @@
     min-width: 30vw;
     max-height: 60%;
     padding: 1.5rem;
+    overflow: hidden;
 }
 
 .modal header {

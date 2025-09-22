@@ -10,7 +10,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.apps import apps
-from ..utils.excel_view_helpers import normalize_sheet_name, to_title
+from ..utils.excel_view_helpers import get_user_from_full_name, normalize_header, normalize_sheet_name, to_title
 from ..models.base_models import DraftModel
 from django.contrib.auth.mixins import LoginRequiredMixin
 from ..mixins.permissions_mixins import UserRoleMixin
@@ -146,11 +146,17 @@ class ExportDocumentsExcelView(LoginRequiredMixin, View):
         wb.save(response)
         return response
 
+UPLOAD_MODEL_MAP = {
+    "accreditation of service and repair enterprises": ServiceRepairAccreditationApplication,
+    "sales promotion permit applications": SalesPromotionPermitApplication,
+    "personal data sheets": PersonalDataSheet,
+    "orders of payment": OrderOfPayment,
+    "checklist of requirements and evaluation sheets": ChecklistEvaluationSheet,
+}
 
-class UploadExcelView(LoginRequiredMixin, View):
+class UploadExcelView(View):
     """
-    Upload an Excel file and import rows into Django models.
-    Only allows .xlsx/.xls files.
+    Upload one or more Excel files and import rows into Django models.
     """
 
     template_name = "documents/excel_templates/excel_upload.html"
@@ -160,67 +166,101 @@ class UploadExcelView(LoginRequiredMixin, View):
 
     @transaction.atomic
     def post(self, request, *args, **kwargs):
-        file = request.FILES.get("file")
-        if not file:
-            messages.error(request, "No file uploaded.")
-            return HttpResponseRedirect(reverse("documents:upload_excel"))
+        files = request.FILES.getlist("files")
 
-        # --- Validate if file extension is xlsx (excel file) ---
-        ext = os.path.splitext(file.name)[1].lower()
-        if ext not in [".xlsx", ".xls"]:
-            messages.error(request, "Invalid file type. Please upload an Excel file (.xlsx or .xls).")
-            return HttpResponseRedirect(reverse("documents:upload_excel"))
+        if not files:
+            messages.error(request, "No files uploaded.")
+            return HttpResponseRedirect(reverse("documents:all-documents"))
 
-        try:
-            wb = load_workbook(file)
-        except Exception as e:
-            messages.error(request, f"Invalid Excel file: {e}")
-            return HttpResponseRedirect(reverse("documents:upload_excel"))
+        total_imported = 0
+        total_skipped = 0
 
-        imported_count = 0
-        skipped_count = 0
-
-        for sheetname in wb.sheetnames:
-            model = EXPORT_MODEL_MAP.get(normalize_sheet_name(sheetname))
-            if not model:
+        for file in files:
+            ext = os.path.splitext(file.name)[1].lower()
+            if ext not in [".xlsx", ".xls"]:
+                messages.error(request, f"Invalid file type: {file.name}. Only .xlsx or .xls allowed.")
                 continue
 
-            ws = wb[sheetname]
-            headers = [str(cell.value).strip().lower() for cell in ws[1]]
+            try:
+                wb = load_workbook(file)
+            except Exception as e:
+                messages.error(request, f"Invalid Excel file {file.name}: {e}")
+                continue
 
-            for row in ws.iter_rows(min_row=2, values_only=True):
-                if not any(row):
+            for sheetname in wb.sheetnames:
+                model = UPLOAD_MODEL_MAP.get(sheetname.strip().lower())
+                if not model:
+                    print(f"⚠️ Skipping sheet (no model match): {sheetname}")
                     continue
 
-                data = {}
-                for header, value in zip(headers, row):
-                    if not header:
+                ws = wb[sheetname]
+                raw_headers = [str(cell.value).strip() if cell.value else "" for cell in ws[1]]
+                headers = [normalize_header(h) for h in raw_headers]
+
+                # Build field mapping
+                field_map = {}
+                for f in model._meta.fields:
+                    field_options = {
+                        normalize_header(f.verbose_name),
+                        normalize_header(f.name),
+                    }
+                    for h in headers:
+                        if h in field_options:
+                            field_map[h] = f.name
+
+                print(f"📄 Processing sheet: {sheetname}")
+                print(f"   ↳ Model: {model.__name__}")
+                print(f"   ↳ Headers: {headers}")
+                print(f"   ↳ Field map: {field_map}")
+
+                imported_count = 0
+                skipped_count = 0
+
+                for row in ws.iter_rows(min_row=2, values_only=True):
+                    if not any(row):
                         continue
 
-                    field = next(
-                        (f for f in model._meta.fields if f.verbose_name.lower() == header),
-                        None,
-                    )
-                    if not field:
+                    data = {}
+                    for header, value in zip(headers, row):
+                        field_name = field_map.get(header)
+                        if not field_name:
+                            continue
+
+                        if isinstance(value, datetime.datetime):
+                            value = value.date()
+                        if value in ("", None):
+                            value = None
+
+                        # special handling for user field
+                        if field_name == "user" and value:
+                            user_obj = get_user_from_full_name(str(value))
+                            if user_obj:
+                                data[field_name] = user_obj
+                            else:
+                                print(f"⚠️ Skipping user lookup: '{value}' not found")
+                                continue
+                        else:
+                            data[field_name] = value
+
+                    try:
+                        if data:
+                            obj = model(**data)
+                            obj.save()
+                            imported_count += 1
+                        else:
+                            skipped_count += 1
+                    except Exception as e:
+                        print(f"❌ Skipped row due to error: {e}")
+                        skipped_count += 1
                         continue
 
-                    if isinstance(value, datetime.datetime):
-                        value = value.date()
-                    if value in ("", None):
-                        value = None
+                total_imported += imported_count
+                total_skipped += skipped_count
 
-                    data[field.name] = value
-
-                try:
-                    obj = model(**data)
-                    obj.save()
-                    imported_count += 1
-                except Exception:
-                    skipped_count += 1
-                    continue
+                print(f"Imported {imported_count} rows from {sheetname}, skipped {skipped_count}")
 
         messages.success(
             request,
-            f"Imported {imported_count} records. Skipped {skipped_count} invalid rows."
+            f"Imported {total_imported} records. Skipped {total_skipped} invalid rows across all files."
         )
-        return HttpResponseRedirect(reverse("documents:upload_excel"))
+        return HttpResponseRedirect(reverse("all-documents"))

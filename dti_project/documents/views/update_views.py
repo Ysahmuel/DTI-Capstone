@@ -10,7 +10,8 @@ from ..forms import FORMSET_CLASSES, ChecklistEvaluationSheetForm, InspectionVal
 from ..models import ChecklistEvaluationSheet, InspectionValidationReport, OrderOfPayment, PersonalDataSheet, SalesPromotionPermitApplication, ServiceRepairAccreditationApplication
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-
+from django.contrib.contenttypes.models import ContentType
+from ..models import ChangeRequest
 
 class UpdateSalesPromotionView(LoginRequiredMixin, MessagesMixin, FormSubmissionMixin, FormStepsMixin, FormsetMixin, OwnershipDraftMixin, UpdateView):
     model = SalesPromotionPermitApplication

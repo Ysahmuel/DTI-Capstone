@@ -1,4 +1,4 @@
-<div class="modal-container" id="upload-files-modal-container" style="display: flex; flex-direction: column;">
+<div class="modal-container" id="upload-files-modal-container">
 
     <div class="modal" id="upload-files-modal">
         <header>
@@ -8,43 +8,35 @@
             </button>
         </header>
 
-        <form id="excel-upload-form" action="{% url 'upload-excel' %}" method="POST">
+        <form id="excel-upload-form" action="{% url 'upload-excel' %}" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
 
-            <div class="upload-image-container">
+            <!-- file input -->
+            <input type="file" id="file-input" name="files" accept=".xls,.xlsx" hidden multiple>
 
-                <button class="upload-file-btn" type="button">
+            <div class="upload-image-container" id="upload-files-container">
+                <button class="upload-file-btn" type="button" onclick="document.getElementById('file-input').click()">
                     <i class="fa-solid fa-upload"></i>
                 </button>
 
                 <h3 id="drag-drop-text">
                     Drag and drop or <span class="highlighted-span">choose file</span> to upload
                 </h3>
-                <p id="file-text">No file chosen yet.</p>
-
+                <p id="file-text">Only .xlsx and .xls files are allowed.</p>
             </div>
 
-            <p id="accepted-file-types">Only .xlsx and .xls files are allowed.</p>
+            <section class="uploaded-files">
+                <h3>Uploaded Files</h3>
+                <ul class="uploaded-files-list">
+                    <li class="no-files">No files yet</li>
+                </ul>
+            </section>
 
+            <div class="actions">
+                <button type="button" id="cancel-btn">Cancel</button>
+                <button type="submit" id="submit-btn">Submit</button>
+            </div>
         </form>
 
-        <section class="uploaded-files">
-            <h3>Uploaded Files</h3>
-            <ul class="uploaded-files-list">
-                <li>
-                    <i class="fa-solid fa-file"></i>
-                    <div class="details">
-                        <strong id="filename">Filename.xls</strong>
-                        <p id="file-size">22.4 MB</p>
-                    </div>
-                    <i class="fa-solid fa-trash"></i>
-                </li>
-            </ul>
-        </section>
-
-        <div class="actions">
-            <button id="submit-btn">Submit</button>
-        </div>
-
     </div>
-
 </div>

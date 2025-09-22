@@ -1,8 +1,15 @@
 #upload-files-modal {
+    flex-direction: column;
     min-width: 40vw;
+    max-height: 70%;
 }
 
-#accepted-file-types {
+#upload-files-container {
+    background-color: white;
+}
+
+.uploaded-files {
+    flex: 1;
     margin: 1rem 0;
 }
 
@@ -11,10 +18,12 @@
     flex-direction: column;
     gap: 0.5rem;
     list-style-type: none;
-    margin-top: 0.5rem;
+    margin-top: 1rem;
+    overflow-y: auto;
+    max-height: 200px; 
 }
 
-.uploaded-files-list li {
+.uploaded-files-list li:not(.no-files) {
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -53,4 +62,13 @@
 
 .uploaded-files-list #submit-btn {
     background-color: var(--accent);
+}
+
+#upload-files-modal-container .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    background: white; 
+    position: sticky;
+    bottom: 0;
 }
