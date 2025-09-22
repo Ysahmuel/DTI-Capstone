@@ -1,0 +1,50 @@
+<div class="modal-container" id="upload-files-modal-container" style="display: flex; flex-direction: column;">
+
+    <div class="modal" id="upload-files-modal">
+        <header>
+            <h2>Upload Excel Files</h2>
+            <button type="button" class="close-modal-btn">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </header>
+
+        <form id="excel-upload-form" action="{% url 'upload-excel' %}" method="POST">
+
+            <div class="upload-image-container">
+
+                <button class="upload-file-btn" type="button">
+                    <i class="fa-solid fa-upload"></i>
+                </button>
+
+                <h3 id="drag-drop-text">
+                    Drag and drop or <span class="highlighted-span">choose file</span> to upload
+                </h3>
+                <p id="file-text">No file chosen yet.</p>
+
+            </div>
+
+            <p id="accepted-file-types">Only .xlsx and .xls files are allowed.</p>
+
+        </form>
+
+        <section class="uploaded-files">
+            <h3>Uploaded Files</h3>
+            <ul class="uploaded-files-list">
+                <li>
+                    <i class="fa-solid fa-file"></i>
+                    <div class="details">
+                        <strong id="filename">Filename.xls</strong>
+                        <p id="file-size">22.4 MB</p>
+                    </div>
+                    <i class="fa-solid fa-trash"></i>
+                </li>
+            </ul>
+        </section>
+
+        <div class="actions">
+            <button id="submit-btn">Submit</button>
+        </div>
+
+    </div>
+
+</div>
