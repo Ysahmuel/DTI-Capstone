@@ -9,9 +9,8 @@ from openpyxl.utils import get_column_letter
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from django.apps import apps
-from ..utils.excel_view_helpers import get_user_from_full_name, normalize_header, normalize_sheet_name, to_title
-from ..models.base_models import DraftModel
+from ..mappings import EXPORT_MODEL_MAP, UPLOAD_MODEL_MAP
+from ..utils.excel_view_helpers import get_user_from_full_name, normalize_header, normalize_sheet_name, shorten_name, to_title
 from django.contrib.auth.mixins import LoginRequiredMixin
 from ..mixins.permissions_mixins import UserRoleMixin
 from django.shortcuts import render
@@ -19,7 +18,6 @@ from django.contrib import messages
 from django.db import transaction
 import pandas as pd
 from openpyxl import load_workbook
-
 import os
 from ..models import (
     ChecklistEvaluationSheet,
@@ -30,20 +28,6 @@ from ..models import (
     ServiceRepairAccreditationApplication,
 )
 
-MODEL_MAP = {
-    model._meta.model_name: model
-    for model in apps.get_models()
-    if issubclass(model, DraftModel) and not model._meta.abstract
-}
-
-EXPORT_MODEL_MAP = {
-    "salespromotionpermitapplication": SalesPromotionPermitApplication,
-    "personaldatasheet": PersonalDataSheet,
-    "servicerepairaccreditationapplication": ServiceRepairAccreditationApplication,
-    "inspectionvalidationreport": InspectionValidationReport,
-    "orderofpayment": OrderOfPayment,
-    "checklistevaluationsheet": ChecklistEvaluationSheet,
-}
 
 class ExportDocumentsExcelView(LoginRequiredMixin, View):
     """
@@ -88,7 +72,10 @@ class ExportDocumentsExcelView(LoginRequiredMixin, View):
         for model_name, objs in grouped.items():
             if not objs:
                 continue
-            ws = wb.create_sheet(title=model_name[:31])
+            # use your helper instead of hard truncation
+            sheet_title = shorten_name(model_name)
+            ws = wb.create_sheet(title=sheet_title)
+
             fields = objs[0]._meta.fields
             headers = [f.verbose_name.title() for f in fields]
             ws.append(headers)
@@ -146,13 +133,6 @@ class ExportDocumentsExcelView(LoginRequiredMixin, View):
         wb.save(response)
         return response
 
-UPLOAD_MODEL_MAP = {
-    "accreditation of service and repair enterprises": ServiceRepairAccreditationApplication,
-    "sales promotion permit applications": SalesPromotionPermitApplication,
-    "personal data sheets": PersonalDataSheet,
-    "orders of payment": OrderOfPayment,
-    "checklist of requirements and evaluation sheets": ChecklistEvaluationSheet,
-}
 
 class UploadExcelView(View):
     """

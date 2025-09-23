@@ -1,5 +1,7 @@
 import re
 from django.contrib.auth import get_user_model
+from difflib import get_close_matches
+from documents.mappings import UPLOAD_MODEL_MAP
 
 def to_title(value):
     """Normalize strings: remove underscores, title-case, handle non-strings gracefully."""
@@ -37,3 +39,19 @@ def get_user_from_full_name(full_name: str):
         return User.objects.get(first_name__iexact=first_name, last_name__iexact=last_name)
     except User.DoesNotExist:
         return None
+    
+def shorten_name(name, max_length=31):
+    words = name.split()
+    shortened = " ".join(words[:3])
+    if len(shortened) > max_length:
+        return shortened[:max_length]  
+    return shortened
+    
+def get_model_from_sheet(sheetname):
+    normalized = normalize_sheet_name(sheetname)
+    candidates = list(UPLOAD_MODEL_MAP.keys())
+    match = get_close_matches(normalized, candidates, n=1, cutoff=0.6)
+
+    if match:
+        return UPLOAD_MODEL_MAP[match[0]]
+    return None
