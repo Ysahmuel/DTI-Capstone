@@ -10,12 +10,12 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from ..mappings import EXPORT_MODEL_MAP, UPLOAD_MODEL_MAP
-from ..utils.excel_view_helpers import get_user_from_full_name, normalize_header, normalize_sheet_name, shorten_name, to_title
+from ..utils.excel_view_helpers import get_model_from_sheet, get_user_from_full_name, normalize_header, normalize_sheet_name, shorten_name, to_title
 from django.contrib.auth.mixins import LoginRequiredMixin
 from ..mixins.permissions_mixins import UserRoleMixin
 from django.shortcuts import render
 from django.contrib import messages
-from django.db import transaction
+from django.db import IntegrityError, transaction
 import pandas as pd
 from openpyxl import load_workbook
 import os
@@ -133,7 +133,6 @@ class ExportDocumentsExcelView(LoginRequiredMixin, View):
         wb.save(response)
         return response
 
-
 class UploadExcelView(View):
     """
     Upload one or more Excel files and import rows into Django models.
@@ -144,12 +143,11 @@ class UploadExcelView(View):
     def get(self, request, *args, **kwargs):
         return render(request, self.template_name)
 
-    @transaction.atomic
     def post(self, request, *args, **kwargs):
         files = request.FILES.getlist("files")
 
         if not files:
-            messages.error(request, "No files uploaded.")
+            messages.error(request, "No files were uploaded. Please select an Excel file to continue.")
             return HttpResponseRedirect(reverse("documents:all-documents"))
 
         total_imported = 0
@@ -158,19 +156,19 @@ class UploadExcelView(View):
         for file in files:
             ext = os.path.splitext(file.name)[1].lower()
             if ext not in [".xlsx", ".xls"]:
-                messages.error(request, f"Invalid file type: {file.name}. Only .xlsx or .xls allowed.")
+                messages.error(request, f"{file.name} was not uploaded. Only Excel files (.xlsx or .xls) are allowed.")
                 continue
 
             try:
                 wb = load_workbook(file)
-            except Exception as e:
-                messages.error(request, f"Invalid Excel file {file.name}: {e}")
+            except Exception:
+                messages.error(request, f"Could not open {file.name}. Please check that it is a valid Excel file.")
                 continue
 
             for sheetname in wb.sheetnames:
-                model = UPLOAD_MODEL_MAP.get(sheetname.strip().lower())
+                model = get_model_from_sheet(sheetname)
                 if not model:
-                    print(f"⚠️ Skipping sheet (no model match): {sheetname}")
+                    print(f"Skipping sheet: {sheetname} (no matching document type found)")
                     continue
 
                 ws = wb[sheetname]
@@ -188,8 +186,8 @@ class UploadExcelView(View):
                         if h in field_options:
                             field_map[h] = f.name
 
-                print(f"📄 Processing sheet: {sheetname}")
-                print(f"   ↳ Model: {model.__name__}")
+                print(f"Processing sheet: {sheetname}")
+                print(f"   ↳ Matched model: {model.__name__}")
                 print(f"   ↳ Headers: {headers}")
                 print(f"   ↳ Field map: {field_map}")
 
@@ -197,7 +195,7 @@ class UploadExcelView(View):
                 skipped_count = 0
 
                 for row in ws.iter_rows(min_row=2, values_only=True):
-                    if not any(row):
+                    if not any(row):  # skip empty rows
                         continue
 
                     data = {}
@@ -211,26 +209,34 @@ class UploadExcelView(View):
                         if value in ("", None):
                             value = None
 
-                        # special handling for user field
+                        # Special handling for user field
                         if field_name == "user" and value:
                             user_obj = get_user_from_full_name(str(value))
                             if user_obj:
                                 data[field_name] = user_obj
                             else:
-                                print(f"⚠️ Skipping user lookup: '{value}' not found")
-                                continue
+                                print(f"Could not find user: '{value}'. Row skipped.")
+                                skipped_count += 1
+                                data = {}
+                                break
                         else:
                             data[field_name] = value
 
                     try:
                         if data:
-                            obj = model(**data)
-                            obj.save()
-                            imported_count += 1
+                            with transaction.atomic():
+                                obj = model(**data)
+                                obj.save()
+                                imported_count += 1
                         else:
                             skipped_count += 1
+
+                    except IntegrityError as e:
+                        print(f"Skipped row due to database error: {e}")
+                        skipped_count += 1
+                        continue
                     except Exception as e:
-                        print(f"❌ Skipped row due to error: {e}")
+                        print(f"Skipped row due to error: {e}")
                         skipped_count += 1
                         continue
 
@@ -239,8 +245,21 @@ class UploadExcelView(View):
 
                 print(f"Imported {imported_count} rows from {sheetname}, skipped {skipped_count}")
 
-        messages.success(
-            request,
-            f"Imported {total_imported} records. Skipped {total_skipped} invalid rows across all files."
-        )
+        # --- User-friendly messages ---
+        if total_imported > 0:
+            messages.success(request, f"Successfully imported {total_imported} records.")
+
+        if total_skipped > 0:
+            messages.error(
+                request,
+                f"{total_skipped} rows were skipped because of missing or invalid information. "
+                "Please review your Excel file and try again."
+            )
+
+        if total_imported == 0 and total_skipped == 0:
+            messages.info(
+                request,
+                "No records were imported. Please make sure your Excel sheets match the expected format."
+            )
+
         return HttpResponseRedirect(reverse("all-documents"))
