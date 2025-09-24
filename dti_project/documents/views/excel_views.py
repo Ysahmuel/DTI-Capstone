@@ -263,3 +263,9 @@ class UploadExcelView(View):
             )
 
         return HttpResponseRedirect(reverse("all-documents"))
+    
+
+class UploadReportView(View):
+    template_name = 'documents/excel_templates/upload_report.html'
+    
+    pass

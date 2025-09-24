@@ -36,7 +36,8 @@ from .list_views import (
 
 from .excel_views import (
     UploadExcelView,
-    ExportDocumentsExcelView
+    ExportDocumentsExcelView,
+    UploadReportView,
 )
 
 from .action_views import (
