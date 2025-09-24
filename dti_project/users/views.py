@@ -17,6 +17,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView
 from django.shortcuts import render, get_object_or_404
 from users.models import User
+from django.views.generic import ListView
+
 from documents.models import (
     # Base models
     BaseApplication,
@@ -98,6 +100,37 @@ class ProfileDetailView(DetailView):
         })
         return context
 
+class StaffListView(ListView):
+    model = User
+    template_name = 'users/staff_accounts.html'
+    
+    def get_queryset(self):
+        qs = User.objects.filter(role='collection_agent')
+
+        return qs
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'users': self.get_queryset()
+        })
+        return context
+    
+class BusinessOwnerListView(ListView):
+    model = User
+    template_name = 'users/bo_accounts.html'
+    
+    def get_queryset(self):
+        qs = User.objects.filter(role='business_owner')
+
+        return qs
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'users': self.get_queryset()
+        })
+        return context
 
 class ProfileEditView(UpdateView):
     model = User

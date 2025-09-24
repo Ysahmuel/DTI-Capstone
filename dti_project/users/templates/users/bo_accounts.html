@@ -1,0 +1,73 @@
+{% extends 'dashboard/layout.html' %}
+{% load static %}
+
+{% block title %}Business Owners{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/bolist.css' %}">
+{% endblock %}
+
+{% block body %}
+<div class="staff-table-container">
+
+    <!-- Header with title and actions -->
+    <div class="staff-table-header">
+        <h3>Business Owners</h3>
+        <div class="actions">
+            <button id="filter-btn"><i class="fa fa-filter"></i> Filter</button>
+            <button id="add-owner-btn">Add Owner</button>
+        </div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <table class="staff-table">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="select-all-checkbox"></th>
+                    <th>Name</th>
+                    <th>Date Joined</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr class="staff-value-row" data-href="{{ user.get_absolute_url }}">
+                    <td>
+                        <input type="checkbox" name="owners" value="user:{{ user.id }}">
+                    </td>
+                    <td>{{ user.get_full_name|default:user.username }}</td>
+                    <td>{{ user.date_joined|date:"Y-m-d" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3">No business owners found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </form>
+</div>
+
+<!-- JavaScript -->
+<script>
+    // Make rows clickable except when clicking checkbox
+    document.querySelectorAll('.staff-value-row').forEach(row => {
+        row.addEventListener('click', function(e) {
+            if (e.target.type !== 'checkbox') {
+                const url = this.getAttribute('data-href');
+                if (url) {
+                    window.location.href = url;
+                }
+            }
+        });
+    });
+
+    // Select all checkboxes
+    document.getElementById('select-all-checkbox').addEventListener('change', function() {
+        const checked = this.checked;
+        document.querySelectorAll('input[name="owners"]').forEach(cb => {
+            cb.checked = checked;
+        });
+    });
+</script>
+{% endblock %}

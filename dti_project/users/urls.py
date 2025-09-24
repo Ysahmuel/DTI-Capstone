@@ -14,7 +14,10 @@ urlpatterns = [
     path("settings/<int:pk>/profile-edit/", views.ProfileEditView.as_view(), name="profile_edit"),
     # Settings page
     path('settings/', views.SettingsView.as_view(), name='settings'),
-
+    
+    #Account pages
+    path('staff-accounts/', views.StaffListView.as_view(), name="staff_accounts"),
+    path('business-owner-accounts/', views.BusinessOwnerListView.as_view(), name="bo_accounts"),
 
 ]
 

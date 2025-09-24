@@ -1,0 +1,108 @@
+/* CSS Variables - adjust colors as needed */
+:root {
+    --accent: #007bff;
+    --border-color: #dcdcdc;
+    --text-secondary: #555;
+    --radius-sm: 4px;
+}
+
+/* Container */
+.owner-table-container {
+    margin: 1.5rem;
+    margin-top: 3rem;
+}
+
+/* Header */
+.owner-table-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 3rem;
+    padding-right: 2.5rem;
+    width: 100%;
+}
+
+.owner-table-header h3 {
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* Header action buttons */
+.owner-table-header .actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.owner-table-header .actions button {
+    background-color: white;
+    border: solid 1px var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: clamp(0.5rem, 0.75vw, 1.5rem);
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    transition: 0.1s;
+    display: flex;
+    align-items: center;
+}
+
+.owner-table-header #filter-btn i {
+    margin-right: 0.4rem;
+    transition: 0.1s;
+}
+
+.owner-table-header #filter-btn:hover {
+    border-color: var(--accent);
+}
+
+.owner-table-header #filter-btn:hover i {
+    color: var(--accent);
+}
+
+.owner-table-header .actions button:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+/* Table styling */
+.owner-table {
+    margin-top: 1rem;
+    width: calc(100% - 1.5rem);
+    border-collapse: collapse;
+    border-spacing: 0; /* kill gaps */
+}
+
+.owner-table thead {
+    width: 100%;
+}
+
+.owner-table th {
+    text-align: left;
+    color: var(--text-secondary);
+    font-weight: 400;
+    border-bottom: solid 1px var(--border-color);
+    padding-bottom: 1rem;
+    padding-left: 1rem;
+}
+
+.owner-value-row {
+    cursor: pointer;
+}
+
+.owner-value-row td {
+    padding: 1rem 0;
+    padding-left: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.owner-value-row:hover td {
+    background-color: rgb(228, 238, 255);
+}
+
+/* Checkbox cursor */
+.owner-value-row input[type="checkbox"] {
+    cursor: pointer;
+}
