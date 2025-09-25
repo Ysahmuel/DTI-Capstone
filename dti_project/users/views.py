@@ -112,7 +112,8 @@ class StaffListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({
-            'users': self.get_queryset()
+            'users': self.get_queryset(),
+            'user_type': 'staff'
         })
         return context
     
@@ -128,7 +129,8 @@ class BusinessOwnerListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({
-            'users': self.get_queryset()
+            'users': self.get_queryset(),
+            'user_type': 'business_owner'
         })
         return context
 
