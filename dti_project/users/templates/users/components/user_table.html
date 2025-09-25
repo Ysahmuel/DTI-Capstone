@@ -1,4 +1,5 @@
 {% load custom_filters %}
+{% load static %}
 
 <div class="user-table-container">
 
@@ -6,7 +7,7 @@
     <div class="user-table-header">
         <h3>{{ user_type|titlecase }} Accounts</h3>
         <div class="actions">
-            <button id="add-user-btn">Add {{ user_type }}</button>
+            <button id="add-user-btn">Add {{ user_type|titlecase}}</button>
             <button id="filter-btn">
                 <i class="fas fa-sliders-h"></i>
             </button>
@@ -18,23 +19,23 @@
         <table class="user-table">
             <thead>
                 <tr>
-                    <th><input type="checkbox" id="select-all-checkbox"></th>
+                    <th><input type="checkbox" name='{{ user_type }}' id="select-all-checkbox"></th>
                     <th>User</th>
-                    <th>Date Created</th>
+                    <th>{% if user_type == 'business_owner' %} Date Joined {% else %} Date Created {% endif %}</th>
                 </tr>
             </thead>
             <tbody>
                 {% for user in users %}
                 <tr class="user-value-row" data-href="{{ user.get_absolute_url }}">
                     <td>
-                        <input type="checkbox" name="staffs" value="user:{{ user.id }}">
+                        <input type="checkbox" name="{{ user_type }}" value="user:{{ user.id }}">
                     </td>
                     <td>{{ user.get_full_name|default:user.username }}</td>
                     <td>{{ user.date_joined|date:"Y-m-d" }}</td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="3">No staff users found.</td>
+                    <td colspan="3">No users found.</td>
                 </tr>
                 {% endfor %}
             </tbody>
