@@ -2,6 +2,7 @@ from datetime import timedelta
 import secrets
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.urls import reverse
 from django.utils import timezone
 
 # Create your models here.
@@ -33,6 +34,8 @@ class User(AbstractUser):
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
 
+    def get_absolute_url(self):
+        return reverse("profile", args=[self.pk])
     
     def generate_secure_otp_code(self):
         """Generate cryptographically secure 6-digit OTP and save to user"""
