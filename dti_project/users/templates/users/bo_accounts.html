@@ -8,14 +8,19 @@
 {% endblock %}
 
 {% block body %}
+
+{% include 'users/components/users_list_header.html' with title='Manage Business Owners' %}
+
 <div class="staff-table-container">
 
     <!-- Header with title and actions -->
     <div class="staff-table-header">
         <h3>Business Owners</h3>
         <div class="actions">
-            <button id="filter-btn"><i class="fa fa-filter"></i> Filter</button>
             <button id="add-owner-btn">Add Owner</button>
+            <button id="filter-btn">
+                <i class="fas fa-sliders-h"></i>
+            </button>
         </div>
     </div>
 
