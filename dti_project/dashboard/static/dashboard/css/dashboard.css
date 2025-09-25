@@ -1,7 +1,5 @@
 @import url('searchbar.css');
 @import url('notifications.css');
-@import url('stafflist.css');
-@import url('bolist.css');
 
 .main-content {
     background-color: rgba(250, 250, 250);
