@@ -17,7 +17,7 @@
                         <span>Dashboard</span>
                     </a>
                 </li>
-                {% if user.role == 'business_owner' %}
+                {% if user.role != 'admin' %}
                     <li class="nav-item dropdown">
                         <button class="nav-dropdown-btn">
                             <i class="fa-solid fa-plus"></i>
