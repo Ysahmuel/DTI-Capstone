@@ -1,0 +1,37 @@
+{% extends 'dashboard/layout.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %} Excel File Upload Report {% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'documents/css/upload-report.css' %}">
+{% endblock %}
+
+{% block body %}
+    <header class="document-details-header">
+        <div class="column">
+            <h1>Excel File Upload Report</h1>
+            <h3>2 Files Uploaded</h3>
+        </div>
+        <div class="actions">
+            {% include 'dashboard/components/dashboard_actions.html' %}
+        </div>
+    </header>
+    
+    <div class="upload-report-container">
+
+        <div>
+            {% include 'documents/upload_report_components/uploaded_file_header.html' %}
+
+            {% include 'documents/upload_report_components/upload_report_table.html' %}
+        </div>
+
+        <div>
+            {% include 'documents/upload_report_components/uploaded_file_header.html' %}
+
+            {% include 'documents/upload_report_components/upload_report_table.html' %}
+        </div>
+
+    </div>
+{% endblock %}

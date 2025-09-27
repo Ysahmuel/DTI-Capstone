@@ -1,4 +1,7 @@
 .upload-report-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
     padding: 1rem 2rem;
 }
 
@@ -10,7 +13,7 @@
     display: flex;
     align-items: start;
     gap: 1rem;
-    padding-bottom: 1rem;
+    padding-bottom: 2.5rem;
     border-bottom: solid 1px var(--border-color);
 }
 
@@ -63,4 +66,8 @@
 .uploaded-file-item .stat-item p {
     color: var(--text-secondary);
     margin-bottom: 4px;
+}
+
+.uploaded-files-table {
+    border-bottom: solid 1px var(--border-color);
 }
