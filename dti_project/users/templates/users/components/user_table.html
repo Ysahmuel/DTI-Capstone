@@ -7,7 +7,9 @@
     <div class="user-table-header">
         <h3>{{ user_type|titlecase }} Accounts</h3>
         <div class="actions">
-            <button id="add-user-btn">Add {{ user_type|titlecase}}</button>
+            {% if user_type == 'staff' %}
+                <button id="add-user-btn">Add {{ user_type|titlecase}}</button>
+            {% endif %}
             <button id="filter-btn">
                 <i class="fas fa-sliders-h"></i>
             </button>
