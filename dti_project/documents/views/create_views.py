@@ -1,6 +1,8 @@
 from django.contrib import messages
 from django.http import JsonResponse
 from django.urls import reverse_lazy
+
+from ..mixins.permissions_mixins import PreventAdminFormPostRequestMixin
 from ..mixins.context_mixins import PreviewContextMixin
 from ..mixins.form_mixins import FormStepsMixin, FormSubmissionMixin, FormsetMixin, MessagesMixin
 from ..mixins.service_mixins import ServiceCategoryMixin
@@ -48,6 +50,7 @@ class BaseCreateView(
     FormSubmissionMixin,
     FormStepsMixin,
     FormsetMixin,
+    PreventAdminFormPostRequestMixin,
     CreateView
 ):
     def post(self, request, *args, **kwargs):
