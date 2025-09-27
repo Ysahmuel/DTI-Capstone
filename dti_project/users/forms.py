@@ -40,7 +40,6 @@ class CustomUserCreationForm(UserCreationForm):
             'default_address',
             'password1',
             'password2',
-            'role',
         ]
 
     def save(self, commit=True):
@@ -50,6 +49,7 @@ class CustomUserCreationForm(UserCreationForm):
         user.email = self.cleaned_data['email']
         user.default_phone = self.cleaned_data['default_phone']
         user.default_address = self.cleaned_data['default_address']
+        user.role == 'business_owner'
 
         # Generate unique username
         base_username = slugify(f"{user.first_name}.{user.last_name}")

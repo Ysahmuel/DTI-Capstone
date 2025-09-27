@@ -38,6 +38,7 @@ urlpatterns = [
     # EXCEL VIEWS
     path("export-to-excel", views.ExportDocumentsExcelView.as_view(), name='export-to-excel'), 
     path('upload-excel', views.UploadExcelView.as_view(), name='upload-excel'),
+    path('upload-report', views.UploadReportView.as_view(), name='upload-report'),
 
     # ACTION VIEWS
     path('approve-documents', views.ApproveDocumentsView.as_view(), name='approve-documents')

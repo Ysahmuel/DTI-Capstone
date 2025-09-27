@@ -15,15 +15,17 @@
                     <h3>Sign in to your account to continue.</h3>
                 </header>
 
-                <div class="form-group">
-                    {{ form.username.label_tag }}
-                    {{ form.username }}
-                </div>
+                <div class="form-scroll">
+                    <div class="form-group">
+                        {{ form.username.label_tag }}
+                        {{ form.username }}
+                    </div>
 
-                <div class="form-group">
-                    {{ form.password.label_tag }}
-                    {{ form.password }}
-                    {{ form.password.errors }}
+                    <div class="form-group">
+                        {{ form.password.label_tag }}
+                        {{ form.password }}
+                        {{ form.password.errors }}
+                    </div>
                 </div>
                 
                 <button type="submit">Sign In</button>

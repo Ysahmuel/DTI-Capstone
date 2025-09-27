@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="{% static 'dashboard/css/navbar.css' %}">
     <link rel="stylesheet" href="{% static 'documents/css/documents.css' %}">
     <link rel="stylesheet" href="{% static 'documents/css/upload.css' %}">
-
+    <link rel="stylesheet" href="{% static 'users/css/user_list.css' %}">
     {% block extra_css %}{% endblock %}
     
     <!-- JS -->
@@ -52,6 +52,9 @@
             {% include 'documents/partials/alerts_container.html' %}
         {% endif %}
     </div>
+
+    <!-- Page-specific scripts -->
+    {% block extra_js %}{% endblock %}
 
 </body>
 </html>

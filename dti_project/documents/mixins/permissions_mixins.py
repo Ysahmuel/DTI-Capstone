@@ -1,6 +1,8 @@
 from django.contrib import messages
+from django.http import HttpResponseForbidden
 from django.shortcuts import redirect
 from django.db.models import Value, F, Q
+from django.contrib import messages
 
 class OwnershipDraftMixin:
     """
@@ -49,3 +51,11 @@ class UserRoleMixin:
             return model.objects.count()
         else:
             return model.objects.filter(user=user).count()
+
+
+class PreventAdminFormPostRequestMixin:
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.role == 'admin':
+            messages.error(request, "Admins are not allowed to access this page.")
+            return redirect(request.META.get('HTTP_REFERER', '/'))
+        return super().dispatch(request, *args, **kwargs)

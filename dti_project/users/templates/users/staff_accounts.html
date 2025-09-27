@@ -1,0 +1,11 @@
+{% extends 'dashboard/layout.html' %}
+
+{% block title %}Staff Accounts{% endblock %}
+
+{% block body %}
+
+    {% include 'users/components/users_list_header.html' with title='Manage Staff' %}
+
+    {% include 'users/components/user_table.html' %}
+
+{% endblock %}
