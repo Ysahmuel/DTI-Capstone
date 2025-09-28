@@ -5,7 +5,6 @@
         <tr>
             <th>Name</th>
             <th>Document Type</th>
-            <th>User</th>
             <th>Status</th>
             <th>Invalid Fields</th>
         </tr>
@@ -15,7 +14,6 @@
         <tr class="document-value-row" data-href="{{ document.absolute_url|default:'#' }}">
             <td>{{ document.display }}</td>
             <td>{{ document.model.title }}</td>
-            <td>{{ document.user }}</td>
             <td>{{ document.status }}</td>
             <td>{{ document.invalid_fields_display|default:"None" }}</td>
         </tr>
