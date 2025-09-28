@@ -134,10 +134,6 @@ class ExportDocumentsExcelView(LoginRequiredMixin, View):
         return response
 
 class UploadExcelView(View):
-    """
-    Upload one or more Excel files and import rows into Django models.
-    """
-
     template_name = "documents/excel_templates/excel_upload.html"
 
     def get(self, request, *args, **kwargs):
@@ -145,58 +141,63 @@ class UploadExcelView(View):
 
     def post(self, request, *args, **kwargs):
         files = request.FILES.getlist("files")
-
         if not files:
             messages.error(request, "No files were uploaded. Please select an Excel file to continue.")
             return HttpResponseRedirect(reverse("documents:all-documents"))
 
-        total_imported = 0
-        total_skipped = 0
+        file_reports = []
 
         for file in files:
+            report = {
+                "filename": file.name,
+                "filesize": round(file.size / (1024 * 1024), 2),  # MB
+                "created_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "total_records": 0,
+                "imported_records": 0,
+                "failed_records": 0,
+                "documents": [],
+            }
+
             ext = os.path.splitext(file.name)[1].lower()
             if ext not in [".xlsx", ".xls"]:
-                messages.error(request, f"{file.name} was not uploaded. Only Excel files (.xlsx or .xls) are allowed.")
+                messages.error(request, f"{file.name} was not uploaded. Only Excel files are allowed.")
                 continue
 
             try:
                 wb = load_workbook(file)
             except Exception:
-                messages.error(request, f"Could not open {file.name}. Please check that it is a valid Excel file.")
+                messages.error(request, f"Could not open {file.name}.")
                 continue
 
             for sheetname in wb.sheetnames:
                 model = get_model_from_sheet(sheetname)
                 if not model:
-                    print(f"Skipping sheet: {sheetname} (no matching document type found)")
                     continue
 
                 ws = wb[sheetname]
-                raw_headers = [str(cell.value).strip() if cell.value else "" for cell in ws[1]]
-                headers = [normalize_header(h) for h in raw_headers]
+                headers = [normalize_header(str(c.value).strip()) if c.value else "" for c in ws[1]]
 
-                # Build field mapping
                 field_map = {}
                 for f in model._meta.fields:
-                    field_options = {
-                        normalize_header(f.verbose_name),
-                        normalize_header(f.name),
-                    }
+                    opts = {normalize_header(f.verbose_name), normalize_header(f.name)}
                     for h in headers:
-                        if h in field_options:
+                        if h in opts:
                             field_map[h] = f.name
 
-                print(f"Processing sheet: {sheetname}")
-                print(f"   ↳ Matched model: {model.__name__}")
-                print(f"   ↳ Headers: {headers}")
-                print(f"   ↳ Field map: {field_map}")
-
-                imported_count = 0
-                skipped_count = 0
-
-                for row in ws.iter_rows(min_row=2, values_only=True):
-                    if not any(row):  # skip empty rows
+                row_number = 1  # This will track the actual Excel row number
+                for row_index, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
+                    if not any(row):
                         continue
+
+                    # Initialize record with display info even if it fails
+                    record = {
+                        "display": "",  # Will be set later based on success/failure
+                        "model": model._meta.verbose_name,
+                        "status": "Imported",
+                        "invalid_fields": [],
+                        "user": None,
+                        "row_number": row_index - 1,  # Use enumerate index for exact Excel row
+                    }
 
                     data = {}
                     for header, value in zip(headers, row):
@@ -209,63 +210,110 @@ class UploadExcelView(View):
                         if value in ("", None):
                             value = None
 
-                        # Special handling for user field
                         if field_name == "user" and value:
                             user_obj = get_user_from_full_name(str(value))
-                            if user_obj:
-                                data[field_name] = user_obj
-                            else:
-                                print(f"Could not find user: '{value}'. Row skipped.")
-                                skipped_count += 1
-                                data = {}
-                                break
+                            if not user_obj:
+                                record["status"] = "Failed"
+                                record["invalid_fields"].append("invalid user")
+                                record["display"] = f"Row {record['row_number']}"  # Set display immediately
+                                continue
+                            data[field_name] = user_obj
+                            record["user"] = str(user_obj)
                         else:
                             data[field_name] = value
 
                     try:
-                        if data:
+                        if data and record["status"] == "Imported":
                             with transaction.atomic():
-                                obj = model(**data)
-                                obj.save()
-                                imported_count += 1
+                                obj = model.objects.create(**data)
+                                record["display"] = str(obj)
+                                record["date_created"] = getattr(obj, "created_at", datetime.datetime.now()).strftime("%Y-%m-%d %H:%M:%S")
+                            report["imported_records"] += 1
                         else:
-                            skipped_count += 1
-
-                    except IntegrityError as e:
-                        print(f"Skipped row due to database error: {e}")
-                        skipped_count += 1
-                        continue
+                            if record["status"] == "Failed":
+                                # For failed records, show row number
+                                record["display"] = f"Row {record['row_number']}"
+                                report["failed_records"] += 1
                     except Exception as e:
-                        print(f"Skipped row due to error: {e}")
-                        skipped_count += 1
-                        continue
+                        record["status"] = "Failed"
+                        # For failed records, show row number
+                        record["display"] = f"Row {record['row_number']}"
+                        
+                        error_msg = str(e).lower()
+                        
+                        # Check if it's a NOT NULL constraint error
+                        if 'not null' in error_msg or 'null constraint' in error_msg:
+                            # Extract field name from error message
+                            # Common patterns: "NOT NULL constraint failed: table.field"
+                            # or "null value in column "field" violates not-null constraint"
+                            import re
+                            
+                            # Try to extract field name from different error message formats
+                            field_match = None
+                            
+                            # Pattern 1: "NOT NULL constraint failed: table.field"
+                            pattern1 = r'NOT NULL constraint failed: \w+\.(\w+)'
+                            field_match = re.search(pattern1, error_msg, re.IGNORECASE)
+                            
+                            if not field_match:
+                                # Pattern 2: 'null value in column "field" violates'
+                                pattern2 = r'null value in column ["\'](\w+)["\']'
+                                field_match = re.search(pattern2, error_msg, re.IGNORECASE)
+                            
+                            if not field_match:
+                                # Pattern 3: "(1048, "Column 'field' cannot be null")"
+                                pattern3 = r"Column ['\"](\w+)['\"] cannot be null"
+                                field_match = re.search(pattern3, error_msg, re.IGNORECASE)
+                            
+                            if field_match:
+                                field_name = field_match.group(1)
+                                # Get the verbose name if available
+                                try:
+                                    field_obj = model._meta.get_field(field_name)
+                                    field_display = field_obj.verbose_name or field_name
+                                except:
+                                    field_display = field_name
+                                
+                                record["invalid_fields"].append(f"missing field ({field_display})")
+                            else:
+                                record["invalid_fields"].append(f"missing required field")
+                        else:
+                            # For other types of errors, show the original message
+                            record["invalid_fields"].append(str(e))
+                        
+                        report["failed_records"] += 1
 
-                total_imported += imported_count
-                total_skipped += skipped_count
+                    report["total_records"] += 1
+                    
+                    # Format invalid fields for display
+                    if record["invalid_fields"]:
+                        if len(record["invalid_fields"]) <= 2:
+                            record["invalid_fields_display"] = ", ".join(record["invalid_fields"])
+                        else:
+                            first_two = ", ".join(record["invalid_fields"][:2])
+                            remaining_count = len(record["invalid_fields"]) - 2
+                            record["invalid_fields_display"] = f"{first_two} + {remaining_count} other invalid/missing fields"
+                    else:
+                        record["invalid_fields_display"] = "None"
+                    
+                    report["documents"].append(record)
 
-                print(f"Imported {imported_count} rows from {sheetname}, skipped {skipped_count}")
+            file_reports.append(report)
 
-        # --- User-friendly messages ---
-        if total_imported > 0:
-            messages.success(request, f"Successfully imported {total_imported} records.")
+        # Store in session safely (JSON-serializable)
+        request.session["file_reports"] = file_reports
 
-        if total_skipped > 0:
-            messages.error(
-                request,
-                f"{total_skipped} rows were skipped because of missing or invalid information. "
-                "Please review your Excel file and try again."
-            )
-
-        if total_imported == 0 and total_skipped == 0:
-            messages.info(
-                request,
-                "No records were imported. Please make sure your Excel sheets match the expected format."
-            )
-
-        return HttpResponseRedirect(reverse("all-documents"))
-    
+        return HttpResponseRedirect(reverse("upload-report"))
 
 class UploadReportView(View):
-    template_name = 'documents/excel_templates/upload_report.html'
-    
-    pass
+    template_name = "documents/excel_templates/upload_report.html"
+
+    def get(self, request, *args, **kwargs):
+        # Pull file_reports from session, default to an empty list
+        file_reports = request.session.get("file_reports", [])
+
+        context = {
+            "file_reports": file_reports,
+        }
+
+        return render(request, self.template_name, context)

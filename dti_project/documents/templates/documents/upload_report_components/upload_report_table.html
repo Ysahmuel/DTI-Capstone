@@ -1,3 +1,5 @@
+{% load custom_filters %}
+
 <table class="documents-table uploaded-files-table">
     <thead>
         <tr>
@@ -5,20 +7,22 @@
             <th>Document Type</th>
             <th>User</th>
             <th>Status</th>
-            <th>Date Created</th>
             <th>Invalid Fields</th>
         </tr>
     </thead>
     <tbody>
-        <tr class="document-value-row" data-href="{{ document.get_absolute_url }}">
-            <td>docname</td>
-            <td>promo</td>
-            <td>
-                You
-            </td>
-            <td>Submitted</td>
-            <td>Sept 26, 2025</td>
-            <td>None</td>
+        {% for document in documents %}
+        <tr class="document-value-row" data-href="{{ document.absolute_url|default:'#' }}">
+            <td>{{ document.display }}</td>
+            <td>{{ document.model.title }}</td>
+            <td>{{ document.user }}</td>
+            <td>{{ document.status }}</td>
+            <td>{{ document.invalid_fields_display|default:"None" }}</td>
         </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6">No documents found for this file.</td>
+        </tr>
+        {% endfor %}
     </tbody>
 </table>

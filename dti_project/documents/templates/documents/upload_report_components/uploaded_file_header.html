@@ -5,24 +5,22 @@
         <i class="fa-solid fa-file"></i>
 
         <div class="column">
-
-            <h3 class="filename">Example Filename.xls</h3>
-            <p class="filesize">12 MB</p>
-            <p>Sept 26, 2025</p>
-
+            <h3 class="filename">{{ report.filename }}</h3>
+            <p class="filesize">{{ report.filesize }} MB</p>
+            <p>{{ report.created_at|date:"M d, Y" }}</p>
         </div>
 
         <div class="stats-row">
             <div class="stat-item">
-                <h3>5</h3>
+                <h3>{{ report.total_records }}</h3>
                 <p>Records</p>
             </div>
             <div class="stat-item">
-                <h3>3</h3>
+                <h3>{{ report.imported_records }}</h3>
                 <p>Imported</p>
             </div>
             <div class="stat-item">
-                <h3>2</h3>
+                <h3>{{ report.failed_records }}</h3>
                 <p>Failed</p>
             </div>
         </div>

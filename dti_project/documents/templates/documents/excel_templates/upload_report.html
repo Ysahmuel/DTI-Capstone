@@ -12,7 +12,6 @@
     <header class="document-details-header">
         <div class="column">
             <h1>Excel File Upload Report</h1>
-            <h3>2 Files Uploaded</h3>
         </div>
         <div class="actions">
             {% include 'dashboard/components/dashboard_actions.html' %}
@@ -20,18 +19,14 @@
     </header>
     
     <div class="upload-report-container">
-
-        <div>
-            {% include 'documents/upload_report_components/uploaded_file_header.html' %}
-
-            {% include 'documents/upload_report_components/upload_report_table.html' %}
-        </div>
-
-        <div>
-            {% include 'documents/upload_report_components/uploaded_file_header.html' %}
-
-            {% include 'documents/upload_report_components/upload_report_table.html' %}
-        </div>
-
+        {% for report in file_reports %}
+            <div>
+                {% include 'documents/upload_report_components/uploaded_file_header.html' with filename=report.filename %}
+                {% include 'documents/upload_report_components/upload_report_table.html' with documents=report.documents %}
+            </div>
+        {% empty %}
+            <p>No uploaded files to report.</p>
+        {% endfor %}
     </div>
+
 {% endblock %}
