@@ -72,7 +72,7 @@ class ServiceRepairAccreditationApplication(DraftModel, models.Model):
 
     telephone_number = models.CharField(max_length=20)
     mobile_number = models.CharField(max_length=20)
-    fax_number = models.CharField(max_length=20, blank=True)
+    fax_number = models.CharField(max_length=20, blank=True, null=True)
     email_address = models.EmailField(max_length=40)
 
     # Authorized Signatory
