@@ -83,6 +83,7 @@ class ServiceRepairAccreditationApplication(DraftModel, models.Model):
     suffix = models.CharField(max_length=10, blank=True)
     designation = models.CharField(max_length=255)
 
+    
     # Additional Info
     sex = models.CharField(max_length=6, choices=SEX_CHOICES)
     social_classification = models.CharField(max_length=10, choices=SOCIAL_CLASSIFICATION_CHOICES)
@@ -102,6 +103,8 @@ class ServiceRepairAccreditationApplication(DraftModel, models.Model):
         blank=True,
         null=True
     )
+    
+    
 
     def __str__(self):
         return self.get_str_display(f"{self.name_of_business} - {self.application_type} - {self.category}")

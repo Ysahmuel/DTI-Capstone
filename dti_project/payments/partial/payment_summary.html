@@ -1,0 +1,43 @@
+{% extends 'dashboard/layout.html' %}
+
+{% block title %} Payment {% endblock %}
+
+{% block body %}
+<main class="main">
+    <div class="header-bar">
+        <h1>Payment Summary for Order #{{ order.id }}</h1>
+
+        <p>Total due: ₱{{ order.get_total_amount }}</p>
+
+    </div>
+        <table>
+        <thead>
+            <tr>
+            <th>#</th><th>Amount</th><th>Reference</th><th>Proof</th><th>Status</th><th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in payments %}
+            <tr>
+                <td>{{ p.pk }}</td>
+                <td>₱{{ p.amount }}</td>
+                <td>{{ p.reference_number }}</td>
+                <td>
+                {% if p.proof %}
+                    <a href="{{ p.proof.url }}" target="_blank">View</a>
+                {% else %}
+                    —
+                {% endif %}
+                </td>
+                <td>{{ p.get_status_display }}</td>
+                <td>{{ p.created_at }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6">No payments submitted.</td></tr>
+            {% endfor %}
+        </tbody>
+        </table>
+
+        <p><a href="{% url 'payments:gcash-pay' order_id=order.id %}">Submit another payment</a></p>
+    </main>
+{% endblock %}
