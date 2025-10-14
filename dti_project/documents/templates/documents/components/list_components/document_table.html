@@ -13,6 +13,7 @@
                 <th>User</th>
                 <th>Status</th>
                 <th>Date Created</th>
+                <th>Payment</th>
             </tr>
         </thead>
         <tbody>
@@ -38,6 +39,14 @@
                             {{ document.date_filed }}
                         {% endif %}
                     </td>
+                    <td>
+                    {% if document.status == 'approved' %}
+                        <a href="{% url 'payment-page' %}" class="btn btn-green">Pay</a>
+                    {% else %}
+                        <span class="text-muted">N/A</span>
+                    {% endif %}
+                    </td>
+
                 </tr>
             {% endfor %}
         </tbody>

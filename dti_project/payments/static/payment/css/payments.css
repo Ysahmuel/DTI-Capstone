@@ -1,0 +1,142 @@
+/* ===== CARD STYLES ===== */
+.card {
+    background: var(--background-white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    transition: box-shadow var(--transition-fast);
+}
+
+.card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.card-header {
+    background: var(--primary);
+    color: white;
+    font-weight: 600;
+    padding: var(--space-md) var(--space-lg);
+    font-size: 1.1rem;
+}
+
+.card-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    padding: var(--space-xl);
+}
+
+/* ===== FORM ELEMENTS ===== */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.form-group label {
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group input[type="email"] {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: var(--space-sm) var(--space-md);
+    font-size: 1rem;
+    transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--input-focus);
+}
+
+/* ===== RADIO GROUP ===== */
+.radio-group {
+    display: flex;
+    gap: var(--space-lg);
+    margin-top: var(--space-sm);
+}
+
+.radio-group label {
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.radio-group input {
+    margin-right: var(--space-xs);
+}
+
+/* ===== TOTAL AMOUNT ===== */
+.total {
+    margin-top: var(--space-lg);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary-light);
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+    display: inline-block;
+    text-decoration: none;       
+    color: white;             
+    font-weight: 600;
+    font-size: 1rem;
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: var(--radius-md);
+    background-color: var(--primary); 
+    transition: background var(--transition-fast), transform var(--transition-fast);
+    text-align: center;
+    cursor: pointer;
+    border: none;
+}
+
+button {
+    padding: var(--space-sm) var(--space-lg);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.btn-blue {
+    background: var(--primary-light);
+    color: white;
+}
+
+.btn-blue:hover {
+    background: var(--accent);
+    transform: scale(1.03);
+}
+
+.btn-green {
+    background: var(--success-color);
+    color: white;
+}
+
+.btn-green:hover {
+    filter: brightness(1.1);
+    transform: scale(1.03);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .card-body {
+        padding: var(--space-lg);
+    }
+
+    .buttons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btn-blue, .btn-green {
+        width: 100%;
+    }
+}

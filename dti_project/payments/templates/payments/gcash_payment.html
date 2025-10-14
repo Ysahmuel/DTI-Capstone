@@ -1,0 +1,37 @@
+{% extends 'dashboard/layout.html' %}
+{% load static %}
+
+{% block body %}
+<link rel="stylesheet" href="{% static 'payment/css/gcash.css' %}">
+
+<main class="gcash-container">
+    <div class="gcash-header-bar">
+        <h2>Pay with GCash</h2>
+        <p><strong>Total Amount:</strong> ₱{{ total }}</p>
+    </div>
+
+    <div class="gcash-qr-section">
+        <p>Scan this QR code using the GCash app on your phone. After payment, enter the Reference/Transaction Number and upload a screenshot (proof).</p>
+        <img src="/media/gcash_qr.jpg" alt="GCash QR">
+    </div>
+
+    {% if messages %}
+    <ul class="gcash-messages">
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" class="gcash-form">
+        {% csrf_token %}
+        <label>Reference Number</label>
+        {{ form.reference_number }}
+
+        <label>Upload Proof of Payment</label>
+        {{ form.proof }}
+
+        <button type="submit" class="gcash-btn">Submit Payment</button>
+    </form>
+</main>
+{% endblock %}
