@@ -9,7 +9,7 @@
     <form method="post">
         {% csrf_token %}
 
-        <!-- Business Information Card -->
+        <!-- Business Information -->
         <div class="card">
             <div class="card-header">Business Information</div>
             <div class="card-body">
@@ -30,13 +30,13 @@
             </div>
         </div>
 
-        <!-- Payment Details Card -->
+        <!-- Payment Details -->
         <div class="card">
             <div class="card-header">Payment Details</div>
             <div class="card-body">
                 <div class="form-group">
                     <label>Applicant Name</label>
-                    <input type="text" name="applicant_name" value="{{ accreditation. }}" readonly>
+                    <input type="text" name="applicant_name" value="{{ accreditation.full_name }}" readonly>
                 </div>
 
                 <div class="form-group">
@@ -57,15 +57,21 @@
                 <div class="form-group">
                     <label>Payment Method</label>
                     <div class="radio-group">
-                        <label><input type="radio" name="payment_method" value="gcash"> Gcash</label>
-                        <label><input type="radio" name="payment_method" value="over-the-counter"> Over the counter</label>
+                        <label>
+                            <input type="radio" name="payment_method" value="gcash">
+                            GCash
+                        </label>
+                        <label>
+                            <input type="radio" name="payment_method" value="over-the-counter">
+                            Over the counter
+                        </label>
                     </div>
                 </div>
 
                 <div class="total">Total Amount = ₱530.00</div>
             </div>
 
-            <div class="buttons">
+            <div class="buttons-payment">
                 <button type="submit" name="resume" class="btn btn-green">Resume Later</button>
                 <button type="submit" name="proceed" class="btn btn-blue">Proceed Payment</button>
             </div>
