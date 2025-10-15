@@ -54,6 +54,10 @@ class BaseCustomForm(forms.ModelForm):
                     'telephone_number',
                     'zip_code',
                 ]
+
+                future_only_dates = [
+                    'promo_period_end',
+                ]
                 if name in numerical_fields:
                     field.widget.attrs.update({
                         'inputmode': 'numeric',
@@ -90,6 +94,10 @@ class BaseCustomForm(forms.ModelForm):
                     field.validators.append(self.validate_tax_identification_number)
                     field.widget.attrs['maxlength'] = 12
                     field.widget.attrs['placeholder'] = 'Enter Tax Identification Number (9 to 12 digits)'
+
+                if name in future_only_dates:
+                    field.validators.append(self.generate_date_not_in_past_validator('Promo Period End'))
+                    field.widget.attrs['min'] = date.today().isoformat()  # prevents past dates in the browser
 
         # --- Auto-fill user fields ---
         if user:
@@ -140,6 +148,11 @@ class BaseCustomForm(forms.ModelForm):
                 raise forms.ValidationError(f'{field_label} cannot be in the future.')
         return validator
 
+    def generate_date_not_in_past_validator(self, field_label):
+        def validator(value):
+            if value < date.today():
+                raise forms.ValidationError(f'{field_label} cannot be in the past.')
+        return validator
 
 
 class SalesPromotionPermitApplicationForm(BaseCustomForm):
