@@ -67,13 +67,18 @@ class BaseCustomForm(forms.ModelForm):
                     field.widget.attrs['placeholder'] = 'Enter Mobile Number (11 digits)'
 
                 if name == 'date_of_birth':
-                    field.validators.append(self.validate_date_of_birth)
+                    field.validators.append(self.generate_date_not_in_future_validator("Date of Birth"))
                     field.widget.attrs['max'] = date.today().isoformat()
                     field.widget.attrs['placeholder'] = 'Enter Date of Birth'
 
+                if name == 'date_established':
+                    field.validators.append(self.generate_date_not_in_future_validator("Date Established"))
+                    field.widget.attrs['max'] = date.today().isoformat()
+                    field.widget.attrs['placeholder'] = 'Enter Date Established'
+
                 if name == 'telephone_number':
                     field.validators.append(self.validate_telephone_number)
-                    field.widget.attrs['maxlength'] = 15
+                    field.widget.attrs['maxlength'] = 10
                     field.widget.attrs['placeholder'] = 'Enter Telephone Number (10 digits)'
 
                 if name == 'zip_code':
@@ -83,7 +88,6 @@ class BaseCustomForm(forms.ModelForm):
 
                 if name == 'tax_identification_number':
                     field.validators.append(self.validate_tax_identification_number)
-                    field.widget.attrs['minlength'] = 9
                     field.widget.attrs['maxlength'] = 12
                     field.widget.attrs['placeholder'] = 'Enter Tax Identification Number (9 to 12 digits)'
 
@@ -130,10 +134,11 @@ class BaseCustomForm(forms.ModelForm):
         if not re.fullmatch(r'\d{9,12}', str(value)):
             raise forms.ValidationError("Tax Identification Number must be between 9 to 12 digits.")
         
-    def validate_date_of_birth(self, value):
-        if value > date.today():
-            raise forms.ValidationError('Date of birth cannot be in the future.')
-
+    def generate_date_not_in_future_validator(self, field_label):
+        def validator(value):
+            if value > date.today():
+                raise forms.ValidationError(f'{field_label} cannot be in the future.')
+        return validator
 
 
 
