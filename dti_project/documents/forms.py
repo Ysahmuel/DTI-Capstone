@@ -51,6 +51,7 @@ class BaseCustomForm(forms.ModelForm):
                     'mobile_number',
                     'fax_number',
                     'telephone_number',
+                    'zip_code',
                 ]
                 if name in numerical_fields:
                     field.widget.attrs.update({
@@ -67,9 +68,18 @@ class BaseCustomForm(forms.ModelForm):
                     field.validators.append(self.validate_date_of_birth)
                     field.widget.attrs['max'] = date.today().isoformat()
 
-                if name in ['telephone_number']:
-                    field.validators.append(self.validate_contact_number)
+                if name == 'telephone_number':
+                    field.validators.append(self.validate_telephone_number)
                     field.widget.attrs['maxlength'] = 15
+                
+                if name == 'zip_code':
+                    field.validators.append(self.validate_zip_code)
+                    field.widget.attrs['maxlength'] = 4
+
+                if name == 'tax_identification_number':
+                    field.validators.append(self.validate_zip_code)
+                    field.widget.attrs['minlength'] = 9
+                    field.widget.attrs['maxlength'] = 12
 
         # --- Auto-fill user fields ---
         if user:
@@ -101,6 +111,18 @@ class BaseCustomForm(forms.ModelForm):
     def validate_contact_number(self, value):
         if not re.fullmatch(r'\d{11}', str(value)):
             raise forms.ValidationError("Contact/Mobile number must be exactly 11 digits.")
+        
+    def validate_telephone_number(self, value):
+        if not re.fullmatch(r'\d{10}', str(value)):
+            raise forms.ValidationError("Telephone number must be exactly 10 digits.")
+        
+    def validate_zip_code(self, value):
+        if not re.fullmatch(r'\d{4}', str(value)):
+            raise forms.ValidationError("Zip code number must be exactly 4 digits.")
+        
+    def validate_tax_identification_number(self, value):
+        if not re.fullmatch(r'\d{9,12}', str(value)):
+            raise forms.ValidationError("Tax Identification Number must be between 9 to 12 digits.")
         
     def validate_date_of_birth(self, value):
         if value > date.today():
