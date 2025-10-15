@@ -67,6 +67,10 @@ class BaseCustomForm(forms.ModelForm):
                     field.validators.append(self.validate_date_of_birth)
                     field.widget.attrs['max'] = date.today().isoformat()
 
+                if name in ['telephone_number']:
+                    field.validators.append(self.validate_contact_number)
+                    field.widget.attrs['maxlength'] = 15
+
         # --- Auto-fill user fields ---
         if user:
             # Check if extra fields exist on a profile
