@@ -93,7 +93,9 @@ class ServiceRepairAccreditationApplication(DraftModel, models.Model):
 
     annual_gross_service_revenue = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True, help_text="Annual Gross Service Revenue (as of Dec 31, 20__)")
     capital_investment = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
-    tax_identification_number = models.CharField(max_length=20)
+    tax_identification_number = models.CharField(max_length=12, help_text="Tax Identification Number (Exactly 9 to 12 digits only)")
+    mobile_number = models.CharField(max_length=11, help_text=("Mobile Number (Exactly 11 digits only)"))
+    telephone_number = models.CharField(max_length=15, help_text=("Telephone Number (Exactly 10 digits)"))
     date_established = models.DateField(blank=True, null=True)
     total_employees = models.PositiveIntegerField()
 
