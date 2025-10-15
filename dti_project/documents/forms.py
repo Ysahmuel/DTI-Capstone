@@ -25,6 +25,7 @@ class BaseCustomForm(forms.ModelForm):
         # --- Field formatting ---
         if hasattr(self, 'fields'):
             for name, field in self.fields.items():
+
                 label_text = field.label if field.label else name.replace('_', ' ').title()
                 if field.required:
                     field.label = f"{label_text} <span class='required-label'>*</span>"
@@ -63,23 +64,28 @@ class BaseCustomForm(forms.ModelForm):
                 if name in ['contact_number', 'mobile_number']:
                     field.validators.append(self.validate_contact_number)
                     field.widget.attrs['maxlength'] = 11
+                    field.widget.attrs['placeholder'] = 'Enter Mobile Number (11 digits)'
 
                 if name == 'date_of_birth':
                     field.validators.append(self.validate_date_of_birth)
                     field.widget.attrs['max'] = date.today().isoformat()
+                    field.widget.attrs['placeholder'] = 'Enter Date of Birth'
 
                 if name == 'telephone_number':
                     field.validators.append(self.validate_telephone_number)
                     field.widget.attrs['maxlength'] = 15
-                
+                    field.widget.attrs['placeholder'] = 'Enter Telephone Number (10 digits)'
+
                 if name == 'zip_code':
                     field.validators.append(self.validate_zip_code)
                     field.widget.attrs['maxlength'] = 4
+                    field.widget.attrs['placeholder'] = 'Enter Zip Code (4 digits)'
 
                 if name == 'tax_identification_number':
-                    field.validators.append(self.validate_zip_code)
+                    field.validators.append(self.validate_tax_identification_number)
                     field.widget.attrs['minlength'] = 9
                     field.widget.attrs['maxlength'] = 12
+                    field.widget.attrs['placeholder'] = 'Enter Tax Identification Number (9 to 12 digits)'
 
         # --- Auto-fill user fields ---
         if user:
