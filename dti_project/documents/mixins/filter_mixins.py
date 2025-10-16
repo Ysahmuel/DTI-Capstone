@@ -9,6 +9,8 @@ class FilterableDocumentMixin:
         start_date = request.GET.get("start_date")
         end_date = request.GET.get("end_date")
         statuses = request.GET.getlist("status")
+        first_name = request.GET.get("first_name")
+        last_name = request.GET.get("last_name")
 
         filters = Q()
         model_fields = {f.name for f in qs.model._meta.get_fields()}
@@ -28,6 +30,14 @@ class FilterableDocumentMixin:
         # Handle statuses
         if "status" in model_fields and statuses:
             filters &= Q(status__in=statuses)
+
+        # Handle user search
+        if "user" in model_fields:
+            if first_name or last_name:
+                filters &= Q(user__first_name__icontains=first_name if first_name else "") & \
+                        Q(user__last_name__icontains=last_name if last_name else "")
+
+
 
         return qs.filter(filters)
 
