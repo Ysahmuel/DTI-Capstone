@@ -1,0 +1,40 @@
+<section id="status-filter">
+    <h4>Status</h4>
+    <ul class="status-filter-list">
+        <li class="status-filter-item">
+            <label>
+                <input type="checkbox" name="status" value="draft"
+                    {% if "draft" in selected_statuses %}checked{% endif %}>
+                Draft
+            </label>
+        </li>
+        <li class="status-filter-item">
+            <label>
+                <input type="checkbox" name="status" value="submitted"
+                    {% if "submitted" in selected_statuses %}checked{% endif %}>
+                Submitted
+            </label>
+        </li>
+        <li class="status-filter-item">
+            <label>
+                <input type="checkbox" name="status" value="submitted_unpaid"
+                    {% if "submitted_unpaid" in selected_statuses %}checked{% endif %}>
+                Submitted (Unpaid)
+            </label>
+        </li>
+        <li class="status-filter-item">
+            <label>
+                <input type="checkbox" name="status" value="submitted_paid"
+                    {% if "submitted_paid" in selected_statuses %}checked{% endif %}>
+                Submitted (Paid)
+            </label>
+        </li>
+        <li class="status-filter-item">
+            <label>
+                <input type="checkbox" name="status" value="approved"
+                    {% if "completed" in selected_statuses %}checked{% endif %}>
+                Approved
+            </label>
+        </li>
+    </ul>
+</section>
