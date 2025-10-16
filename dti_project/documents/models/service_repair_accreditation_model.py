@@ -1,6 +1,7 @@
 from django.db import models
 from django.forms import ValidationError
 from django.urls import reverse
+from locations.models import Barangay, CityMunicipality, Province, Region
 from ..models.base_models import BaseApplication, DraftModel, PeriodModel
 from django.utils import timezone
 from ..model_choices import REGION_CHOICES, SERVICE_CATEGORY_CHOICES, STAR_RATING_CHOICES
@@ -64,10 +65,10 @@ class ServiceRepairAccreditationApplication(DraftModel, models.Model):
     # Business Address Fields
     building_name_or_number = models.CharField(max_length=50)
     street_name = models.CharField(max_length=50)
-    barangay = models.CharField(max_length=50)
-    city_or_municipality = models.CharField(max_length=50)
-    province = models.CharField(max_length=50)
-    region = models.CharField(max_length=255, choices=REGION_CHOICES)
+    region = models.ForeignKey(Region, on_delete=models.SET_NULL, null=True, blank=True)
+    province = models.ForeignKey(Province, on_delete=models.SET_NULL, null=True, blank=True)
+    city_or_municipality = models.ForeignKey(CityMunicipality, on_delete=models.SET_NULL, null=True, blank=True)
+    barangay = models.ForeignKey(Barangay, on_delete=models.SET_NULL, null=True, blank=True)
     zip_code = models.CharField(max_length=10)
 
     telephone_number = models.CharField(max_length=20)
