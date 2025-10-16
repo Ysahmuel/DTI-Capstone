@@ -16,6 +16,10 @@ class Province(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['region']),  # Index for faster filtering
+        ]
 
 class CityMunicipality(models.Model):
     province = models.ForeignKey(Province, on_delete=models.CASCADE, related_name='cities')
@@ -24,6 +28,11 @@ class CityMunicipality(models.Model):
 
     def __str__(self):
         return self.name
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['province']),
+        ]
 
 
 class Barangay(models.Model):
@@ -33,3 +42,8 @@ class Barangay(models.Model):
 
     def __str__(self):
         return self.name
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['city']),
+        ]
