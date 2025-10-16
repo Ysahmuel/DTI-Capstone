@@ -1,6 +1,7 @@
 from datetime import date
 import re
 from django import forms
+from locations.models import Barangay, CityMunicipality, Province, Region
 from .utils.form_helpers import create_inline_formset
 from .validators import validate_period
 from .models import CharacterReference, ChecklistEvaluationSheet, EducationalAttainment, EmployeeBackground, InspectionValidationReport, OrderOfPayment, ProductCovered, SalesPromotionPermitApplication, PersonalDataSheet, Service, ServiceCategory, ServiceRepairAccreditationApplication, TrainingsAttended
@@ -232,6 +233,12 @@ class CharacterReferenceForm(BaseCustomForm):
         exclude = ['personal_data_sheet']     
 
 class ServiceRepairAccreditationApplicationForm(BaseCustomForm):
+    # Override the FK fields to avoid querying all objects on page load
+    region = forms.ModelChoiceField(queryset=Region.objects.none(), required=False)
+    province = forms.ModelChoiceField(queryset=Province.objects.none(), required=False)
+    city_or_municipality = forms.ModelChoiceField(queryset=CityMunicipality.objects.none(), required=False)
+    barangay = forms.ModelChoiceField(queryset=Barangay.objects.none(), required=False)
+
     class Meta:
         model = ServiceRepairAccreditationApplication
         fields = '__all__'
