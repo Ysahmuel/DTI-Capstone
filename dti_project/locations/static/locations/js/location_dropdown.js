@@ -200,4 +200,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
         }
     }
+
+    const form = document.querySelector('form'); // adjust selector if needed
+
+    form.addEventListener('submit', function() {
+        [regionDropdown, provinceDropdown, cityDropdown, barangayDropdown].forEach(dropdown => {
+            if (dropdown.value && !dropdown.querySelector(`option[value="${dropdown.value}"]`)) {
+                const opt = document.createElement('option');
+                opt.value = dropdown.value;
+                opt.textContent = dropdown.dataset.name || 'Selected'; // optional: store display name in data-name
+                opt.selected = true;
+                dropdown.appendChild(opt);
+            }
+        });
+    });
+
 });
