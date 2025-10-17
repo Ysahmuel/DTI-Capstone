@@ -3,16 +3,23 @@ from django.views.generic import ListView
 from ..mixins.filter_mixins import FilterableDocumentMixin
 from ..mixins.counter_mixins import DocumentCountMixin
 from ..mixins.permissions_mixins import UserRoleMixin
-from ..models import ChecklistEvaluationSheet, InspectionValidationReport, OrderOfPayment, PersonalDataSheet, SalesPromotionPermitApplication, ServiceRepairAccreditationApplication
+from ..mixins.sort_mixins import SortMixin  
+from ..models import (
+    ChecklistEvaluationSheet,
+    InspectionValidationReport,
+    OrderOfPayment,
+    PersonalDataSheet,
+    SalesPromotionPermitApplication,
+    ServiceRepairAccreditationApplication
+)
 from itertools import chain
-from operator import attrgetter
-from django.db.models import Q
 
 def get_date_field(obj):
     """Return the date field (date_filed or date) for any document."""
     return getattr(obj, "date_filed", None) or getattr(obj, "date", None) or datetime.date.min
 
-class BaseDocumentListView(UserRoleMixin, DocumentCountMixin, FilterableDocumentMixin, ListView):
+
+class BaseDocumentListView(UserRoleMixin, DocumentCountMixin, FilterableDocumentMixin, SortMixin, ListView):
     """
     Generic list view for document models.
     Just set `model`, `template_name`, `context_object_name`, and `active_doc_type`.
@@ -23,7 +30,8 @@ class BaseDocumentListView(UserRoleMixin, DocumentCountMixin, FilterableDocument
         user = self.request.user
         qs = self.get_queryset_or_all(self.model, user)
         qs = self.apply_filters(qs)
-        return sorted(qs, key=get_date_field, reverse=True)
+        # Apply sorting instead of hardcoded date sort
+        return self.apply_sorting(qs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -32,7 +40,7 @@ class BaseDocumentListView(UserRoleMixin, DocumentCountMixin, FilterableDocument
         return context
 
 
-class AllDocumentListView(UserRoleMixin, DocumentCountMixin, FilterableDocumentMixin, ListView):
+class AllDocumentListView(UserRoleMixin, DocumentCountMixin, FilterableDocumentMixin, SortMixin, ListView):
     template_name = "documents/list_templates/all_documents_list.html"
     context_object_name = "documents"
 
@@ -56,7 +64,8 @@ class AllDocumentListView(UserRoleMixin, DocumentCountMixin, FilterableDocumentM
             self.apply_filters(checklist_evaluation_sheets),
         )
 
-        documents = sorted(combined, key=get_date_field, reverse=True)
+        # Apply sorting to the combined documents
+        documents = self.apply_sorting(combined)
         return documents
 
     def get_context_data(self, **kwargs):
@@ -74,6 +83,7 @@ class AllDocumentListView(UserRoleMixin, DocumentCountMixin, FilterableDocumentM
         })
 
         return context
+
 
 class SalesPromotionListView(BaseDocumentListView):
     model = SalesPromotionPermitApplication

@@ -8,11 +8,21 @@
                 <th>
                     <input type="checkbox" id="select-all-checkbox">
                 </th>
-                <th>Name</th>
+                <th>
+                    Name
+                    <button id="sort-by-name-btn" type="button" class="sort-btn" data-sort="name">
+                        <i class="fa-solid {% if sort_by == 'name' %}{% if order == 'asc' %}fa-sort-up{% else %}fa-sort-down{% endif %}{% else %}fa-sort{% endif %}"></i>
+                    </button>
+                </th>
                 <th>Document Type</th>
                 <th>User</th>
                 <th>Status</th>
-                <th>Date Created</th>
+                <th>
+                    Date Created
+                    <button id="sort-by-date-btn" type="button" class="sort-btn" data-sort="date">
+                        <i class="fa-solid {% if sort_by == 'date' or not sort_by %}{% if order == 'asc' %}fa-sort-up{% else %}fa-sort-down{% endif %}{% else %}fa-sort{% endif %}"></i>
+                    </button>
+                </th>
                 <th>Payment</th>
             </tr>
         </thead>
