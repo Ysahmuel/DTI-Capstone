@@ -1,0 +1,19 @@
+<section id="application-type-filter">
+    <h4>Application Type</h4>
+    <ul class="radio-filter-list">
+        <li class="radio-filter-item">
+            <label>
+                <input type="radio" name="application_type" value="NEW"
+                    {% if "NEW" == selected_application_types %}checked{% endif %}>
+                New
+            </label>
+        </li>
+        <li class="radio-filter-item">
+            <label>
+                <input type="radio" name="application_type" value="RENEWAL"
+                    {% if "RENEWAL" == selected_application_types %}checked{% endif %}>
+                Renewal
+            </label>
+        </li>
+    </ul>
+</section>

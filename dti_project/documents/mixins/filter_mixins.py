@@ -11,9 +11,15 @@ class FilterableDocumentMixin:
         statuses = request.GET.getlist("status")
         first_name = request.GET.get("first_name")
         last_name = request.GET.get("last_name")
+        application_types = request.GET.getlist('application_type')
 
         filters = Q()
         model_fields = {f.name for f in qs.model._meta.get_fields()}
+
+        # If application_type filter is active but this model doesn't have that field,
+        # return empty queryset (exclude this model from results)
+        if application_types and "application_type" not in model_fields:
+            return qs.none()
 
         # Handle dates
         if "date" in model_fields:
@@ -31,7 +37,7 @@ class FilterableDocumentMixin:
         if "status" in model_fields and statuses:
             filters &= Q(status__in=statuses)
 
-        # Handle user search
+        # Handle user search safely
         if "user" in model_fields:
             user_filters = Q()
             if first_name:
@@ -54,5 +60,6 @@ class FilterableDocumentMixin:
         context["selected_start_date"] = request.GET.get("start_date", "")
         context["selected_end_date"] = request.GET.get("end_date", "")
         context["selected_statuses"] = request.GET.getlist("status")
+        context["selected_application_types"] = request.GET.getlist("application_type")
 
         return context
