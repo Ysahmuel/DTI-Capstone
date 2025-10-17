@@ -25,6 +25,11 @@ class FilterableDocumentMixin:
         selected_categories = request.GET.getlist("category")
         if selected_categories and "category" not in model_fields:
             return qs.none()
+
+        # If social_classification filter is active but this model doesn't have that field, skip
+        selected_social = request.GET.getlist("social_classification")
+        if selected_social and "social_classification" not in model_fields:
+            return qs.none()
         # Handle dates
         if "date" in model_fields:
             if start_date:
@@ -58,6 +63,10 @@ class FilterableDocumentMixin:
         # Category filter
         if "category" in model_fields and selected_categories:
             filters &= Q(category__in=selected_categories)
+
+        # Social classification filter
+        if "social_classification" in model_fields and selected_social:
+            filters &= Q(social_classification__in=selected_social)
         return qs.filter(filters)
 
     def get_context_data(self, **kwargs):
@@ -71,7 +80,11 @@ class FilterableDocumentMixin:
 
         # ServiceRepairAccreditationApplication-specific filters
         context["selected_categories"] = request.GET.getlist("category")
+        context["selected_social_classifications"] = request.GET.getlist("social_classification")
+        context["selected_asset_sizes"] = request.GET.getlist("asset_size")
         # Add the choice lists themselves for rendering checkboxes/radios
         if hasattr(ServiceRepairAccreditationApplication, "CATEGORIES"):
             context["CATEGORY_CHOICES"] = ServiceRepairAccreditationApplication.CATEGORIES
+        if hasattr(ServiceRepairAccreditationApplication, "SOCIAL_CLASSIFICATION_CHOICES"):
+            context["SOCIAL_CLASSIFICATION_CHOICES"] = ServiceRepairAccreditationApplication.SOCIAL_CLASSIFICATION_CHOICES
         return context
