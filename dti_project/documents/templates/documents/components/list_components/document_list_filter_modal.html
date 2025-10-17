@@ -19,20 +19,32 @@
             <!-- User search filters -->
             {% include 'documents/partials/filter_modal_partials/user_search_filters.html' %}
 
-            <!-- Application type filters -->
-            {% include 'documents/partials/filter_modal_partials/application_type_filters.html' %}
+            {% if show_service_repair_filters %}
+                <!-- Application type filters -->
+                {% include 'documents/partials/filter_modal_partials/application_type_filters.html' %}
+                
+                <!-- Service category filters -->
+                {% include 'documents/partials/filter_modal_partials/service_category_filters.html' %}
+                
+                <!-- Social classification filters -->
+                {% include 'documents/partials/filter_modal_partials/social_classification_filters.html' %}
+                
+                <!-- Asset size filters -->
+                {% include 'documents/partials/filter_modal_partials/asset_size_filters.html' %}
+                
+                <!-- Form of organization filters -->
+                {% include 'documents/partials/filter_modal_partials/form_of_organization_filters.html' %}
+            {% endif %}
 
-            <!-- Service category filters -->
-            {% include 'documents/partials/filter_modal_partials/service_category_filters.html' %}
+            <!-- SalesPromotionPermitApplication filters -->
+            {% if show_sales_promo_filters %}
+                {% include 'documents/partials/filter_modal_partials/coverage_filters.html' %}
+            {% endif %}
 
-            <!-- Social classification filters -->
-            {% include 'documents/partials/filter_modal_partials/social_classification_filters.html' %}
-
-            <!-- Asset size filters -->
-            {% include 'documents/partials/filter_modal_partials/asset_size_filters.html' %}
-
-            <!-- Form of ogranization filters -->
-            {% include 'documents/partials/filter_modal_partials/form_of_organization_filters.html' %}
+            <!-- PersonalDataSheet filters -->
+            {% if show_pds_filters %}
+                {% include 'documents/partials/filter_modal_partials/civil_status_filters.html' %}
+            {% endif %}
 
             <!-- Actions -->
             <div class="actions">

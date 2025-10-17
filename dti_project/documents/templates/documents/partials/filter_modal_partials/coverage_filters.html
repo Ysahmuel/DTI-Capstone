@@ -1,0 +1,14 @@
+<section id="coverage-filter">
+    <h4>Coverage</h4>
+    <ul class="checkbox-filter-list">
+        {% for key, label in COVERAGE_CHOICES %}
+        <li class="checkbox-filter-item">
+            <label>
+                <input type="checkbox" name="coverage" value="{{ key }}"
+                    {% if key in selected_coverage %}checked{% endif %}>
+                {{ label }}
+            </label>
+        </li>
+        {% endfor %}
+    </ul>
+</section>
