@@ -16,9 +16,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    const statusFilterItems = document.querySelectorAll('.status-filter-item');
+    // Checkbox handling
+    const checkboxFilterItems = document.querySelectorAll('.checkbox-filter-item');
 
-    statusFilterItems.forEach(item => {
+    checkboxFilterItems.forEach(item => {
         item.addEventListener('click', function(e) {
             if (e.target.tagName.toLowerCase() === 'input') return;
 
@@ -31,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // initialize checked styling on page load
-    statusFilterItems.forEach(item => {
+    checkboxFilterItems.forEach(item => {
         const checkbox = item.querySelector('input[type="checkbox"]');
         if (checkbox.checked) {
             item.classList.add('active');
