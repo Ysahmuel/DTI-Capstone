@@ -13,34 +13,23 @@ class FilterableDocumentMixin:
         statuses = request.GET.getlist("status")
         first_name = request.GET.get("first_name")
         last_name = request.GET.get("last_name")
-        application_types = request.GET.getlist("application_type")
 
         filters = Q()
         model_fields = {f.name for f in qs.model._meta.get_fields()}
 
-        # If application_type filter is active but this model doesn't have that field, skip
-        if application_types and "application_type" not in model_fields:
-            return qs.none()
-
-        # If category filter is active but this model doesn't have that field, skip
-        selected_categories = request.GET.getlist("category")
-        if selected_categories and "category" not in model_fields:
-            return qs.none()
-
-        # If social_classification filter is active but this model doesn't have that field, skip
-        selected_social = request.GET.getlist("social_classification")
-        if selected_social and "social_classification" not in model_fields:
-            return qs.none()
-
-        # If asset_size filter is active but this model doesn't have that field, skip
-        selected_assets = request.GET.getlist("asset_size")
-        if selected_assets and "asset_size" not in model_fields:
-            return qs.none()
-
-        # If form_of_organization filter is active but this model doesn't have that field, skip
-        selected_forms = request.GET.getlist("form_of_organization")
-        if selected_forms and "form_of_organization" not in model_fields:
-            return qs.none()
+        # Model-specific filters - if any are active but model doesn't have the field, skip
+        model_specific_filters = {
+            "application_type": request.GET.getlist("application_type"),
+            "category": request.GET.getlist("category"),
+            "sex": request.GET.get("sex"),
+            "social_classification": request.GET.getlist("social_classification"),
+            "asset_size": request.GET.getlist("asset_size"),
+            "form_of_organization": request.GET.getlist("form_of_organization"),
+        }
+        
+        for field_name, filter_value in model_specific_filters.items():
+            if filter_value and field_name not in model_fields:
+                return qs.none()
 
         # Handle dates
         if "date" in model_fields:
@@ -67,25 +56,10 @@ class FilterableDocumentMixin:
                 user_filters &= Q(user__last_name__icontains=last_name)
             filters &= user_filters
 
-        # Application types
-        if "application_type" in model_fields and application_types:
-            filters &= Q(application_type__in=application_types)
-
-        # Category filter
-        if "category" in model_fields and selected_categories:
-            filters &= Q(category__in=selected_categories)
-
-        # Social classification filter
-        if "social_classification" in model_fields and selected_social:
-            filters &= Q(social_classification__in=selected_social)
-
-        # Asset size filter
-        if "asset_size" in model_fields and selected_assets:
-            filters &= Q(asset_size__in=selected_assets)
-
-        # Form of organization filter
-        if "form_of_organization" in model_fields and selected_forms:
-            filters &= Q(form_of_organization__in=selected_forms)
+        # Apply model-specific filters if field exists
+        for field_name, filter_value in model_specific_filters.items():
+            if field_name in model_fields and filter_value:
+                filters &= Q(**{f"{field_name}__in": filter_value}) if isinstance(filter_value, list) else Q(**{field_name: filter_value})
 
         return qs.filter(filters)
 
