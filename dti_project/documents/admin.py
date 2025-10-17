@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from .utils.admin_helpers import get_full_name_from_personal_data
-from .models import CharacterReference, ChecklistEvaluationSheet, EducationalAttainment, EmployeeBackground, InspectionValidationReport, OrderOfPayment, PersonalDataSheet, ProductCovered, SalesPromotionPermitApplication, Service, ServiceCategory, ServiceRepairAccreditationApplication, TrainingsAttended, ChangeRequest
+from .models import CollectionReportItem, CharacterReference, ChecklistEvaluationSheet, EducationalAttainment, EmployeeBackground, InspectionValidationReport, OrderOfPayment, PersonalDataSheet, ProductCovered, SalesPromotionPermitApplication, Service, ServiceCategory, ServiceRepairAccreditationApplication, TrainingsAttended, ChangeRequest
 
 
 # Register your models here.
@@ -23,6 +23,25 @@ class StatusModelAdmin(admin.ModelAdmin):
 
 
 # 🔹 Admin registrations
+@admin.register(CollectionReportItem)
+class CollectionReportItemAdmin(admin.ModelAdmin):
+    list_display = (
+        "date",
+        "official_receipt_number",
+        "payor",
+        "particulars",
+        "amount",
+        "stamp_tax",
+    )
+    search_fields = (
+        "official_receipt_number",
+        "payor",
+        "rc_code",
+        "particulars",
+    )
+    list_filter = ("date", "particulars")
+    ordering = ["-date"]
+
 @admin.register(SalesPromotionPermitApplication)
 class SalesPromotionAdmin(StatusModelAdmin):
     list_display = ("promo_title",)

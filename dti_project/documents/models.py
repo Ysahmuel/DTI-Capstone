@@ -35,6 +35,9 @@ from .models import (
     
     # Change requests
     ChangeRequest,
+
+    # Collection item
+    CollectionReportItem
 )
 
 
