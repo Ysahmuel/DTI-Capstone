@@ -33,11 +33,17 @@ class FilterableDocumentMixin:
 
         # Handle user search
         if "user" in model_fields:
-            if first_name or last_name:
-                filters &= Q(user__first_name__icontains=first_name if first_name else "") & \
-                        Q(user__last_name__icontains=last_name if last_name else "")
+            user_filters = Q()
+            if first_name:
+                user_filters &= Q(user__first_name__icontains=first_name)
+            if last_name:
+                user_filters &= Q(user__last_name__icontains=last_name)
+            filters &= user_filters
 
-
+                
+        # Handle application types
+        if "application_type" in model_fields and application_types:
+            filters &= Q(application_type__in=application_types)
 
         return qs.filter(filters)
 
