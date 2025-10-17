@@ -1,8 +1,10 @@
 from django.db.models import Q
+from ..models.service_repair_accreditation_model import ServiceRepairAccreditationApplication
 
 class FilterableDocumentMixin:
     """
-    Adds filtering support for date ranges and status.
+    Adds filtering support for date ranges, status, application type,
+    and other ServiceRepairAccreditationApplication-specific fields.
     """
     def apply_filters(self, qs):
         request = self.request
@@ -11,13 +13,12 @@ class FilterableDocumentMixin:
         statuses = request.GET.getlist("status")
         first_name = request.GET.get("first_name")
         last_name = request.GET.get("last_name")
-        application_types = request.GET.getlist('application_type')
+        application_types = request.GET.getlist("application_type")
 
         filters = Q()
         model_fields = {f.name for f in qs.model._meta.get_fields()}
 
-        # If application_type filter is active but this model doesn't have that field,
-        # return empty queryset (exclude this model from results)
+        # If application_type filter is active but this model doesn't have that field, skip
         if application_types and "application_type" not in model_fields:
             return qs.none()
 
@@ -36,6 +37,11 @@ class FilterableDocumentMixin:
         if selected_assets and "asset_size" not in model_fields:
             return qs.none()
 
+        # If form_of_organization filter is active but this model doesn't have that field, skip
+        selected_forms = request.GET.getlist("form_of_organization")
+        if selected_forms and "form_of_organization" not in model_fields:
+            return qs.none()
+
         # Handle dates
         if "date" in model_fields:
             if start_date:
@@ -52,7 +58,7 @@ class FilterableDocumentMixin:
         if "status" in model_fields and statuses:
             filters &= Q(status__in=statuses)
 
-        # Handle user search safely
+        # Handle user search
         if "user" in model_fields:
             user_filters = Q()
             if first_name:
@@ -61,8 +67,7 @@ class FilterableDocumentMixin:
                 user_filters &= Q(user__last_name__icontains=last_name)
             filters &= user_filters
 
-                
-        # Handle application types
+        # Application types
         if "application_type" in model_fields and application_types:
             filters &= Q(application_type__in=application_types)
 
@@ -77,12 +82,18 @@ class FilterableDocumentMixin:
         # Asset size filter
         if "asset_size" in model_fields and selected_assets:
             filters &= Q(asset_size__in=selected_assets)
+
+        # Form of organization filter
+        if "form_of_organization" in model_fields and selected_forms:
+            filters &= Q(form_of_organization__in=selected_forms)
+
         return qs.filter(filters)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         request = self.request
 
+        # Date and status
         context["selected_start_date"] = request.GET.get("start_date", "")
         context["selected_end_date"] = request.GET.get("end_date", "")
         context["selected_statuses"] = request.GET.getlist("status")
@@ -92,6 +103,8 @@ class FilterableDocumentMixin:
         context["selected_categories"] = request.GET.getlist("category")
         context["selected_social_classifications"] = request.GET.getlist("social_classification")
         context["selected_asset_sizes"] = request.GET.getlist("asset_size")
+        context["selected_forms_of_organization"] = request.GET.getlist("form_of_organization")
+
         # Add the choice lists themselves for rendering checkboxes/radios
         if hasattr(ServiceRepairAccreditationApplication, "CATEGORIES"):
             context["CATEGORY_CHOICES"] = ServiceRepairAccreditationApplication.CATEGORIES
@@ -99,4 +112,7 @@ class FilterableDocumentMixin:
             context["SOCIAL_CLASSIFICATION_CHOICES"] = ServiceRepairAccreditationApplication.SOCIAL_CLASSIFICATION_CHOICES
         if hasattr(ServiceRepairAccreditationApplication, "ASSET_SIZE_CHOICES"):
             context["ASSET_SIZE_CHOICES"] = ServiceRepairAccreditationApplication.ASSET_SIZE_CHOICES
+        if hasattr(ServiceRepairAccreditationApplication, "FORM_OF_ORGANIZATION_CHOICES"):
+            context["FORM_OF_ORGANIZATION_CHOICES"] = ServiceRepairAccreditationApplication.FORM_OF_ORGANIZATION_CHOICES
+
         return context
