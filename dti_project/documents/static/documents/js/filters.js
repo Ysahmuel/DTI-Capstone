@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-
     if (modalContainer && closemodalBtn) {
         closemodalBtn.addEventListener('click', function() {
             modalContainer.style.display = 'none';
@@ -37,5 +36,40 @@ document.addEventListener('DOMContentLoaded', function() {
         if (checkbox.checked) {
             item.classList.add('active');
         }
+    });
+
+    // Radio handling
+    const radioFilterItems = document.querySelectorAll('.radio-filter-item');
+
+    radioFilterItems.forEach(item => {
+        const radio = item.querySelector('input[type="radio"]');
+
+        // style the initially checked radio
+        if (radio.checked) item.classList.add('active');
+
+        item.addEventListener('click', function(e) {
+            if (e.target.tagName.toLowerCase() === 'input') return;
+
+            // uncheck all radios in the same group
+            const name = radio.name;
+            document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+                r.checked = false;
+                r.closest('.radio-filter-item').classList.remove('active');
+            });
+
+            // check the clicked one
+            radio.checked = true;
+            item.classList.add('active');
+        });
+
+        // also handle clicking the radio itself
+        radio.addEventListener('change', function() {
+            if (radio.checked) {
+                document.querySelectorAll(`input[name="${radio.name}"]`).forEach(r => {
+                    if (r !== radio) r.closest('.radio-filter-item').classList.remove('active');
+                });
+                item.classList.add('active');
+            }
+        });
     });
 });
