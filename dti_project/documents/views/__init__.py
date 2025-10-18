@@ -12,7 +12,8 @@ from .detail_views import (
     ServiceRepairAccreditationApplicationDetailView,
     InspectionValidationReportDetailView,
     OrderOfPaymentDetailView,
-    ChecklistEvaluationSheetDetailView
+    ChecklistEvaluationSheetDetailView,
+    CollectionReportDetailView,
 )
 
 from .update_views import (

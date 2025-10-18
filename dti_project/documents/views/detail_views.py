@@ -1,5 +1,6 @@
 import re
 
+from ..models.collection_models import CollectionReport
 from ..mixins.context_mixins import TabsSectionMixin
 from ..constants import CHECKLIST_EVALUATION_DETAIL_GROUPS, CHECKLIST_REQUIREMENT_GROUPS, INSPECTION_VALIDATION_DETAIL_GROUPS, ORDER_OF_PAYMENT_DETAIL_GROUPS, PERSONAL_DATA_SHEET_DETAIL_GROUPS, PERSONAL_DATA_SHEET_TAB_SECTIONS, SALES_PROMOTION_DETAIL_GROUPS, SERVICE_REPAIR_ACCREDITATION_DETAIL_GROUPS
 from ..models import ChecklistEvaluationSheet, InspectionValidationReport, OrderOfPayment, PersonalDataSheet, SalesPromotionPermitApplication, ServiceRepairAccreditationApplication
@@ -136,5 +137,15 @@ class ChecklistEvaluationSheetDetailView(LoginRequiredMixin, DetailView):
         context['detail_groups'] = CHECKLIST_EVALUATION_DETAIL_GROUPS
         context['requirement_groups'] = CHECKLIST_REQUIREMENT_GROUPS
         context["update_url_name"] = "update-checklist-evaluation-sheet"
+
+        return context
+    
+class CollectionReportDetailView(LoginRequiredMixin, DetailView):
+    template_name = 'documents/collection_reports/collection_report.html'
+    model = CollectionReport
+    context_object_name = 'collection_report'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
 
         return context
