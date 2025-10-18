@@ -1,0 +1,30 @@
+{% load custom_filters %}
+
+<table class="documents-table uploaded-files-table">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Official Receipt Number</th>
+            <th>RC Code</th>
+            <th>Payor</th>
+            <th>Particulars</th>
+            <th>Amount</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+        <tr class="document-value-row" data-href="">
+            <td>{{ item.date }}</td>
+            <td>{{ item.number }}</td>
+            <td>{{ item.rc_code }}</td>
+            <td>{{ item.payor }}</td>
+            <td>{{ item.particulars }}</td>
+            <td>{{ item.amount }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6">No documents found for this file.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

@@ -1,0 +1,25 @@
+{% extends 'dashboard/layout.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %} Collection {{ collection_report }} {% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'documents/css/upload-report.css' %}">
+{% endblock %}
+
+{% block body %}
+    <header class="document-details-header">
+        <div class="column">
+            <h1>Collection {{ collection_report }}</h1>
+        </div>
+        <div class="actions">
+            {% include 'dashboard/components/dashboard_actions.html' %}
+        </div>
+    </header>
+    
+    <div class="upload-report-container">
+        {% include 'documents/collection_reports/collection_report_table.html' with items=collection_report.report_items.all %}
+    </div>
+
+{% endblock %}
