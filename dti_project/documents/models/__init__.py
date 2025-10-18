@@ -8,7 +8,7 @@ from .personal_data_sheet_model import PersonalDataSheet, EmployeeBackground, Tr
 from .sales_promotion_model import SalesPromotionPermitApplication, ProductCovered
 from .service_repair_accreditation_model import ServiceRepairAccreditationApplication, Service, ServiceCategory
 from .change_request_models import ChangeRequest
-from .collection_models import CollectionReportItem
+from .collection_models import CollectionReport, CollectionReportItem
 
 __all__ = [
     # Base models
@@ -46,5 +46,6 @@ __all__ = [
     'ChangeRequest',
 
     # collection item
+    'CollectionReport',
     'CollectionReportItem',
 ]
