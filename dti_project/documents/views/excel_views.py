@@ -10,7 +10,7 @@ from openpyxl.utils import get_column_letter
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from ..models.collection_models import CollectionReportItem
+from ..models.collection_models import CollectionReport, CollectionReportItem
 from ..mappings import EXPORT_MODEL_MAP, UPLOAD_MODEL_MAP
 from ..utils.excel_view_helpers import get_model_from_sheet, get_user_from_full_name, normalize_header, normalize_sheet_name, shorten_name, to_title
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -20,6 +20,9 @@ from django.contrib import messages
 from django.db import IntegrityError, transaction
 import pandas as pd
 from openpyxl import load_workbook
+from openpyxl.utils.datetime import from_excel
+from django.utils.dateparse import parse_date
+
 import os
 from ..models import (
     ChecklistEvaluationSheet,
@@ -134,13 +137,13 @@ class ExportDocumentsExcelView(LoginRequiredMixin, View):
         response["Content-Disposition"] = f"attachment; filename={safe_filename}; filename*=UTF-8''{safe_filename}"
         wb.save(response)
         return response
-
+    
 class UploadExcelView(View):
     @staticmethod
     def normalize_header(value):
         """Normalize headers to simplify matching."""
         return (
-            value.strip()
+            str(value).strip()
             .lower()
             .replace(" ", "_")
             .replace("(", "")
@@ -156,26 +159,12 @@ class UploadExcelView(View):
             messages.error(request, "No files were uploaded. Please select an Excel file to continue.")
             return redirect(reverse("documents:all-documents"))
 
-        file_reports = []
+        created_reports = []  # we'll store created reports to redirect to last one
 
         for file in files:
-            report = {
-                "filename": file.name,
-                "filesize": round(file.size / (1024 * 1024), 2),
-                "created_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "total_records": 0,
-                "imported_records": 0,
-                "failed_records": 0,
-                "documents": [],
-            }
-
             ext = os.path.splitext(file.name)[1].lower()
-            if file.name.startswith("~$"):
-                messages.error(request, f"Temporary file {file.name} is not valid.")
-                continue
-
-            if ext not in [".xlsx", ".xls"]:
-                messages.error(request, f"{file.name} was not uploaded. Only Excel files are allowed.")
+            if file.name.startswith("~$") or ext not in [".xlsx", ".xls"]:
+                messages.error(request, f"{file.name} was not uploaded. Invalid file.")
                 continue
 
             try:
@@ -194,7 +183,7 @@ class UploadExcelView(View):
                     break
 
             if not header_row:
-                messages.error(request, f"Header row not found in {file.name}. Ensure it contains 'Official Receipt' or 'Date'.")
+                messages.error(request, f"Header row not found in {file.name}.")
                 continue
 
             # === Combine header + subheader row ===
@@ -207,7 +196,7 @@ class UploadExcelView(View):
                 combined = f"{part1} {part2}".strip()
                 headers.append(self.normalize_header(combined))
 
-            # === Map headers to model fields ===
+            # === Field mapping ===
             field_map = {}
             for f in CollectionReportItem._meta.fields:
                 opts = {self.normalize_header(f.verbose_name or ""), self.normalize_header(f.name)}
@@ -215,104 +204,77 @@ class UploadExcelView(View):
                     if h in opts:
                         field_map[h] = f.name
 
-            # Map Official Receipt Number manually
+            # Manual mappings
             if "official_receipt_number" in headers:
                 field_map["official_receipt_number"] = "number"
+            if "official_receipt_number" not in field_map and "number" in headers:
+                field_map["number"] = "number"
+            if "date" not in field_map and any("date" in h for h in headers):
+                date_header = next(h for h in headers if "date" in h)
+                field_map[date_header] = "date"
 
-            # Ensure date header is mapped
-            if "date" in headers and "date" not in field_map:
-                field_map["date"] = "date"
+            report = CollectionReport.objects.create()
 
-            # Identify "No." column index to ignore
-            no_column_index = 0
-            for idx, header in enumerate(headers):
-                normalized = header.lower().strip() if header else ""
-                if 'no' in normalized and len(normalized) <= 5:
-                    no_column_index = idx
-                    break
-
-            # DB column indices (for empty row check)
-            db_column_indices = [idx for idx, header in enumerate(headers) if header in field_map]
-
+            db_column_indices = [idx for idx, h in enumerate(headers) if h in field_map]
             empty_row_count = 0
             MAX_EMPTY_ROWS = 5
 
             for row_index, row in enumerate(ws.iter_rows(min_row=header_row + 2, values_only=True), start=header_row + 2):
-                meaningful_data_found = any(
-                    row[idx] is not None and str(row[idx]).strip()
-                    for idx in db_column_indices
-                )
-
-                if not meaningful_data_found:
+                if not any(row[idx] for idx in db_column_indices):
                     empty_row_count += 1
                     if empty_row_count >= MAX_EMPTY_ROWS:
-                        break  # HARD STOP after 5 consecutive empty rows
+                        break
                     continue
 
-                empty_row_count = 0  # reset counter
-
-                # === Process row ===
-                record = {
-                    "display": "",
-                    "model": "Collection Report Item",
-                    "status": "Imported",
-                    "invalid_fields": [],
-                    "row_number": row_index
-                }
+                empty_row_count = 0
                 data = {}
 
                 for idx, value in enumerate(row):
-                    header = headers[idx]
+                    header = headers[idx] if idx < len(headers) else None
                     field_name = field_map.get(header)
                     if not field_name:
-                        continue  # Skip columns like "No."
+                        continue
 
-                    # Convert dates and clean strings
-                    if isinstance(value, datetime.datetime):
-                        value = value.date()
-                    elif isinstance(value, str):
-                        value = value.strip()
-                        if value == "":
-                            value = None
-                    elif isinstance(value, datetime.date):
-                        pass  # already date
-                    elif value is None:
-                        value = None
+                    # ✅ Handle Date column properly
+                    if field_name == "date":
+                        if isinstance(value, datetime.datetime):
+                            value = value.date()
+                        elif isinstance(value, float):
+                            # Excel serial date
+                            base_date = datetime.datetime(1899, 12, 30)
+                            value = base_date + datetime.timedelta(days=value)
+                            value = value.date()
+                        elif isinstance(value, str):
+                            try:
+                                value = datetime.datetime.strptime(value.strip(), "%Y-%m-%d").date()
+                            except Exception:
+                                try:
+                                    value = datetime.datetime.strptime(value.strip(), "%m/%d/%Y").date()
+                                except Exception:
+                                    value = None
 
                     data[field_name] = value
 
                 if not data:
-                    continue  # Skip rows with no mapped DB fields
+                    continue
 
                 try:
                     with transaction.atomic():
-                        obj = CollectionReportItem.objects.create(**data)
-                        record["display"] = str(obj)
-                        record["date_created"] = getattr(obj, "created_at", datetime.datetime.now()).strftime("%Y-%m-%d %H:%M:%S")
-                    report["imported_records"] += 1
+                        item = CollectionReportItem.objects.create(**data)
+                        report.report_items.add(item)
                 except Exception as e:
-                    record["status"] = "Failed"
-                    record["display"] = f"Row {record['row_number']}"
-                    field_match = re.search(r'NOT NULL constraint failed: \w+\.(\w+)', str(e).lower())
-                    if field_match:
-                        record["invalid_fields"].append(f"Missing required field ({field_match.group(1)})")
-                    else:
-                        record["invalid_fields"].append(str(e))
-                    report["failed_records"] += 1
+                    print(f"Failed to save row {row_index}: {e}")
+                    continue
 
-                # Increment total_records at report level
-                report["total_records"] += 1
+            created_reports.append(report)
 
-                record["invalid_fields_display"] = ", ".join(record["invalid_fields"]) if record["invalid_fields"] else "None"
-                record["data"] = data  # <-- Attach data for template
+        if created_reports:
+            last_report = created_reports[-1]
+            messages.success(request, "Excel file successfully uploaded.")
+            return redirect(reverse("collection-report", args=[last_report.pk]))
 
-                report["documents"].append(record)
-
-            file_reports.append(report)
-
-        request.session["file_reports"] = file_reports
-        messages.success(request, "Excel upload processed successfully!")
-        return redirect(reverse("upload-report"))
+        messages.error(request, "No valid reports were created.")
+        return redirect(reverse("all-documents"))
 
 
 class UploadReportView(View):
