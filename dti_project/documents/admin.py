@@ -27,14 +27,14 @@ class StatusModelAdmin(admin.ModelAdmin):
 class CollectionReportItemAdmin(admin.ModelAdmin):
     list_display = (
         "date",
-        "official_receipt_number",
+        "number",
         "payor",
         "particulars",
         "amount",
         "stamp_tax",
     )
     search_fields = (
-        "official_receipt_number",
+        "number",
         "payor",
         "rc_code",
         "particulars",
