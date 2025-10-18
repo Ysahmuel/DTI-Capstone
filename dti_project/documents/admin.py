@@ -1,7 +1,6 @@
 from django.contrib import admin
-
 from .utils.admin_helpers import get_full_name_from_personal_data
-from .models import CollectionReportItem, CharacterReference, ChecklistEvaluationSheet, EducationalAttainment, EmployeeBackground, InspectionValidationReport, OrderOfPayment, PersonalDataSheet, ProductCovered, SalesPromotionPermitApplication, Service, ServiceCategory, ServiceRepairAccreditationApplication, TrainingsAttended, ChangeRequest
+from .models import CollectionReport, CollectionReportItem, CharacterReference, ChecklistEvaluationSheet, EducationalAttainment, EmployeeBackground, InspectionValidationReport, OrderOfPayment, PersonalDataSheet, ProductCovered, SalesPromotionPermitApplication, Service, ServiceCategory, ServiceRepairAccreditationApplication, TrainingsAttended, ChangeRequest
 
 
 # Register your models here.
@@ -23,6 +22,25 @@ class StatusModelAdmin(admin.ModelAdmin):
 
 
 # 🔹 Admin registrations
+@admin.register(CollectionReport)
+class CollectionReportAdmin(admin.ModelAdmin):
+    list_display = ('date_range_display',)
+
+    def date_range_display(self, obj):
+        dates = obj.report_items.values_list('date', flat=True)
+        if not dates:
+            return "No dates"
+
+        first_date = min(dates)
+        last_date = max(dates)
+
+        if first_date == last_date:
+            return first_date.strftime("%b %d, %Y")
+        else:
+            return f"{first_date.strftime('%b %d, %Y')} - {last_date.strftime('%b %d, %Y')}"
+
+    date_range_display.short_description = "Date Range"
+
 @admin.register(CollectionReportItem)
 class CollectionReportItemAdmin(admin.ModelAdmin):
     list_display = (
