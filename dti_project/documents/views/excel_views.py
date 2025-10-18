@@ -1,5 +1,6 @@
 import datetime
 from itertools import chain
+import re
 from urllib.parse import quote
 from django.urls import reverse
 from django.views import View
@@ -9,11 +10,12 @@ from openpyxl.utils import get_column_letter
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
+from ..models.collection_models import CollectionReportItem
 from ..mappings import EXPORT_MODEL_MAP, UPLOAD_MODEL_MAP
 from ..utils.excel_view_helpers import get_model_from_sheet, get_user_from_full_name, normalize_header, normalize_sheet_name, shorten_name, to_title
 from django.contrib.auth.mixins import LoginRequiredMixin
 from ..mixins.permissions_mixins import UserRoleMixin
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.db import IntegrityError, transaction
 import pandas as pd
@@ -134,19 +136,32 @@ class ExportDocumentsExcelView(LoginRequiredMixin, View):
         return response
 
 class UploadExcelView(View):
+    @staticmethod
+    def normalize_header(value):
+        """Normalize headers to simplify matching."""
+        return (
+            value.strip()
+            .lower()
+            .replace(" ", "_")
+            .replace("(", "")
+            .replace(")", "")
+            .replace("/", "_")
+            .replace("-", "_")
+        )
+
     def post(self, request, *args, **kwargs):
         files = request.FILES.getlist("files")
-        
+
         if not files:
             messages.error(request, "No files were uploaded. Please select an Excel file to continue.")
-            return HttpResponseRedirect(reverse("documents:all-documents"))
+            return redirect(reverse("documents:all-documents"))
 
         file_reports = []
 
         for file in files:
             report = {
                 "filename": file.name,
-                "filesize": round(file.size / (1024 * 1024), 2),  # MB
+                "filesize": round(file.size / (1024 * 1024), 2),
                 "created_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 "total_records": 0,
                 "imported_records": 0,
@@ -155,9 +170,8 @@ class UploadExcelView(View):
             }
 
             ext = os.path.splitext(file.name)[1].lower()
-            # Skip temporary Excel files (those starting with ~$)
             if file.name.startswith("~$"):
-                messages.error(request, f"Temporary file {file.name} is not a valid Excel file.")
+                messages.error(request, f"Temporary file {file.name} is not valid.")
                 continue
 
             if ext not in [".xlsx", ".xls"]:
@@ -165,156 +179,146 @@ class UploadExcelView(View):
                 continue
 
             try:
-                wb = load_workbook(file)
+                wb = load_workbook(file, data_only=True)
+                ws = wb.active
             except Exception:
                 messages.error(request, f"Could not open {file.name}.")
                 continue
 
-            for sheetname in wb.sheetnames:
-                model = get_model_from_sheet(sheetname)
-                if not model:
+            # === Auto-detect header row ===
+            header_row = None
+            for i, row in enumerate(ws.iter_rows(values_only=True), start=1):
+                cells = [str(c).strip().lower() for c in row if c]
+                if any("official receipt" in c or "date" == c for c in cells):
+                    header_row = i
+                    break
+
+            if not header_row:
+                messages.error(request, f"Header row not found in {file.name}. Ensure it contains 'Official Receipt' or 'Date'.")
+                continue
+
+            # === Combine header + subheader row ===
+            header_row_1 = header_row
+            header_row_2 = header_row + 1
+            headers = []
+            for c1, c2 in zip(ws[header_row_1], ws[header_row_2]):
+                part1 = str(c1.value).strip() if c1.value else ""
+                part2 = str(c2.value).strip() if c2.value else ""
+                combined = f"{part1} {part2}".strip()
+                headers.append(self.normalize_header(combined))
+
+            # === Map headers to model fields ===
+            field_map = {}
+            for f in CollectionReportItem._meta.fields:
+                opts = {self.normalize_header(f.verbose_name or ""), self.normalize_header(f.name)}
+                for h in headers:
+                    if h in opts:
+                        field_map[h] = f.name
+
+            # Map Official Receipt Number manually
+            if "official_receipt_number" in headers:
+                field_map["official_receipt_number"] = "number"
+
+            # Ensure date header is mapped
+            if "date" in headers and "date" not in field_map:
+                field_map["date"] = "date"
+
+            # Identify "No." column index to ignore
+            no_column_index = 0
+            for idx, header in enumerate(headers):
+                normalized = header.lower().strip() if header else ""
+                if 'no' in normalized and len(normalized) <= 5:
+                    no_column_index = idx
+                    break
+
+            # DB column indices (for empty row check)
+            db_column_indices = [idx for idx, header in enumerate(headers) if header in field_map]
+
+            empty_row_count = 0
+            MAX_EMPTY_ROWS = 5
+
+            for row_index, row in enumerate(ws.iter_rows(min_row=header_row + 2, values_only=True), start=header_row + 2):
+                meaningful_data_found = any(
+                    row[idx] is not None and str(row[idx]).strip()
+                    for idx in db_column_indices
+                )
+
+                if not meaningful_data_found:
+                    empty_row_count += 1
+                    if empty_row_count >= MAX_EMPTY_ROWS:
+                        break  # HARD STOP after 5 consecutive empty rows
                     continue
 
-                ws = wb[sheetname]
-                headers = [normalize_header(str(c.value).strip()) if c.value else "" for c in ws[1]]
+                empty_row_count = 0  # reset counter
 
-                field_map = {}
-                for f in model._meta.fields:
-                    opts = {normalize_header(f.verbose_name), normalize_header(f.name)}
-                    for h in headers:
-                        if h in opts:
-                            field_map[h] = f.name
+                # === Process row ===
+                record = {
+                    "display": "",
+                    "model": "Collection Report Item",
+                    "status": "Imported",
+                    "invalid_fields": [],
+                    "row_number": row_index
+                }
+                data = {}
 
-                row_number = 1  # This will track the actual Excel row number
-                for row_index, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
-                    if not any(row):
-                        continue
+                for idx, value in enumerate(row):
+                    header = headers[idx]
+                    field_name = field_map.get(header)
+                    if not field_name:
+                        continue  # Skip columns like "No."
 
-                    # Initialize record with display info even if it fails
-                    record = {
-                        "display": "",  # Will be set later based on success/failure
-                        "model": model._meta.verbose_name,
-                        "status": "Imported",
-                        "invalid_fields": [],
-                        "user": None,
-                        "row_number": row_index - 1,  # Use enumerate index for exact Excel row
-                    }
-
-                    data = {}
-                    for header, value in zip(headers, row):
-                        field_name = field_map.get(header)
-                        if not field_name:
-                            continue
-
-                        if isinstance(value, datetime.datetime):
-                            value = value.date()
-                        if value in ("", None):
+                    # Convert dates and clean strings
+                    if isinstance(value, datetime.datetime):
+                        value = value.date()
+                    elif isinstance(value, str):
+                        value = value.strip()
+                        if value == "":
                             value = None
+                    elif isinstance(value, datetime.date):
+                        pass  # already date
+                    elif value is None:
+                        value = None
 
-                        if field_name == "user" and value:
-                            user_obj = get_user_from_full_name(str(value))
-                            if not user_obj:
-                                record["status"] = "Failed"
-                                record["invalid_fields"].append("invalid user")
-                                record["display"] = f"Row {record['row_number']}"  # Set display immediately
-                                continue
-                            data[field_name] = user_obj
-                            record["user"] = str(user_obj)
-                        else:
-                            data[field_name] = value
+                    data[field_name] = value
 
-                    try:
-                        if data and record["status"] == "Imported":
-                            with transaction.atomic():
-                                obj = model.objects.create(**data)
-                                record["display"] = str(obj)
-                                record["date_created"] = getattr(obj, "created_at", datetime.datetime.now()).strftime("%Y-%m-%d %H:%M:%S")
-                            report["imported_records"] += 1
-                        else:
-                            if record["status"] == "Failed":
-                                # For failed records, show row number
-                                record["display"] = f"Row {record['row_number']}"
-                                report["failed_records"] += 1
-                    except Exception as e:
-                        record["status"] = "Failed"
-                        # For failed records, show row number
-                        record["display"] = f"Row {record['row_number']}"
-                        
-                        error_msg = str(e).lower()
-                        
-                        # Check if it's a NOT NULL constraint error
-                        if 'not null' in error_msg or 'null constraint' in error_msg:
-                            # Extract field name from error message
-                            # Common patterns: "NOT NULL constraint failed: table.field"
-                            # or "null value in column "field" violates not-null constraint"
-                            import re
-                            
-                            # Try to extract field name from different error message formats
-                            field_match = None
-                            
-                            # Pattern 1: "NOT NULL constraint failed: table.field"
-                            pattern1 = r'NOT NULL constraint failed: \w+\.(\w+)'
-                            field_match = re.search(pattern1, error_msg, re.IGNORECASE)
-                            
-                            if not field_match:
-                                # Pattern 2: 'null value in column "field" violates'
-                                pattern2 = r'null value in column ["\'](\w+)["\']'
-                                field_match = re.search(pattern2, error_msg, re.IGNORECASE)
-                            
-                            if not field_match:
-                                # Pattern 3: "(1048, "Column 'field' cannot be null")"
-                                pattern3 = r"Column ['\"](\w+)['\"] cannot be null"
-                                field_match = re.search(pattern3, error_msg, re.IGNORECASE)
-                            
-                            if field_match:
-                                field_name = field_match.group(1)
-                                # Get the verbose name if available
-                                try:
-                                    field_obj = model._meta.get_field(field_name)
-                                    field_display = field_obj.verbose_name or field_name
-                                except:
-                                    field_display = field_name
-                                
-                                record["invalid_fields"].append(f"missing field ({field_display})")
-                            else:
-                                record["invalid_fields"].append(f"missing required field")
-                        else:
-                            # For other types of errors, show the original message
-                            record["invalid_fields"].append(str(e))
-                        
-                        report["failed_records"] += 1
+                if not data:
+                    continue  # Skip rows with no mapped DB fields
 
-                    report["total_records"] += 1
-                    
-                    # Format invalid fields for display
-                    if record["invalid_fields"]:
-                        if len(record["invalid_fields"]) <= 2:
-                            record["invalid_fields_display"] = ", ".join(record["invalid_fields"])
-                        else:
-                            first_two = ", ".join(record["invalid_fields"][:2])
-                            remaining_count = len(record["invalid_fields"]) - 2
-                            record["invalid_fields_display"] = f"{first_two} + {remaining_count} other invalid/missing fields"
+                try:
+                    with transaction.atomic():
+                        obj = CollectionReportItem.objects.create(**data)
+                        record["display"] = str(obj)
+                        record["date_created"] = getattr(obj, "created_at", datetime.datetime.now()).strftime("%Y-%m-%d %H:%M:%S")
+                    report["imported_records"] += 1
+                except Exception as e:
+                    record["status"] = "Failed"
+                    record["display"] = f"Row {record['row_number']}"
+                    field_match = re.search(r'NOT NULL constraint failed: \w+\.(\w+)', str(e).lower())
+                    if field_match:
+                        record["invalid_fields"].append(f"Missing required field ({field_match.group(1)})")
                     else:
-                        record["invalid_fields_display"] = "None"
-                    
-                    report["documents"].append(record)
+                        record["invalid_fields"].append(str(e))
+                    report["failed_records"] += 1
+
+                # Increment total_records at report level
+                report["total_records"] += 1
+
+                record["invalid_fields_display"] = ", ".join(record["invalid_fields"]) if record["invalid_fields"] else "None"
+                record["data"] = data  # <-- Attach data for template
+
+                report["documents"].append(record)
 
             file_reports.append(report)
 
-        # Store in session safely (JSON-serializable)
         request.session["file_reports"] = file_reports
+        messages.success(request, "Excel upload processed successfully!")
+        return redirect(reverse("upload-report"))
 
-        return HttpResponseRedirect(reverse("upload-report"))
 
 class UploadReportView(View):
     template_name = "documents/excel_templates/upload_report.html"
 
     def get(self, request, *args, **kwargs):
-        # Pull file_reports from session, default to an empty list
         file_reports = request.session.get("file_reports", [])
-
-        context = {
-            "file_reports": file_reports,
-        }
-
+        context = {"file_reports": file_reports}
         return render(request, self.template_name, context)
