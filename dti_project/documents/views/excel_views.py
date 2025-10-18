@@ -1,13 +1,18 @@
 import datetime
+from io import BytesIO
 from itertools import chain
+import json
 import re
+import threading
+import time
 from urllib.parse import quote
+import uuid
 from django.urls import reverse
 from django.views import View
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill
 from openpyxl.utils import get_column_letter
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, StreamingHttpResponse
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from ..models.collection_models import CollectionReport, CollectionReportItem
@@ -22,6 +27,8 @@ import pandas as pd
 from openpyxl import load_workbook
 from openpyxl.utils.datetime import from_excel
 from django.utils.dateparse import parse_date
+from django.http import JsonResponse
+from django.core.cache import cache
 
 import os
 from ..models import (
@@ -139,6 +146,10 @@ class ExportDocumentsExcelView(LoginRequiredMixin, View):
         return response
     
 class UploadExcelView(View):
+    """
+    Initial upload endpoint - stores files in cache and returns session ID
+    """
+    
     @staticmethod
     def normalize_header(value):
         """Normalize headers to simplify matching."""
@@ -156,131 +167,297 @@ class UploadExcelView(View):
         files = request.FILES.getlist("files")
 
         if not files:
-            messages.error(request, "No files were uploaded. Please select an Excel file to continue.")
-            return redirect(reverse("documents:all-documents"))
+            return JsonResponse({
+                'status': 'error',
+                'message': 'No files were uploaded.'
+            })
 
-        created_reports = []  # we'll store created reports to redirect to last one
+        # Get or create session ID
+        session_id = request.POST.get('session_id')
+        if not session_id:
+            session_id = str(uuid.uuid4())
 
+        # Store files temporarily in cache (convert to byte strings)
+        file_data_list = []
         for file in files:
-            ext = os.path.splitext(file.name)[1].lower()
-            if file.name.startswith("~$") or ext not in [".xlsx", ".xls"]:
-                messages.error(request, f"{file.name} was not uploaded. Invalid file.")
-                continue
+            file_data_list.append({
+                'name': file.name,
+                'content': file.read(),
+            })
+        
+        cache.set(f'upload_files_{session_id}', file_data_list, timeout=600)
 
+        # Initialize progress
+        cache.set(f'upload_progress_{session_id}', {
+            'status': 'queued',
+            'current_row': 0,
+            'total_rows': 0,
+            'current_file': 0,
+            'total_files': len(files),
+            'percentage': 0,
+            'message': 'Upload queued...',
+            'timestamp': time.time()
+        }, timeout=600)
+
+        # Return session ID immediately
+        return JsonResponse({
+            'status': 'queued',
+            'session_id': session_id
+        })
+
+
+class ProcessUploadView(View):
+    """
+    Separate view that processes the upload.
+    This is called via AJAX and streams progress updates.
+    """
+    
+    @staticmethod
+    def normalize_header(value):
+        """Normalize headers to simplify matching."""
+        return (
+            str(value).strip()
+            .lower()
+            .replace(" ", "_")
+            .replace("(", "")
+            .replace(")", "")
+            .replace("/", "_")
+            .replace("-", "_")
+        )
+    
+    def get(self, request, session_id):   
+        print(f"ProcessUploadView GET called with session_id: {session_id}")  # DEBUG     
+        def process_and_stream():
             try:
-                wb = load_workbook(file, data_only=True)
-                ws = wb.active
-            except Exception:
-                messages.error(request, f"Could not open {file.name}.")
-                continue
+                # Get files from cache
+                file_data_list = cache.get(f'upload_files_{session_id}')
+                if not file_data_list:
+                    yield self._sse_message({'status': 'error', 'message': 'Files not found'})
+                    return
 
-            # === Auto-detect header row ===
-            header_row = None
-            for i, row in enumerate(ws.iter_rows(values_only=True), start=1):
-                cells = [str(c).strip().lower() for c in row if c]
-                if any("official receipt" in c or "date" == c for c in cells):
-                    header_row = i
-                    break
+                yield self._sse_message({
+                    'status': 'processing',
+                    'message': 'Starting processing...',
+                    'percentage': 0
+                })
 
-            if not header_row:
-                messages.error(request, f"Header row not found in {file.name}.")
-                continue
+                created_reports = []
+                
+                # First pass: Count total rows
+                total_rows = 0
+                file_row_counts = []
+                
+                yield self._sse_message({
+                    'status': 'counting',
+                    'message': 'Counting rows...',
+                    'percentage': 0
+                })
+                
+                for file_data in file_data_list:
+                    ext = os.path.splitext(file_data['name'])[1].lower()
+                    if file_data['name'].startswith("~$") or ext not in [".xlsx", ".xls"]:
+                        file_row_counts.append(0)
+                        continue
+                    
+                    try:
+                        file_obj = BytesIO(file_data['content'])
+                        wb = load_workbook(file_obj, data_only=True)
+                        ws = wb.active
+                        row_count = max(0, ws.max_row - 2)
+                        file_row_counts.append(row_count)
+                        total_rows += row_count
+                        wb.close()
+                    except Exception as e:
+                        print(f"Error counting rows: {e}")
+                        file_row_counts.append(0)
 
-            # === Combine header + subheader row ===
-            header_row_1 = header_row
-            header_row_2 = header_row + 1
-            headers = []
-            for c1, c2 in zip(ws[header_row_1], ws[header_row_2]):
-                part1 = str(c1.value).strip() if c1.value else ""
-                part2 = str(c2.value).strip() if c2.value else ""
-                combined = f"{part1} {part2}".strip()
-                headers.append(self.normalize_header(combined))
+                yield self._sse_message({
+                    'status': 'processing',
+                    'current_row': 0,
+                    'total_rows': total_rows,
+                    'current_file': 0,
+                    'total_files': len(file_data_list),
+                    'percentage': 0,
+                    'message': f'Processing {total_rows} rows...'
+                })
 
-            # === Field mapping ===
-            field_map = {}
-            for f in CollectionReportItem._meta.fields:
-                opts = {self.normalize_header(f.verbose_name or ""), self.normalize_header(f.name)}
-                for h in headers:
-                    if h in opts:
-                        field_map[h] = f.name
-
-            # Manual mappings
-            if "official_receipt_number" in headers:
-                field_map["official_receipt_number"] = "number"
-            if "official_receipt_number" not in field_map and "number" in headers:
-                field_map["number"] = "number"
-            if "date" not in field_map and any("date" in h for h in headers):
-                date_header = next(h for h in headers if "date" in h)
-                field_map[date_header] = "date"
-
-            report = CollectionReport.objects.create()
-
-            db_column_indices = [idx for idx, h in enumerate(headers) if h in field_map]
-            empty_row_count = 0
-            MAX_EMPTY_ROWS = 5
-
-            for row_index, row in enumerate(ws.iter_rows(min_row=header_row + 2, values_only=True), start=header_row + 2):
-                if not any(row[idx] for idx in db_column_indices):
-                    empty_row_count += 1
-                    if empty_row_count >= MAX_EMPTY_ROWS:
-                        break
-                    continue
-
-                empty_row_count = 0
-                data = {}
-
-                for idx, value in enumerate(row):
-                    header = headers[idx] if idx < len(headers) else None
-                    field_name = field_map.get(header)
-                    if not field_name:
+                current_row = 0
+                
+                # Process each file
+                for file_index, file_data in enumerate(file_data_list):
+                    ext = os.path.splitext(file_data['name'])[1].lower()
+                    
+                    yield self._sse_message({
+                        'status': 'processing',
+                        'current_row': current_row,
+                        'total_rows': total_rows,
+                        'current_file': file_index + 1,
+                        'total_files': len(file_data_list),
+                        'percentage': round((current_row / total_rows * 100) if total_rows > 0 else 0, 2),
+                        'message': f'Processing {file_data["name"]}...',
+                        'current_filename': file_data['name']
+                    })
+                    
+                    if file_data['name'].startswith("~$") or ext not in [".xlsx", ".xls"]:
                         continue
 
-                    # ✅ Handle Date column properly
-                    if field_name == "date":
-                        if isinstance(value, datetime.datetime):
-                            value = value.date()
-                        elif isinstance(value, float):
-                            # Excel serial date
-                            base_date = datetime.datetime(1899, 12, 30)
-                            value = base_date + datetime.timedelta(days=value)
-                            value = value.date()
-                        elif isinstance(value, str):
-                            try:
-                                value = datetime.datetime.strptime(value.strip(), "%Y-%m-%d").date()
-                            except Exception:
-                                try:
-                                    value = datetime.datetime.strptime(value.strip(), "%m/%d/%Y").date()
-                                except Exception:
-                                    value = None
+                    try:
+                        file_obj = BytesIO(file_data['content'])
+                        wb = load_workbook(file_obj, data_only=True)
+                        ws = wb.active
+                    except Exception as e:
+                        print(f"Error opening file: {e}")
+                        continue
 
-                    data[field_name] = value
+                    # Auto-detect header row
+                    header_row = None
+                    for i, row in enumerate(ws.iter_rows(values_only=True), start=1):
+                        cells = [str(c).strip().lower() for c in row if c]
+                        if any("official receipt" in c or "date" == c for c in cells):
+                            header_row = i
+                            break
 
-                if not data:
-                    continue
+                    if not header_row:
+                        wb.close()
+                        continue
 
-                try:
-                    with transaction.atomic():
-                        item = CollectionReportItem.objects.create(**data)
-                        report.report_items.add(item)
-                except Exception as e:
-                    print(f"Failed to save row {row_index}: {e}")
-                    continue
+                    # Combine header rows
+                    headers = []
+                    for c1, c2 in zip(ws[header_row], ws[header_row + 1]):
+                        part1 = str(c1.value).strip() if c1.value else ""
+                        part2 = str(c2.value).strip() if c2.value else ""
+                        combined = f"{part1} {part2}".strip()
+                        headers.append(self.normalize_header(combined))
 
-            created_reports.append(report)
+                    # Field mapping
+                    field_map = {}
+                    for f in CollectionReportItem._meta.fields:
+                        opts = {self.normalize_header(f.verbose_name or ""), self.normalize_header(f.name)}
+                        for h in headers:
+                            if h in opts:
+                                field_map[h] = f.name
 
-        if created_reports:
-            last_report = created_reports[-1]
-            messages.success(request, "Excel file successfully uploaded.")
-            return redirect(reverse("collection-report", args=[last_report.pk]))
+                    # Manual mappings
+                    if "official_receipt_number" in headers:
+                        field_map["official_receipt_number"] = "number"
+                    if "official_receipt_number" not in field_map and "number" in headers:
+                        field_map["number"] = "number"
+                    if "date" not in field_map and any("date" in h for h in headers):
+                        date_header = next(h for h in headers if "date" in h)
+                        field_map[date_header] = "date"
 
-        messages.error(request, "No valid reports were created.")
-        return redirect(reverse("all-documents"))
+                    report = CollectionReport.objects.create()
+                    db_column_indices = [idx for idx, h in enumerate(headers) if h in field_map]
+                    empty_row_count = 0
+                    MAX_EMPTY_ROWS = 5
+
+                    # Process rows
+                    for row_index, row in enumerate(ws.iter_rows(min_row=header_row + 2, values_only=True), start=header_row + 2):
+                        if not any(row[idx] if idx < len(row) else None for idx in db_column_indices):
+                            empty_row_count += 1
+                            if empty_row_count >= MAX_EMPTY_ROWS:
+                                break
+                            continue
+
+                        empty_row_count = 0
+                        current_row += 1
+                        
+                        # Send update every 5 rows for better performance
+                        if current_row % 5 == 0:
+                            percentage = round((current_row / total_rows * 100) if total_rows > 0 else 0, 2)
+                            yield self._sse_message({
+                                'status': 'processing',
+                                'current_row': current_row,
+                                'total_rows': total_rows,
+                                'current_file': file_index + 1,
+                                'total_files': len(file_data_list),
+                                'percentage': percentage,
+                                'message': f'Processing row {current_row} of {total_rows}',
+                                'current_filename': file_data['name']
+                            })
+
+                        data = {}
+                        for idx, value in enumerate(row):
+                            header = headers[idx] if idx < len(headers) else None
+                            field_name = field_map.get(header)
+                            if not field_name:
+                                continue
+
+                            # Handle Date column
+                            if field_name == "date":
+                                if isinstance(value, datetime.datetime):
+                                    value = value.date()
+                                elif isinstance(value, float):
+                                    base_date = datetime.datetime(1899, 12, 30)
+                                    value = base_date + datetime.timedelta(days=value)
+                                    value = value.date()
+                                elif isinstance(value, str):
+                                    try:
+                                        value = datetime.datetime.strptime(value.strip(), "%Y-%m-%d").date()
+                                    except:
+                                        try:
+                                            value = datetime.datetime.strptime(value.strip(), "%m/%d/%Y").date()
+                                        except:
+                                            value = None
+
+                            data[field_name] = value
+
+                        if not data:
+                            continue
+
+                        try:
+                            with transaction.atomic():
+                                item = CollectionReportItem.objects.create(**data)
+                                report.report_items.add(item)
+                        except Exception as e:
+                            print(f"Failed to save row {row_index}: {e}")
+                            continue
+
+                    created_reports.append(report)
+                    wb.close()
+
+                # Send final completion message
+                redirect_url = reverse("collection-report", args=[created_reports[-1].pk]) if created_reports else reverse("all-documents")
+                
+                yield self._sse_message({
+                    'status': 'complete',
+                    'current_row': total_rows,
+                    'total_rows': total_rows,
+                    'current_file': len(file_data_list),
+                    'total_files': len(file_data_list),
+                    'percentage': 100,
+                    'message': 'Upload complete!',
+                    'redirect_url': redirect_url
+                })
+
+                # Clean up cache
+                cache.delete(f'upload_files_{session_id}')
+
+            except Exception as e:
+                print(f"Processing error: {e}")
+                import traceback
+                traceback.print_exc()
+                yield self._sse_message({
+                    'status': 'error',
+                    'message': f'Error: {str(e)}'
+                })
+        
+        response = StreamingHttpResponse(
+            process_and_stream(),
+            content_type='text/event-stream'
+        )
+        response['Cache-Control'] = 'no-cache'
+        response['X-Accel-Buffering'] = 'no'
+        return response
+    
+    def _sse_message(self, data):
+        """Format data as SSE message"""
+        return f"data: {json.dumps(data)}\n\n"
 
 
-class UploadReportView(View):
-    template_name = "documents/excel_templates/upload_report.html"
-
-    def get(self, request, *args, **kwargs):
-        file_reports = request.session.get("file_reports", [])
-        context = {"file_reports": file_reports}
-        return render(request, self.template_name, context)
+class UploadProgressStreamView(View):
+    """Legacy view - kept for backwards compatibility but not used in new flow"""
+    
+    def get(self, request, session_id):
+        progress_data = cache.get(f'upload_progress_{session_id}')
+        return JsonResponse(progress_data or {'status': 'not_found'})

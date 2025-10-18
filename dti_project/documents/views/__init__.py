@@ -13,7 +13,7 @@ from .detail_views import (
     InspectionValidationReportDetailView,
     OrderOfPaymentDetailView,
     ChecklistEvaluationSheetDetailView,
-    CollectionReportDetailView,
+    CollectionReportView,
 )
 
 from .update_views import (
@@ -38,7 +38,8 @@ from .list_views import (
 from .excel_views import (
     UploadExcelView,
     ExportDocumentsExcelView,
-    UploadReportView,
+    ProcessUploadView,
+    UploadProgressStreamView,
 )
 
 from .action_views import (
