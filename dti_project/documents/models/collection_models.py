@@ -1,14 +1,37 @@
 from django.db import models
 from django.utils import timezone
 
+class CollectionReport(models.Model):
+    report_items = models.ManyToManyField(
+        'CollectionReportItem',
+        related_name='collection_reports'
+    )
+
+    def date_range_display(self):
+        """Return a readable date range for all report items."""
+        dates = self.report_items.values_list('date', flat=True)
+        if not dates:
+            return "No dates"
+
+        first_date = min(dates)
+        last_date = max(dates)
+
+        if first_date == last_date:
+            return first_date.strftime("%b %d, %Y")
+        else:
+            return f"{first_date.strftime('%b %d, %Y')} - {last_date.strftime('%b %d, %Y')}"
+
+    def __str__(self):
+        return f"Report ({self.date_range_display()})"
+
 
 class CollectionReportItem(models.Model):
     # General information
     date = models.DateField(default=timezone.now)
-    official_receipt_number = models.CharField(max_length=50)
+    number = models.CharField(max_length=50, blank=True, null=True, help_text='Official Receipt Number')
     rc_code = models.CharField(max_length=50, blank=True, null=True)
-    payor = models.CharField(max_length=255)
-    particulars = models.CharField(max_length=255)
+    payor = models.CharField(max_length=255, blank=True, null=True)
+    particulars = models.CharField(max_length=255, blank=True, null=True)
 
     # Core amounts
     amount = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
@@ -50,4 +73,4 @@ class CollectionReportItem(models.Model):
     misc_income = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
 
     def __str__(self):
-        return f"{self.payor} - {self.official_receipt_number or 'No OR'}"
+        return f"{self.payor} - {self.number or 'No OR'}"
