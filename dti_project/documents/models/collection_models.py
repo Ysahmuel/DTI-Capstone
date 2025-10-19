@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 from django.utils import timezone
 
 class CollectionReport(models.Model):
@@ -39,6 +40,9 @@ class CollectionReport(models.Model):
         self.report_items.all().delete()
         # Then delete the report itself
         super().delete(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse("collection-report", args=[self.pk])
 
 
 class CollectionReportItem(models.Model):

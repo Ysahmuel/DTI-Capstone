@@ -10,7 +10,7 @@
     </thead>
     <tbody>
         {% for report in collection_reports %}
-        <tr class="document-value-row" data-href="">
+        <tr class="document-value-row" data-href="{{ report.get_absolute_url }}">
             <td>{{ report }}</td>
         </tr>
         {% empty %}
