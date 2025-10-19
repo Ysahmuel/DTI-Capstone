@@ -37,35 +37,45 @@
                         </div>
                     </li>
                 {% endif %}
-                <li class="nav-item dropdown">
-                    <button class="nav-dropdown-btn">
-                        <i class="fa-solid fa-file"></i>
-                        <span>Documents</span>
-                        <i class="fa-solid fa-angle-down"></i>
-                    </button>
-                    <div class="nav-dropdown-list">
-                        <a href="{% url 'all-documents' %}">
-                            <span>All Documents</span>
+                    <li class="nav-item dropdown">
+                        <button class="nav-dropdown-btn">
+                            <i class="fa-solid fa-file"></i>
+                            <span>Documents</span>
+                            <i class="fa-solid fa-angle-down"></i>
+                        </button>
+                        <div class="nav-dropdown-list">
+                            <a href="{% url 'all-documents' %}">
+                                <span>All Documents</span>
+                            </a>
+                        </div>
+                    </li>
+
+                {% if user.role == 'admin' %}
+                    <li class="nav-item dropdown">
+                        <button class="nav-dropdown-btn">
+                            <i class="fa-solid fa-user"></i>
+                            <span>Manage Users</span>
+                            <i class="fa-solid fa-angle-down"></i>
+                        </button>
+                        <div class="nav-dropdown-list">
+                            <a href="{% url 'staff_accounts' %}">
+                                <span>Staff Accounts</span>
+                            </a>
+                            <a href="{% url 'bo_accounts' %}">
+                                <span>Business Owner Accounts</span>
+                            </a>
+                        </div>
+                    </li>
+                {% endif %}
+
+                {% if user.role == 'collection_agent' or user.role == 'admin' %}
+                    <li class="nav-item">
+                        <a href="{% url 'collection-report-list' %}" class="nav-link">
+                            <i class="fa-solid fa-file-invoice"></i>
+                            <span>Collection Reports</span>
                         </a>
-                    </div>
-                </li>
-                {%if user.role == 'admin' %}
-                <li class="nav-item dropdown">
-                    <button class="nav-dropdown-btn">
-                        <i class="fa-solid fa-user"></i>
-                        <span>Manage Users</span>
-                        <i class="fa-solid fa-angle-down"></i>
-                    </button>
-                    <div class="nav-dropdown-list">
-                        <a href="{% url 'staff_accounts' %}">
-                            <span>Staff Accounts</span>
-                        </a>
-                        <a href="{% url 'bo_accounts' %}">
-                            <span>Business Owner Accounts</span>
-                        </a>
-                    </div>
-                </li>
-                {%endif%}
+                    </li>
+                {% endif %}
 
                 <!-- Payment -->
                 <li class="nav-item">
