@@ -4,13 +4,15 @@ from ..mixins.filter_mixins import FilterableDocumentMixin
 from ..mixins.counter_mixins import DocumentCountMixin
 from ..mixins.permissions_mixins import UserRoleMixin
 from ..mixins.sort_mixins import SortMixin  
+from django.contrib.auth.mixins import LoginRequiredMixin
 from ..models import (
     ChecklistEvaluationSheet,
     InspectionValidationReport,
     OrderOfPayment,
     PersonalDataSheet,
     SalesPromotionPermitApplication,
-    ServiceRepairAccreditationApplication
+    ServiceRepairAccreditationApplication,
+    CollectionReport
 )
 from itertools import chain
 
@@ -125,3 +127,13 @@ class ChecklistEvaluationSheetListView(BaseDocumentListView):
     template_name = "documents/list_templates/checklist_evaluation_list.html"
     context_object_name = "checklist_evaluation_sheets"
     active_doc_type = "checklist_evaluation_sheets"
+    
+class CollectionReportItemListView(LoginRequiredMixin, BaseDocumentListView):
+    template_name = 'documents/collection_reports/collection_report.html'
+    model = CollectionReport
+    context_object_name = 'collection_report'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        return context

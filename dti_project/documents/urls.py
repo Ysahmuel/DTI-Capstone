@@ -36,12 +36,13 @@ urlpatterns = [
     path("checklist-evaluation-sheets/", views.ChecklistEvaluationSheetListView.as_view(), name="checklist-list"),
     
     # COLLECTION REPORT 
-    path("collection-reports/<int:pk>", views.CollectionReportView.as_view(), name="collection-report"),
+    path("collection-reports/<int:pk>", views.CollectionReportItemListView.as_view(), name="collection-report"),
 
     # EXCEL VIEWS
     path("export-to-excel", views.ExportDocumentsExcelView.as_view(), name='export-to-excel'), 
     path('upload-excel/', views.UploadExcelView.as_view(), name='upload-excel'),
     path('process-upload/<str:session_id>/', views.ProcessUploadView.as_view(), name='process-upload'),
+    path('cancel-upload/<str:session_id>/', views.CancelUploadView.as_view(), name='cancel-upload'),
 
     # ACTION VIEWS
     path('approve-documents', views.ApproveDocumentsView.as_view(), name='approve-documents')
