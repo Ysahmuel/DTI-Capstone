@@ -1,5 +1,6 @@
 import re
 
+from ..mixins.permissions_mixins import RoleFormPageRestrictionMixin
 from ..models.collection_models import CollectionReport, CollectionReportItem
 from ..mixins.context_mixins import TabsSectionMixin
 from ..constants import CHECKLIST_EVALUATION_DETAIL_GROUPS, CHECKLIST_REQUIREMENT_GROUPS, COLLECTION_REPORT_ITEM_DETAIL_GROUPS, INSPECTION_VALIDATION_DETAIL_GROUPS, ORDER_OF_PAYMENT_DETAIL_GROUPS, PERSONAL_DATA_SHEET_DETAIL_GROUPS, PERSONAL_DATA_SHEET_TAB_SECTIONS, SALES_PROMOTION_DETAIL_GROUPS, SERVICE_REPAIR_ACCREDITATION_DETAIL_GROUPS
@@ -140,20 +141,22 @@ class ChecklistEvaluationSheetDetailView(LoginRequiredMixin, DetailView):
 
         return context
     
-class CollectionReportDetailView(LoginRequiredMixin, DetailView):
+class CollectionReportDetailView(RoleFormPageRestrictionMixin, LoginRequiredMixin, DetailView):
     template_name = 'documents/collection_reports/collection_report.html'
     model = CollectionReport
     context_object_name = 'collection_report'
+    allowed_roles = ['collection_agent', 'admin']
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         return context
     
-class CollectionReportItemDetailView(LoginRequiredMixin, DetailView):
+class CollectionReportItemDetailView(RoleFormPageRestrictionMixin, LoginRequiredMixin, DetailView):
     template_name = 'documents/collection_reports/collection_report_item.html'
     model = CollectionReportItem
     context_object_name = 'collection_report_item'
+    allowed_roles = ['collection_agent', 'admin']
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
