@@ -19,7 +19,7 @@
     </header>
     
     <div class="upload-report-container">
-        {% include 'documents/components/collection_report_components/collection_report_table.html' with items=collection_report.report_items.all %}
+        {% include 'documents/components/collection_report_components/collection_report_item_table.html' with items=collection_report.report_items.all %}
     </div>
 
 {% endblock %}
