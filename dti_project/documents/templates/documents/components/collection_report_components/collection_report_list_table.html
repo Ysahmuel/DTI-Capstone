@@ -1,0 +1,22 @@
+{% load custom_filters %}
+
+<table class="documents-table uploaded-files-table">
+    <thead>
+        <tr>
+            <th>Report Name</th>
+            <th>Date From</th>
+            <th>Date to</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for report in collection_reports %}
+        <tr class="document-value-row" data-href="{{ report.get_absolute_url }}">
+            <td>{{ report }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6">No documents found for this file.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

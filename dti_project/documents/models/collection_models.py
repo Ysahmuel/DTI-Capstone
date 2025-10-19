@@ -94,3 +94,6 @@ class CollectionReportItem(models.Model):
 
     def __str__(self):
         return f"{self.payor} - {self.number or 'No OR'}"
+    
+    def get_absolute_url(self):
+        return reverse("collection-report-item", args=[self.pk]) 

@@ -1,0 +1,16 @@
+{% extends 'dashboard/layout.html' %}
+
+{% block title %} Collection {{ collection_report_item }} {% endblock %}
+
+{% block body %}
+
+    <header class="document-details-header">
+        <div class="column">
+            <h1>Collection {{ collection_report_item }}</h1>
+        </div>
+        <div class="actions">
+            {% include 'dashboard/components/dashboard_actions.html' %}
+        </div>
+    </header>
+
+{% endblock %}

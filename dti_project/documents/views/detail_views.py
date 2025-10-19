@@ -1,6 +1,6 @@
 import re
 
-from ..models.collection_models import CollectionReport
+from ..models.collection_models import CollectionReport, CollectionReportItem
 from ..mixins.context_mixins import TabsSectionMixin
 from ..constants import CHECKLIST_EVALUATION_DETAIL_GROUPS, CHECKLIST_REQUIREMENT_GROUPS, INSPECTION_VALIDATION_DETAIL_GROUPS, ORDER_OF_PAYMENT_DETAIL_GROUPS, PERSONAL_DATA_SHEET_DETAIL_GROUPS, PERSONAL_DATA_SHEET_TAB_SECTIONS, SALES_PROMOTION_DETAIL_GROUPS, SERVICE_REPAIR_ACCREDITATION_DETAIL_GROUPS
 from ..models import ChecklistEvaluationSheet, InspectionValidationReport, OrderOfPayment, PersonalDataSheet, SalesPromotionPermitApplication, ServiceRepairAccreditationApplication
@@ -140,7 +140,7 @@ class ChecklistEvaluationSheetDetailView(LoginRequiredMixin, DetailView):
 
         return context
     
-class CollectionReportItemDetailView(LoginRequiredMixin, DetailView):
+class CollectionReportDetailView(LoginRequiredMixin, DetailView):
     template_name = 'documents/collection_reports/collection_report.html'
     model = CollectionReport
     context_object_name = 'collection_report'
@@ -149,3 +149,14 @@ class CollectionReportItemDetailView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
 
         return context
+    
+class CollectionReportItemDetailView(LoginRequiredMixin, DetailView):
+    template_name = 'documents/collection_reports/collection_report_item.html'
+    model = CollectionReportItem
+    context_object_name = 'collection_report_item'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        return context
+    

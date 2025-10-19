@@ -13,6 +13,7 @@ from .detail_views import (
     InspectionValidationReportDetailView,
     OrderOfPaymentDetailView,
     ChecklistEvaluationSheetDetailView,
+    CollectionReportDetailView,
     CollectionReportItemDetailView,
 )
 
