@@ -114,7 +114,8 @@ document.addEventListener("DOMContentLoaded", function () {
         uploadFilesContainer.style.display = "none";
         document.querySelector(".uploaded-files").style.display = "none";
         
-        const actionsContainer = document.querySelector(".actions");
+        // Hide the original actions container by adding class
+        const actionsContainer = form.closest('.modal').querySelector(".actions");
         if (actionsContainer) {
             actionsContainer.classList.add('uploading');
         }
@@ -122,31 +123,47 @@ document.addEventListener("DOMContentLoaded", function () {
         const progressContainer = document.createElement("div");
         progressContainer.className = "progress-container";
         progressContainer.innerHTML = `
-            <div class="progress-header">
-                <i class="fa-solid fa-file-arrow-up fa-bounce"></i>
-                <h3>Processing Excel Files...</h3>
-            </div>
-            <div class="progress-stats">
-                <span id="progress-percentage">0%</span>
-                <span id="progress-eta" class="eta-text">Initializing...</span>
-            </div>
-            <div class="progress-bar-wrapper">
-                <div class="progress-bar" id="progress-bar">
-                    <div class="progress-bar-shine"></div>
+            <div class="progress-content">
+                <div class="progress-header">
+                    <i class="fa-solid fa-file-arrow-up fa-bounce"></i>
+                    <h3>Processing Excel Files...</h3>
                 </div>
+                <div class="progress-stats">
+                    <span id="progress-percentage">0%</span>
+                    <span id="progress-eta" class="eta-text">Initializing...</span>
+                </div>
+                <div class="progress-bar-wrapper">
+                    <div class="progress-bar" id="progress-bar">
+                        <div class="progress-bar-shine"></div>
+                    </div>
+                </div>
+                <p class="progress-info">
+                    <span id="progress-message">Starting upload...</span>
+                </p>
+                <p class="progress-details">
+                    Processing <strong><span id="current-row">0</span></strong> of <strong><span id="total-rows">...</span></strong> rows
+                    <br>
+                    File <strong><span id="current-file">0</span></strong> of <strong><span id="total-files">...</span></strong>
+                    <span id="current-filename" class="filename-badge"></span>
+                </p>
             </div>
-            <p class="progress-info">
-                <span id="progress-message">Starting upload...</span>
-            </p>
-            <p class="progress-details">
-                Processing <strong><span id="current-row">0</span></strong> of <strong><span id="total-rows">...</span></strong> rows
-                <br>
-                File <strong><span id="current-file">0</span></strong> of <strong><span id="total-files">...</span></strong>
-                <span id="current-filename" class="filename-badge"></span>
-            </p>
+            <div class="progress-actions">
+                <button type="button" id="cancel-upload-btn" class="cancel-upload-btn">Cancel</button>
+            </div>
         `;
 
         form.appendChild(progressContainer);
+        
+        // Add cancel functionality
+        document.getElementById("cancel-upload-btn").addEventListener("click", function() {
+            if (confirm("Are you sure you want to cancel the upload?")) {
+                if (eventSource) {
+                    eventSource.close();
+                }
+                uploadFilesModal.style.display = "none";
+                resetForm();
+            }
+        });
     }
 
     function uploadWithRealTimeProgress(formData) {
@@ -346,7 +363,8 @@ document.addEventListener("DOMContentLoaded", function () {
         uploadFilesContainer.style.display = "flex";
         document.querySelector(".uploaded-files").style.display = "block";
         
-        const actionsContainer = document.querySelector(".actions");
+        // Show original actions again by removing class
+        const actionsContainer = form.closest('.modal').querySelector(".actions");
         if (actionsContainer) {
             actionsContainer.classList.remove('uploading');
         }
