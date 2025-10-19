@@ -1,0 +1,23 @@
+{% extends 'dashboard/layout.html' %}
+
+{% block title %} Collection Report List {% endblock %}
+
+{% block body %}
+
+    {% include 'documents/components/list_components/document_list_filter_modal.html' %}
+    {% include 'documents/components/upload-files-modal.html' %}
+
+    <div class="document-list-container">
+
+        <header class="document-list-header">
+            <h1>Collection Reports</h1>
+            {% include 'dashboard/components/dashboard_actions.html' %}
+        </header>
+
+        <section class="documents-table-container">
+            {% include 'documents/components/collection_report_components/collection_report_header.html' %}
+            {% include 'documents/components/collection_report_components/collection_report_table.html' %}
+        </section>
+
+    </div>
+{% endblock %}

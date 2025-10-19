@@ -13,6 +13,7 @@ from .detail_views import (
     InspectionValidationReportDetailView,
     OrderOfPaymentDetailView,
     ChecklistEvaluationSheetDetailView,
+    CollectionReportItemDetailView,
 )
 
 from .update_views import (
@@ -32,7 +33,7 @@ from .list_views import (
     InspectionValidationReportListView,
     OrderOfPaymentListView,
     ChecklistEvaluationSheetListView,
-    CollectionReportItemListView,
+    CollectionReportListView,
 )
 
 from .excel_views import (

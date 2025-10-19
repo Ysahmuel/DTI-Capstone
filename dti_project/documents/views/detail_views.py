@@ -139,3 +139,13 @@ class ChecklistEvaluationSheetDetailView(LoginRequiredMixin, DetailView):
         context["update_url_name"] = "update-checklist-evaluation-sheet"
 
         return context
+    
+class CollectionReportItemDetailView(LoginRequiredMixin, DetailView):
+    template_name = 'documents/collection_reports/collection_report.html'
+    model = CollectionReport
+    context_object_name = 'collection_report'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        return context
