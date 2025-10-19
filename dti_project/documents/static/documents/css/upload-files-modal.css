@@ -79,11 +79,17 @@
 
 /* Progress Container Styles */
 .progress-container {
-    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.progress-content {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
     align-items: center;
+    padding: 2rem;
 }
 
 .progress-header {
@@ -147,6 +153,31 @@
 .progress-info span {
     font-weight: 600;
     color: var(--text-dark, #333);
+}
+
+/* Progress Actions - Cancel Button at Bottom Right */
+.progress-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0 2rem 2rem 2rem;
+    background: white;
+}
+
+.cancel-upload-btn {
+    border: solid 1px var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 8px 16px;
+    cursor: pointer;
+    background: white;
+    transition: background-color 0.2s;
+}
+
+.cancel-upload-btn:hover {
+    background-color: #f5f5f5;
+}
+
+.cancel-upload-btn:active {
+    transform: scale(0.98);
 }
 
 /* Success State */
