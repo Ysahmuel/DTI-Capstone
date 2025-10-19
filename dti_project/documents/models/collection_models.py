@@ -6,9 +6,19 @@ class CollectionReport(models.Model):
         'CollectionReportItem',
         related_name='collection_reports'
     )
+    date_from = models.DateField(null=True, blank=True)
+    date_to = models.DateField(null=True, blank=True)
 
     def date_range_display(self):
-        """Return a readable date range for all report items."""
+        """Return a readable date range, preferring stored dates over calculated ones."""
+        # Use stored date range if available
+        if self.date_from and self.date_to:
+            if self.date_from == self.date_to:
+                return self.date_from.strftime("%b %d, %Y")
+            else:
+                return f"{self.date_from.strftime('%b %d, %Y')} - {self.date_to.strftime('%b %d, %Y')}"
+        
+        # Fall back to calculating from report items
         dates = self.report_items.values_list('date', flat=True)
         if not dates:
             return "No dates"
