@@ -128,12 +128,8 @@ class ChecklistEvaluationSheetListView(BaseDocumentListView):
     context_object_name = "checklist_evaluation_sheets"
     active_doc_type = "checklist_evaluation_sheets"
     
-class CollectionReportItemListView(LoginRequiredMixin, BaseDocumentListView):
-    template_name = 'documents/collection_reports/collection_report.html'
+class CollectionReportListView(BaseDocumentListView):
     model = CollectionReport
-    context_object_name = 'collection_report'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        return context
+    template_name = "documents/collection_reports/collection_report_list.html"
+    context_object_name = "collection_reports"
+    active_doc_type = "collection_reports"
