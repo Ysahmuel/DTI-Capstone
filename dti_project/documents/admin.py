@@ -41,6 +41,19 @@ class CollectionReportAdmin(admin.ModelAdmin):
 
     date_range_display.short_description = "Date Range"
 
+    # Override delete for single object
+    def delete_model(self, request, obj):
+        # Delete all related report items first
+        obj.report_items.all().delete()
+        super().delete_model(request, obj)
+
+    # Override delete for bulk delete (queryset)
+    def delete_queryset(self, request, queryset):
+        for obj in queryset:
+            obj.report_items.all().delete()
+        super().delete_queryset(request, queryset)
+
+
 @admin.register(CollectionReportItem)
 class CollectionReportItemAdmin(admin.ModelAdmin):
     list_display = (

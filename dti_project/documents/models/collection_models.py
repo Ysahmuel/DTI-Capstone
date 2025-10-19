@@ -24,6 +24,12 @@ class CollectionReport(models.Model):
     def __str__(self):
         return f"Report ({self.date_range_display()})"
 
+    def delete(self, *args, **kwargs):
+        # Delete all associated report items first
+        self.report_items.all().delete()
+        # Then delete the report itself
+        super().delete(*args, **kwargs)
+
 
 class CollectionReportItem(models.Model):
     # General information

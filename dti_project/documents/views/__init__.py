@@ -4,7 +4,7 @@ from .create_views import (
     CreateServiceRepairAccreditationApplicationView,
     CreateInspectionValidationReportView,
     CreateOrderOfPaymentView,
-    CreateChecklistEvaluationSheetView
+    CreateChecklistEvaluationSheetView,
 )
 from .detail_views import (
     SalesPromotionDetailView,
@@ -13,7 +13,6 @@ from .detail_views import (
     InspectionValidationReportDetailView,
     OrderOfPaymentDetailView,
     ChecklistEvaluationSheetDetailView,
-    CollectionReportView,
 )
 
 from .update_views import (
@@ -33,6 +32,7 @@ from .list_views import (
     InspectionValidationReportListView,
     OrderOfPaymentListView,
     ChecklistEvaluationSheetListView,
+    CollectionReportItemListView,
 )
 
 from .excel_views import (
@@ -40,6 +40,7 @@ from .excel_views import (
     ExportDocumentsExcelView,
     ProcessUploadView,
     UploadProgressStreamView,
+    CancelUploadView,
 )
 
 from .action_views import (
