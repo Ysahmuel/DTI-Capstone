@@ -69,6 +69,7 @@ class CollectionReportItem(models.Model):
     # Core amounts
     amount = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     stamp_tax = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    deposit = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
 
     # BN Registration
     bn_original = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
