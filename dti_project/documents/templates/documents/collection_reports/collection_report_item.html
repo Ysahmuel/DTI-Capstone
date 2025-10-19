@@ -6,11 +6,27 @@
 
     <header class="document-details-header">
         <div class="column">
-            <h1>Collection {{ collection_report_item }}</h1>
+            <h1>Collection Report Item: {{ collection_report_item }}</h1>
         </div>
         <div class="actions">
             {% include 'dashboard/components/dashboard_actions.html' %}
         </div>
     </header>
 
+    <div class="document-details-container">
+
+        <div class="details-grid">
+
+            <section class="grid-item" id="details-grid-item">
+                {% for group in detail_groups %}
+                    {% with obj=collection_report_item %}
+                        {% include 'documents/partials/details_grid_item.html' %}
+                    {% endwith %} 
+                {% endfor %}
+            </section>
+        </div>
+
+    </div>
+
 {% endblock %}
+

@@ -343,6 +343,64 @@ CHECKLIST_EVALUATION_DETAIL_GROUPS = [
     ])
 ]
 
+COLLECTION_REPORT_ITEM_DETAIL_GROUPS = [
+    ('Main Details', [
+        ('Date', 'date'),
+        ('Official Receipt Number', 'number'),
+        ('Payor', 'payor'),
+        ('Particulars', 'particulars'),
+        ('Responsibility Center Code', 'rc_code'),
+    ]),
+
+    ('Core Amounts', [
+        ('Amount', 'amount'),
+        ('Stamp Tax', 'stamp_tax'),
+    ]),
+
+    ('BN Registration', [
+        ('BN Original', 'bn_original'),
+        ('BN Renewal', 'bn_renewal'),
+    ]),
+
+    ('Accreditation', [
+        ('Accreditation Original', 'accreditation_original'),
+        ('Accreditation Renewal', 'accreditation_renewal'),
+        ('Accreditation Filing Fee', 'accreditation_filing_fee'),
+        ('Truck Rebuilding Original', 'truck_rebuilding_original'),
+        ('Truck Rebuilding Renewal', 'truck_rebuilding_renewal'),
+    ]),
+
+    ('Sales Promo', [
+        ('Sales Promo Fee', 'sales_promo_fee'),
+        ('Sales Promo Revisions', 'sales_promo_revisions'),
+    ]),
+
+    ('Licensing and Certifications', [
+        ('Certification', 'certification'),
+        ('Bulk Sales', 'bulk_sales'),
+        ('Assessment Fee', 'assessment_fee'),
+        ('License Fee', 'license_fee'),
+    ]),
+
+    ('PETC and Miscellaneous', [
+        ('PETC Accreditation', 'petc_accreditation'),
+        ('BN Listings', 'bn_listings'),
+        ('Confiscated Materials', 'confiscated_materials'),
+    ]),
+
+    ('Admin and Surcharge', [
+        ('Fines & Penalties', 'fines_penalties'),
+        ('Surcharge BN Registration', 'surcharge_bn_reg'),
+        ('Surcharge Accreditation', 'surcharge_accre'),
+        ('Unserviceable', 'unserviceable'),
+    ]),
+
+    ('Miscellaneous Income (678)', [
+        ('Miscellaneous Income', 'misc_income'),
+    ]),
+]
+
+
 CHECKLIST_REQUIREMENT_GROUPS = [
     ('Requirements', [
         ('Application Form', 'req_application_form'),

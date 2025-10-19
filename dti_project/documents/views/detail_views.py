@@ -2,7 +2,7 @@ import re
 
 from ..models.collection_models import CollectionReport, CollectionReportItem
 from ..mixins.context_mixins import TabsSectionMixin
-from ..constants import CHECKLIST_EVALUATION_DETAIL_GROUPS, CHECKLIST_REQUIREMENT_GROUPS, INSPECTION_VALIDATION_DETAIL_GROUPS, ORDER_OF_PAYMENT_DETAIL_GROUPS, PERSONAL_DATA_SHEET_DETAIL_GROUPS, PERSONAL_DATA_SHEET_TAB_SECTIONS, SALES_PROMOTION_DETAIL_GROUPS, SERVICE_REPAIR_ACCREDITATION_DETAIL_GROUPS
+from ..constants import CHECKLIST_EVALUATION_DETAIL_GROUPS, CHECKLIST_REQUIREMENT_GROUPS, COLLECTION_REPORT_ITEM_DETAIL_GROUPS, INSPECTION_VALIDATION_DETAIL_GROUPS, ORDER_OF_PAYMENT_DETAIL_GROUPS, PERSONAL_DATA_SHEET_DETAIL_GROUPS, PERSONAL_DATA_SHEET_TAB_SECTIONS, SALES_PROMOTION_DETAIL_GROUPS, SERVICE_REPAIR_ACCREDITATION_DETAIL_GROUPS
 from ..models import ChecklistEvaluationSheet, InspectionValidationReport, OrderOfPayment, PersonalDataSheet, SalesPromotionPermitApplication, ServiceRepairAccreditationApplication
 from django.views.generic import DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -157,6 +157,7 @@ class CollectionReportItemDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['detail_groups'] = COLLECTION_REPORT_ITEM_DETAIL_GROUPS
 
         return context
     

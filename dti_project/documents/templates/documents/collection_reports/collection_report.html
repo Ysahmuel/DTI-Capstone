@@ -17,6 +17,10 @@
             {% include 'dashboard/components/dashboard_actions.html' %}
         </div>
     </header>
+
+    <div class="collection-summary">
+        <h2>Summary</h2>
+    </div>
     
     <div class="upload-report-container">
         {% include 'documents/components/collection_report_components/collection_report_table.html' with items=collection_report.report_items.all %}
