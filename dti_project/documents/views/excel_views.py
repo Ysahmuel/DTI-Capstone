@@ -144,7 +144,7 @@ class ExportDocumentsExcelView(LoginRequiredMixin, View):
         response["Content-Disposition"] = f"attachment; filename={safe_filename}; filename*=UTF-8''{safe_filename}"
         wb.save(response)
         return response
-  
+
 class UploadExcelView(View):
     """
     Returns immediately and lets the client poll for status.
@@ -238,7 +238,7 @@ class ProcessUploadView(View):
             .replace("-", "_")
         )
     
-    def get(self, request, session_id):        
+    def get(self, request, session_id):
         def process_and_stream():
             try:
                 # Get files from cache
@@ -345,99 +345,154 @@ class ProcessUploadView(View):
                             # Extract Date From, Date To, Summary, and Certification data
                             for row_idx in range(1, min(ws.max_row + 1, 100)):  # Check up to 100 rows
                                 row = ws[row_idx]
-                                if len(row) >= 2:
-                                    cell_a = str(row[0].value).strip().lower() if row[0].value else ""
-                                    cell_b_val = row[1].value
+                                
+                                # Check all cells in the row for labels (horizontal layout)
+                                for col_idx in range(len(row) - 1):  # -1 because we need col+1 for value
+                                    cell_label = str(row[col_idx].value).strip().lower() if row[col_idx].value else ""
+                                    cell_value = row[col_idx + 1].value if col_idx + 1 < len(row) else None
                                     
-                                    # Extract Date From
-                                    if "date from" in cell_a and cell_b_val:
-                                        if isinstance(cell_b_val, datetime.datetime):
-                                            date_from = cell_b_val.date()
-                                        elif isinstance(cell_b_val, datetime.date):
-                                            date_from = cell_b_val
-                                        elif isinstance(cell_b_val, str):
+                                    # Extract Date From (horizontal: label in col, value in col+1)
+                                    if "date from" in cell_label and cell_value:
+                                        if isinstance(cell_value, datetime.datetime):
+                                            date_from = cell_value.date()
+                                        elif isinstance(cell_value, datetime.date):
+                                            date_from = cell_value
+                                        elif isinstance(cell_value, (int, float)):
                                             try:
-                                                date_from = datetime.datetime.strptime(cell_b_val.strip(), "%m/%d/%Y").date()
+                                                base_date = datetime.datetime(1899, 12, 30)
+                                                date_from = (base_date + datetime.timedelta(days=float(cell_value))).date()
                                             except:
                                                 pass
+                                        elif isinstance(cell_value, str):
+                                            # Try multiple date formats
+                                            for date_format in ["%m/%d/%Y", "%Y-%m-%d", "%d-%b-%y", "%d/%m/%Y"]:
+                                                try:
+                                                    date_from = datetime.datetime.strptime(cell_value.strip(), date_format).date()
+                                                    break
+                                                except:
+                                                    pass
                                     
-                                    # Extract Date To
-                                    elif "date to" in cell_a and cell_b_val:
-                                        if isinstance(cell_b_val, datetime.datetime):
-                                            date_to = cell_b_val.date()
-                                        elif isinstance(cell_b_val, datetime.date):
-                                            date_to = cell_b_val
-                                        elif isinstance(cell_b_val, str):
+                                    # Extract Date To (horizontal: label in col, value in col+1)
+                                    elif "date to" in cell_label and cell_value:
+                                        if isinstance(cell_value, datetime.datetime):
+                                            date_to = cell_value.date()
+                                        elif isinstance(cell_value, datetime.date):
+                                            date_to = cell_value
+                                        elif isinstance(cell_value, (int, float)):
                                             try:
-                                                date_to = datetime.datetime.strptime(cell_b_val.strip(), "%m/%d/%Y").date()
+                                                base_date = datetime.datetime(1899, 12, 30)
+                                                date_to = (base_date + datetime.timedelta(days=float(cell_value))).date()
                                             except:
                                                 pass
+                                        elif isinstance(cell_value, str):
+                                            # Try multiple date formats
+                                            for date_format in ["%m/%d/%Y", "%Y-%m-%d", "%d-%b-%y", "%d/%m/%Y"]:
+                                                try:
+                                                    date_to = datetime.datetime.strptime(cell_value.strip(), date_format).date()
+                                                    break
+                                                except:
+                                                    pass
                                     
                                     # Extract Undeposited Collections
-                                    elif "undeposited collections per last report" in cell_a:
-                                        if len(row) >= 7 and row[6].value:  # Column G (index 6)
-                                            try:
-                                                undeposited_collections = float(str(row[6].value).replace(',', ''))
-                                            except:
-                                                pass
+                                    elif "undeposited collections per last report" in cell_label:
+                                        # Check a few columns to the right for the value
+                                        for offset in range(1, 10):
+                                            if col_idx + offset < len(row) and row[col_idx + offset].value:
+                                                try:
+                                                    undeposited_collections = float(str(row[col_idx + offset].value).replace(',', ''))
+                                                    break
+                                                except:
+                                                    pass
                                     
                                     # Extract Total Collections
-                                    elif "total" in cell_a and "undeposited" not in cell_a:
-                                        if len(row) >= 7 and row[6].value:  # Column G (index 6)
-                                            try:
-                                                total_collections = float(str(row[6].value).replace(',', ''))
-                                            except:
-                                                pass
+                                    elif cell_label == "total" or (cell_label.startswith("total") and "undeposited" not in cell_label):
+                                        # Check a few columns to the right for the value
+                                        for offset in range(1, 10):
+                                            if col_idx + offset < len(row) and row[col_idx + offset].value:
+                                                try:
+                                                    val = float(str(row[col_idx + offset].value).replace(',', ''))
+                                                    # Only set if it's a reasonable number (not 0)
+                                                    if val > 0:
+                                                        total_collections = val
+                                                        break
+                                                except:
+                                                    pass
                                     
                                     # Extract Certification Text
-                                    elif "certification" in cell_a:
+                                    if "certification" in cell_label:
                                         # Look for the certification paragraph in the next few rows
                                         cert_lines = []
                                         for cert_row_idx in range(row_idx + 1, min(row_idx + 10, ws.max_row + 1)):
                                             cert_row = ws[cert_row_idx]
-                                            if cert_row[0].value:
-                                                cert_text = str(cert_row[0].value).strip()
-                                                if cert_text and len(cert_text) > 20:  # Likely paragraph text
-                                                    cert_lines.append(cert_text)
-                                                # Stop if we hit "Name and Signature"
-                                                if "name and signature" in cert_text.lower():
-                                                    break
+                                            # Check first few columns for text
+                                            for cert_col in range(min(5, len(cert_row))):
+                                                if cert_row[cert_col].value:
+                                                    cert_text = str(cert_row[cert_col].value).strip()
+                                                    if cert_text and len(cert_text) > 20:  # Likely paragraph text
+                                                        cert_lines.append(cert_text)
+                                                        break
+                                            # Stop if we hit "Name and Signature"
+                                            if any(cert_row[i].value and "name and signature" in str(cert_row[i].value).lower() 
+                                                   for i in range(min(5, len(cert_row)))):
+                                                break
                                         if cert_lines:
                                             certification_text = " ".join(cert_lines[:3])  # Take first 3 lines
                                     
                                     # Extract Name and Signature of Collecting Officer
-                                    elif "name and signature of collecting officer" in cell_a:
-                                        # Look above this row for the name
+                                    elif "name and signature of collecting officer" in cell_label:
+                                        # Look above this row for the name in nearby columns
                                         if row_idx > 0:
                                             name_row = ws[row_idx - 1]
-                                            if len(name_row) >= 7 and name_row[6].value:  # Column G
-                                                collecting_officer_name = str(name_row[6].value).strip()
+                                            for offset in range(min(10, len(name_row))):
+                                                if name_row[offset].value:
+                                                    name_val = str(name_row[offset].value).strip()
+                                                    if name_val and len(name_val) > 3:  # Likely a name
+                                                        collecting_officer_name = name_val
+                                                        break
                                     
                                     # Extract Special Collecting Officer
-                                    elif "special collecting officer" in cell_a:
-                                        # Look for value in columns to the right
-                                        if len(row) >= 7 and row[6].value:  # Column G
-                                            special_collecting_officer = str(row[6].value).strip()
-                                        # Check next column for date
-                                        if len(row) >= 8 and row[7].value:  # Column H
-                                            date_val = row[7].value
-                                            if isinstance(date_val, datetime.datetime):
-                                                special_collecting_officer_date = date_val.date()
-                                            elif isinstance(date_val, datetime.date):
-                                                special_collecting_officer_date = date_val
-                                            elif isinstance(date_val, str):
-                                                try:
-                                                    special_collecting_officer_date = datetime.datetime.strptime(date_val.strip(), "%d-%b-%y").date()
-                                                except:
-                                                    pass
+                                    elif "special collecting officer" in cell_label:
+                                        # Look for value in next columns
+                                        for offset in range(1, 5):
+                                            if col_idx + offset < len(row) and row[col_idx + offset].value:
+                                                val = str(row[col_idx + offset].value).strip()
+                                                # Check if it's a name (not a date)
+                                                if val and len(val) > 3 and not any(char.isdigit() for char in val[:3]):
+                                                    special_collecting_officer = val
+                                                    break
+                                        
+                                        # Check next columns for date
+                                        for offset in range(1, 8):
+                                            if col_idx + offset < len(row) and row[col_idx + offset].value:
+                                                date_val = row[col_idx + offset].value
+                                                if isinstance(date_val, datetime.datetime):
+                                                    special_collecting_officer_date = date_val.date()
+                                                    break
+                                                elif isinstance(date_val, datetime.date):
+                                                    special_collecting_officer_date = date_val
+                                                    break
+                                                elif isinstance(date_val, str):
+                                                    for date_format in ["%d-%b-%y", "%m/%d/%Y", "%Y-%m-%d"]:
+                                                        try:
+                                                            special_collecting_officer_date = datetime.datetime.strptime(date_val.strip(), date_format).date()
+                                                            break
+                                                        except:
+                                                            pass
+                                                    if special_collecting_officer_date:
+                                                        break
                                     
                                     # Extract Official Designation
-                                    elif "official designation" in cell_a:
-                                        if len(row) >= 7 and row[6].value:  # Column G
-                                            official_designation = str(row[6].value).strip()
+                                    elif "official designation" in cell_label:
+                                        # Look for value in next columns
+                                        for offset in range(1, 5):
+                                            if col_idx + offset < len(row) and row[col_idx + offset].value:
+                                                official_designation = str(row[col_idx + offset].value).strip()
+                                                break
                                             
                         except Exception as e:
                             print(f"Error extracting metadata: {e}")
+                            import traceback
+                            traceback.print_exc()
 
                     # Auto-detect header row with more flexibility
                     header_row = None
@@ -497,6 +552,7 @@ class ProcessUploadView(View):
                         'payor': ['payor', 'payer', 'name'],
                         'particulars': ['particulars', 'particular', 'description', 'purpose'],
                         'amount': ['amount', 'total', 'total_amount'],
+                        'deposit': ['deposit', 'deposits'],
                     }
                     
                     # Try to map each field
