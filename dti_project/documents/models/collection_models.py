@@ -7,21 +7,8 @@ class CollectionReport(models.Model):
         'CollectionReportItem',
         related_name='collection_reports'
     )
-
     date_from = models.DateField(null=True, blank=True)
     date_to = models.DateField(null=True, blank=True)
-
-    # Certification fields
-    certification_text = models.TextField(null=True, blank=True)
-    collecting_officer_name = models.CharField(max_length=255, null=True, blank=True)
-    # collecting_officer_signature = models.CharField(max_length=255, null=True, blank=True)  # Or ImageField if you want to store actual signatures
-    special_collecting_officer = models.CharField(max_length=255, null=True, blank=True)
-    special_collecting_officer_date = models.DateField(null=True, blank=True)
-    official_designation = models.CharField(max_length=255, null=True, blank=True)
-    
-    # # Summary fields
-    undeposited_collections = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    total_collections = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
     def date_range_display(self):
         """Return a readable date range, preferring stored dates over calculated ones."""
@@ -69,7 +56,6 @@ class CollectionReportItem(models.Model):
     # Core amounts
     amount = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     stamp_tax = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
-    deposit = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
 
     # BN Registration
     bn_original = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
