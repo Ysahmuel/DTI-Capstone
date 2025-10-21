@@ -2,7 +2,7 @@ import datetime
 from django.views.generic import ListView
 from ..mixins.filter_mixins import FilterableDocumentMixin
 from ..mixins.counter_mixins import DocumentCountMixin
-from ..mixins.permissions_mixins import UserRoleMixin
+from ..mixins.permissions_mixins import RoleFormPageRestrictionMixin, UserRoleMixin
 from ..mixins.sort_mixins import SortMixin  
 from django.contrib.auth.mixins import LoginRequiredMixin
 from ..models import (
@@ -128,8 +128,9 @@ class ChecklistEvaluationSheetListView(BaseDocumentListView):
     context_object_name = "checklist_evaluation_sheets"
     active_doc_type = "checklist_evaluation_sheets"
     
-class CollectionReportListView(BaseDocumentListView):
+class CollectionReportListView(RoleFormPageRestrictionMixin, BaseDocumentListView):
     model = CollectionReport
     template_name = "documents/collection_reports/collection_report_list.html"
     context_object_name = "collection_reports"
     active_doc_type = "collection_reports"
+    allowed_roles = ['collection_agent', 'admin']
