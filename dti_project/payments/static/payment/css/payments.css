@@ -190,3 +190,15 @@
         width: 100%;
     }
 }
+
+.payment-status-horizontal {
+    display: flex;
+    flex-direction: row;
+    gap: 8px; 
+}
+
+.payment-status-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
