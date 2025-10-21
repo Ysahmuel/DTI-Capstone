@@ -24,13 +24,16 @@
                     </button>
                 </th>
                 <th>Payment</th>
+                {% if request.user.role != 'business_owner' %}
+                    <th>Order of Payment</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
             {% for document in documents %}
                 <tr class="document-value-row" data-href="{{ document.get_absolute_url }}">
                     <td>
-                        <input type="checkbox" name="documents" id="" value="{{ document.model_name }}:{{ document.id }}">
+                        <input type="checkbox" name="documents" value="{{ document.model_name }}:{{ document.id }}">
                     </td>
                     <td>{{ document }}</td>
                     <td>{{ document.model_verbose_name|titlecase }}</td>
@@ -49,14 +52,63 @@
                             {{ document.date_filed }}
                         {% endif %}
                     </td>
+
+                    <!-- Payment column -->
                     <td>
-                    {% if document.status == 'approved' %}
-                        <a href="{% url 'payment-page' %}" class="btn btn-green">Pay</a>
-                    {% else %}
-                        <span class="text-muted">N/A</span>
-                    {% endif %}
+                        {% if document.model_verbose_name == 'Sales Promotion Permit Application' %}
+                            {% with document.order_of_payment as oop %}
+                                {% if not oop %}
+                                    <span class="payment-badge payment-badge-warning">Pending OOP</span>
+
+                                {% else %}
+                                    {% if request.user.role == 'admin' or request.user.role == 'collection_agent' %}
+                                        {% if oop.payment_status == 'pending' %}
+                                            <span class="payment-badge payment-badge-secondary">Awaiting Payment</span>
+                                        {% elif oop.payment_status == 'paid' %}
+                                            <a href="{% url 'verify-payment' oop.pk %}" class="payment-btn payment-btn-blue">Verify Payment</a>
+                                        {% elif oop.payment_status == 'verified' %}
+                                            <span class="payment-badge payment-badge-success">Paid & Verified</span>
+                                        {% else %}
+                                            <span class="payment-badge payment-badge-light">Unknown</span>
+                                        {% endif %}
+
+                                    {% else %}
+                                        {% if oop.payment_status == 'pending' %}
+                                            <a href="{% url 'payment-page' oop.pk %}" class="payment-btn payment-btn-green">Pay</a>
+                                        {% elif oop.payment_status == 'paid' %}
+                                            <span class="payment-badge payment-badge-info">Pending Verification</span>
+                                        {% elif oop.payment_status == 'verified' %}
+                                            <span class="payment-badge payment-badge-success">Paid</span>
+                                        {% else %}
+                                            <span class="payment-badge payment-badge-light">Unknown</span>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endif %}
+                            {% endwith %}
+                        {% else %}
+                        {% endif %}
                     </td>
 
+                    <!-- Order of Payment column -->
+                    <td>
+                        {% if request.user.role != 'business_owner' %}
+                            {% if document.model_verbose_name == 'Sales Promotion Permit Application' %}
+                                {% if document.status != 'approved' %}
+                                    <span class="oop-badge oop-badge-warning">Pending for Approval</span>
+                                {% else %}
+                                    {% with document.order_of_payment as oop %}
+                                        {% if oop %}
+                                            <a href="{% url 'update-order-of-payment' oop.pk %}" class="oop-btn oop-view">View OOP</a>
+                                        {% else %}
+                                            <a href="{% url 'create-order-of-payment' %}?sppa={{ document.pk }}" class="oop-btn oop-create" onclick="event.stopPropagation();">Create OOP</a>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted"></span>
+                            {% endif %}
+                        {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
         </tbody>

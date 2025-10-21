@@ -12,6 +12,18 @@ class OrderOfPayment(DraftModel, models.Model):
         verbose_name_plural = "Orders of Payment"
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    sales_promotion_permit_application = models.OneToOneField(
+        'SalesPromotionPermitApplication',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='order_of_payment'
+    )
+    payment_status = models.CharField(
+        max_length=20,
+        choices=[('pending', 'Pending'), ('paid', 'Paid'), ('verified', 'Verified')],
+        default='pending'
+    )
     name = models.CharField(max_length=55)
     date = models.DateTimeField(default=timezone.now)
     address = models.TextField(max_length=255)
