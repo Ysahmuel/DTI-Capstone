@@ -232,7 +232,7 @@ class ProcessUploadView(View):
             'report_no': None,
             'report_collection_date': None,
             'certification': None,
-            'name_of_collecting_officer': None,
+            'name_and_signature_of_collecting_officer': None,
             'official_designation': None,
         }
         
@@ -324,36 +324,37 @@ class ProcessUploadView(View):
         for row_idx in range(footer_start, ws.max_row + 1):
             for cell in ws[row_idx]:
                 if cell.value and isinstance(cell.value, str):
-                    cell_lower = str(cell.value).lower()
+                    cell_text = str(cell.value).strip()
+                    cell_lower = cell_text.lower()
                     
-                    # Look for "Name and Signature of Collecting Officer" label
-                    if 'name' in cell_lower and 'signature' in cell_lower and 'collecting officer' in cell_lower:
-                        # The actual name should be in the row ABOVE (since label is below)
+                    # Look for "Name and Signature of Collecting Officer" label (exact match, same logic as designation)
+                    if cell_lower == 'name and signature of collecting officer':
+                        # The actual name should be in the row ABOVE
                         name_cell = ws.cell(row=cell.row - 1, column=cell.column)
                         if name_cell.value:
                             name_text = str(name_cell.value).strip()
                             # Skip if it looks like an underline or empty
-                            if name_text and name_text not in ['_', '__', '___', '____', '_____'] and not all(c in '_ ' for c in name_text):
-                                metadata['name_of_collecting_officer'] = name_text
+                            if name_text and name_text not in ['_', '__', '___', '____', '_____', '______'] and not all(c in '_ ' for c in name_text):
+                                metadata['name_and_signature_of_collecting_officer'] = name_text
                                 print(f"DEBUG - Found officer name: {name_text}")
                         
                         # Also check 2 rows above in case there's an underline row
-                        if not metadata['name_of_collecting_officer']:
+                        if not metadata['name_and_signature_of_collecting_officer']:
                             name_cell_2 = ws.cell(row=cell.row - 2, column=cell.column)
                             if name_cell_2.value:
                                 name_text = str(name_cell_2.value).strip()
                                 if name_text and not all(c in '_ ' for c in name_text):
-                                    metadata['name_of_collecting_officer'] = name_text
+                                    metadata['name_and_signature_of_collecting_officer'] = name_text
                                     print(f"DEBUG - Found officer name (2 rows up): {name_text}")
                     
-                    # Look for "Official Designation" label
-                    if 'official designation' in cell_lower or (cell_lower == 'official designation'):
+                    # Look for "Official Designation" label (exact match)
+                    if cell_lower == 'official designation':
                         # The actual designation should be in the row ABOVE
                         designation_cell = ws.cell(row=cell.row - 1, column=cell.column)
                         if designation_cell.value:
                             designation_text = str(designation_cell.value).strip()
                             # Skip if it looks like an underline or empty
-                            if designation_text and designation_text not in ['_', '__', '___', '____', '_____'] and not all(c in '_ ' for c in designation_text):
+                            if designation_text and designation_text not in ['_', '__', '___', '____', '_____', '______'] and not all(c in '_ ' for c in designation_text):
                                 metadata['official_designation'] = designation_text
                                 print(f"DEBUG - Found designation: {designation_text}")
                         
@@ -367,7 +368,7 @@ class ProcessUploadView(View):
                                     print(f"DEBUG - Found designation (2 rows up): {designation_text}")
                     
                     # Look for "Special Collecting Officer" as a standalone value
-                    if 'special collecting officer' in cell_lower and not metadata['official_designation']:
+                    if cell_lower == 'special collecting officer' and not metadata['official_designation']:
                         metadata['official_designation'] = 'Special Collecting Officer'
                         print(f"DEBUG - Found designation: Special Collecting Officer")
         
@@ -525,14 +526,13 @@ class ProcessUploadView(View):
                         report_no=metadata['report_no'],
                         report_collection_date=metadata['report_collection_date'],
                         certification=metadata['certification'],
-                        name_of_collecting_officer=metadata['name_of_collecting_officer'],
+                        name_and_signature_of_collecting_officer=metadata['name_and_signature_of_collecting_officer'],
                         official_designation=metadata['official_designation']
                     )
                     
                     db_column_indices = [idx for idx, h in enumerate(headers) if h in field_map]
                     empty_row_count = 0
                     MAX_EMPTY_ROWS = 5
-                    last_data_row = header_row + 2  # Track the last row with data
 
                     # Process rows
                     for row_index, row in enumerate(ws.iter_rows(min_row=header_row + 2, values_only=True), start=header_row + 2):
@@ -543,7 +543,6 @@ class ProcessUploadView(View):
                             continue
 
                         empty_row_count = 0
-                        last_data_row = row_index  # Update last row with actual data
                         current_row += 1
                         
                         # Send update every 5 rows for better performance

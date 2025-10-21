@@ -20,6 +20,49 @@
 
     <div class="collection-summary">
         <h2>Summary</h2>
+        <ul>
+            <li>
+                <strong>DTI Office: </strong>
+                <p>{{ collection_report.dti_office }}</p>
+            </li>
+
+            {% if collection_report.report_no %}
+                <li>
+                    <strong>Report No: </strong>
+                    <p>{{ collection_report.report_no }}</p>
+                </li>
+            {% endif %}
+
+            {% if collection_report.collection_date %}
+                <li>
+                    <strong>Report Collection Date: </strong>
+                    <p>{{ collection_report.report_collection_date }}</p>
+                </li>
+            {% endif %}
+
+            <li>
+                <strong>Date from: </strong>
+                <p>{{ collection_report.date_from }}</p>
+            </li>
+            <li>
+                <strong>Date to:</strong>
+                <p>{{ collection_report.date_to }}</p>
+            </li>
+
+            {% if collection_report.name_and_signature_of_collection_officer %}
+                <li>
+                    <strong>Name of Collection Officer:</strong>
+                    <p>{{ collection_report.name_and_signature_of_collection_officer }}</p>
+                </li>
+            {% endif %}
+
+            {% if collection_report.official_designation %}
+                <li>
+                    <strong>Official Designation:</strong>
+                    <p>{{ collection_report.official_designation }}</p>
+                </li>
+            {% endif %}
+        </ul>
     </div>
     
     <div class="upload-report-container">
