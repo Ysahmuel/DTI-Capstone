@@ -1,0 +1,16 @@
+{% extends 'dashboard/layout.html' %}
+{% block body %}
+<div class="payment-failed-page">
+    <div class="payment-card">
+        <div class="payment-card-header payment-card-header-failed">
+            Payment Failed
+        </div>
+        <div class="payment-card-body">
+            <p>We were unable to process your payment. Please try again or use a different method.</p>
+            <a href="{% url 'payment-page' oop_id=1 %}" class="payment-btn payment-btn-dark">
+                Try Again
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock body %}

@@ -1,18 +1,18 @@
-/* ===== CARD STYLES ===== */
-.card {
+.payment-card {
     background: var(--background-white);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
     overflow: hidden;
+    margin-bottom: var(--space-lg);
     transition: box-shadow var(--transition-fast);
 }
 
-.card:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+.payment-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-.card-header {
+.payment-card-header {
     background: var(--primary);
     color: white;
     font-weight: 600;
@@ -20,28 +20,25 @@
     font-size: 1.1rem;
 }
 
-.card-body {
+.payment-card-body {
     display: flex;
     flex-direction: column;
-    gap: var(--space-lg);
+    gap: var(--space-md);
     padding: var(--space-xl);
 }
 
-/* ===== FORM ELEMENTS ===== */
-.form-group {
+.payment-form-group {
     display: flex;
     flex-direction: column;
     gap: var(--space-xs);
 }
 
-.form-group label {
+.payment-form-group label {
     font-weight: 600;
     color: var(--text-secondary);
 }
 
-.form-group input[type="text"],
-.form-group input[type="number"],
-.form-group input[type="email"] {
+.payment-form-group input[type="text"] {
     border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
     padding: var(--space-sm) var(--space-md);
@@ -49,94 +46,147 @@
     transition: border-color var(--transition-fast), background var(--transition-fast);
 }
 
-.form-group input:focus {
+.payment-form-group input:focus {
     outline: none;
     border-color: var(--accent);
     background: var(--input-focus);
 }
 
-/* ===== RADIO GROUP ===== */
-.radio-group {
+.payment-radio-group {
     display: flex;
     gap: var(--space-lg);
     margin-top: var(--space-sm);
 }
 
-.radio-group label {
+.payment-radio-group label {
     font-weight: 500;
     cursor: pointer;
 }
 
-.radio-group input {
-    margin-right: var(--space-xs);
-}
-
-/* ===== TOTAL AMOUNT ===== */
-.total {
-    margin-top: var(--space-lg);
+.payment-form-group strong {
     font-size: 1.1rem;
     font-weight: 700;
     color: var(--primary-light);
 }
 
-/* ===== BUTTONS ===== */
-.btn {
-    display: inline-block;
-    text-decoration: none;       
-    color: white;             
-    font-weight: 600;
-    font-size: 1rem;
+
+.payment-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    color: white;
+    font-size: clamp(0.65rem, 0.8vw, 1rem);
+    font-weight: 500;
     padding: var(--space-sm) var(--space-lg);
-    border-radius: var(--radius-md);
-    background-color: var(--primary); 
+    border-radius: var(--radius-sm);
+    background-color: var(--primary);
     transition: background var(--transition-fast), transform var(--transition-fast);
     text-align: center;
     cursor: pointer;
     border: none;
 }
 
-button {
-    padding: var(--space-sm) var(--space-lg);
-    border: none;
-    border-radius: var(--radius-md);
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background var(--transition-fast), transform var(--transition-fast);
+.payment-btn:hover {
+    transform: scale(1.03);
 }
 
-.btn-blue {
+.payment-btn-blue {
     background: var(--primary-light);
-    color: white;
 }
 
-.btn-blue:hover {
+.payment-btn-blue:hover {
     background: var(--accent);
-    transform: scale(1.03);
 }
 
-.btn-green {
+.payment-btn-green {
     background: var(--success-color);
-    color: white;
 }
 
-.btn-green:hover {
+.payment-btn-green:hover {
     filter: brightness(1.1);
-    transform: scale(1.03);
 }
 
-/* ===== RESPONSIVE ===== */
+.payment-btn-dark {
+    background: var(--primary);
+}
+
+.payment-btn-dark:hover {
+    filter: brightness(1.1);
+}
+
+.payment-badge {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.payment-badge-warning {
+    background: rgba(255, 193, 7, 0.2);
+    color: rgb(170, 120, 0);
+}
+
+.payment-badge-secondary {
+    background: rgba(108, 117, 125, 0.2);
+    color: rgb(90, 95, 100);
+}
+
+.payment-badge-success {
+    background: rgba(25, 135, 84, 0.2);
+    color: var(--success-color);
+}
+
+.payment-badge-info {
+    background: rgba(13, 202, 240, 0.2);
+    color: rgb(0, 150, 200);
+}
+
+.payment-badge-light {
+    background: rgba(220, 220, 220, 0.3);
+    color: rgb(120, 120, 120);
+}
+
+
+.payment-buttons-area {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-md);
+    margin-top: var(--space-md);
+}
+
+.payment-success-page,
+.payment-failed-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+}
+
+.payment-success-page .payment-card-header {
+    background: var(--success-color);
+}
+
+.payment-failed-page .payment-card-header {
+    background: rgb(192, 16, 16);
+}
+
 @media (max-width: 768px) {
-    .card-body {
+    .payment-card-body {
         padding: var(--space-lg);
     }
 
-    .buttons {
+    .payment-buttons-area {
         flex-direction: column;
         align-items: stretch;
     }
 
-    .btn-blue, .btn-green {
+    .payment-btn {
         width: 100%;
     }
 }

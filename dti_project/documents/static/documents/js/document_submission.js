@@ -5,6 +5,18 @@ document.addEventListener('DOMContentLoaded', function () {
     const previewModal = document.getElementById('preview-modal-container');
     const confirmBtn = previewModal?.querySelector('.confirm-btn');
     const cancelBtn = previewModal?.querySelector('.cancel-btn');
+    const urlParams = new URLSearchParams(window.location.search);
+    const sppaParam = urlParams.get('sppa');
+
+
+    console.log('SPPA param from URL:', sppaParam);
+
+    console.log('Form elements found:', {
+        documentsForm: !!documentsForm,
+        documentsFormSubmitBtn: !!documentsFormSubmitBtn,
+        previewModal: !!previewModal,
+        confirmBtn: !!confirmBtn
+    });
 
     console.log('Form elements found:', {
         documentsForm: !!documentsForm,
@@ -61,6 +73,28 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log("Submit button clicked");
 
             const formData = new FormData(documentsForm);
+
+            // Ensure the SPPA query param is included for preview requests (and create a hidden input
+            // in the form so final submits include it too).
+            if (sppaParam) {
+                // append to FormData so AJAX preview sees it
+                formData.append('sppa', sppaParam);
+
+                // if form does not already contain the sales_promotion_permit_application field as hidden,
+                // add one so normal form submission includes the SPPA id.
+                if (!documentsForm.querySelector('input[name="sales_promotion_permit_application"]')) {
+                    const sppaHidden = document.createElement('input');
+                    sppaHidden.type = 'hidden';
+                    sppaHidden.name = 'sales_promotion_permit_application';
+                    sppaHidden.value = sppaParam;
+                    documentsForm.appendChild(sppaHidden);
+                } else {
+                    // keep value in sync if present
+                    const existing = documentsForm.querySelector('input[name="sales_promotion_permit_application"]');
+                    existing.value = sppaParam;
+                }
+            }
+
             formData.append("action", "preview");
             
             console.log("Form action URL:", documentsForm.action);
@@ -91,7 +125,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.log("Parsed data:", data);
                 
                 if (status === 200 && data.preview_groups) {
-                    // ✅ Success - show preview modal
+                    // Success - show preview modal
                     console.log("Showing preview modal");
                     let html = "";
                     data.preview_groups.forEach(group => {
@@ -119,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         showErrorInContainer("Error: Preview functionality is not available.");
                     }
                 } else if ((status === 400 || data.status === "error") && data.messages_html) {
-                    // ❌ Validation errors - show messages from Django
+                    // Validation errors - show messages from Django
                     console.log("Showing validation errors from Django messages");
                     let alertsContainer = document.querySelector(".alerts-container");
                     
@@ -180,6 +214,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 actionInput.value = 'submitted';
                 documentsForm.appendChild(actionInput);
 
+                // Ensure SPPA hidden input exists for the final POST
+                if (sppaParam && !documentsForm.querySelector('input[name="sales_promotion_permit_application"]')) {
+                    const sppaHidden = document.createElement('input');
+                    sppaHidden.type = 'hidden';
+                    sppaHidden.name = 'sales_promotion_permit_application';
+                    sppaHidden.value = sppaParam;
+                    documentsForm.appendChild(sppaHidden);
+                }
+
                 // Submit the form normally (no AJAX)
                 console.log("Submitting form normally");
                 documentsForm.submit();
@@ -204,6 +247,15 @@ document.addEventListener('DOMContentLoaded', function () {
             actionInput.name = 'action';
             actionInput.value = 'draft';
             documentsForm.appendChild(actionInput);
+
+            // Ensure SPPA hidden input exists for the final POST
+            if (sppaParam && !documentsForm.querySelector('input[name="sales_promotion_permit_application"]')) {
+                const sppaHidden = document.createElement('input');
+                sppaHidden.type = 'hidden';
+                sppaHidden.name = 'sales_promotion_permit_application';
+                sppaHidden.value = sppaParam;
+                documentsForm.appendChild(sppaHidden);
+            }
 
             // Normal form post → keeps Django messages
             documentsForm.submit();
