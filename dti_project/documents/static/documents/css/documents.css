@@ -601,3 +601,48 @@
     border: solid 1px var(--accent);
     color: var(--accent);
 }
+
+.oop-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: clamp(0.65rem, 0.8vw, 1rem);
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  font-weight: 500;
+  transition: 0.2s ease;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.oop-btn:hover {
+  transform: translateY(-1px);
+}
+
+.oop-create {
+  background-color: var(--accent);
+  color: #fff;
+  border: 1px solid var(--accent);
+}
+
+.oop-view {
+  background-color: var(--primary-light);
+  color: #fff;
+  border: 1px solid var(--primary-light);
+}
+
+.oop-badge {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.oop-badge-warning {
+    background: rgba(255, 193, 7, 0.2);
+    color: rgb(170, 120, 0);
+}

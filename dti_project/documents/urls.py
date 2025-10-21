@@ -1,5 +1,6 @@
 from django.urls import path
 from documents import views 
+from payments.views import verify_payment
 
 urlpatterns = [
     # CREATE VIEWS
@@ -48,5 +49,6 @@ urlpatterns = [
     path('cancel-upload/<str:session_id>/', views.CancelUploadView.as_view(), name='cancel-upload'),
 
     # ACTION VIEWS
-    path('approve-documents', views.ApproveDocumentsView.as_view(), name='approve-documents')
+    path('approve-documents', views.ApproveDocumentsView.as_view(), name='approve-documents'),
+    path('verify-payment/<int:oop_id>/', verify_payment, name='verify-payment'),
 ]

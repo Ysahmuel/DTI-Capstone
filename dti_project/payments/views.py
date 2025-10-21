@@ -1,49 +1,143 @@
+from django.contrib.auth.decorators import login_required
+import requests
+import base64
+from django.http import FileResponse
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+from io import BytesIO
+import datetime
+from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from .forms import GCashPaymentForm
-from documents.models import ServiceRepairAccreditationApplication
+from documents.models import SalesPromotionPermitApplication, OrderOfPayment
+
+def payment_page(request, oop_id):
+    oop = get_object_or_404(OrderOfPayment, pk=oop_id)
+    sppa = oop.sales_promotion_permit_application
+
+    total_amount = oop.total_amount or oop.calculate_total()
+    
+    # Display data
+    context = {
+        "oop": oop,
+        "business_name": sppa.sponsor_name,
+        "scope": sppa.coverage,
+        "registration_type": "Sales Promotion Permit",
+        "transaction_type": "Application",
+        "applicant_name": sppa.sponsor_authorized_rep,
+        "citizenship": "Filipino",
+        "processing_fee": total_amount - oop.doc_stamp_amount,
+        "doc_stamp_fee": oop.doc_stamp_amount,
+        "total_amount": total_amount,
+    }
+
+    # ✅ When user proceeds to pay via GCash
+    if request.method == "POST" and "proceed" in request.POST:
+        payment_method = request.POST.get("payment_method")
+
+    # Payment handling
+    if request.method == "POST" and "proceed" in request.POST:
+        payment_method = request.POST.get("payment_method")
+
+        if payment_method == "gcash":
+            key = base64.b64encode(settings.PAYMONGO_SECRET_KEY.encode()).decode()
+            headers = {
+                "accept": "application/json",
+                "content-type": "application/json",
+                "authorization": f"Basic {key}",
+            }
+
+            data = {
+                "data": {
+                    "attributes": {
+                        "amount": int(total_amount * 100),  # centavos
+                        "currency": "PHP",
+                        "type": "gcash",
+                        "redirect": {
+                            "success": request.build_absolute_uri(f"/payments/success/{oop.id}/"),
+                            "failed": request.build_absolute_uri(f"/payments/failed/{oop.id}/"),
+                        }
+                    }
+                }
+            }
+
+            response = requests.post("https://api.paymongo.com/v1/sources", headers=headers, json=data)
+            result = response.json()
+
+            if "data" in result:
+                checkout_url = result["data"]["attributes"]["redirect"]["checkout_url"]
+                return redirect(checkout_url)
+            else:
+                messages.error(request, "Failed to initialize GCash payment. Please try again.")
+
+    return render(request, "payments/payment-page.html", context)
+
+def payment_success(request, oop_id):
+    oop = get_object_or_404(OrderOfPayment, pk=oop_id)
+    if oop.payment_status != OrderOfPayment.PaymentStatus.VERIFIED:
+        oop.payment_status = OrderOfPayment.PaymentStatus.PAID
+        oop.save()
+    messages.success(request, f"✅ Payment for {oop.sales_promotion_permit_application} successful! Awaiting verification.")
+    return render(request, "payments/payment_success.html", {"oop": oop})
 
 
-def payment_page(request):
-    user = request.user  # Current logged-in user
+def payment_failed(request):
+    messages.error(request, "❌ Payment failed or was canceled. Please try again.")
+    return render(request, "payments/payment_failed.html")
 
-    # Get the most recent accreditation for this user
-    accreditation = get_object_or_404(ServiceRepairAccreditationApplication, user=user)
+@login_required
+def verify_payment(request, oop_id):
+    oop = get_object_or_404(OrderOfPayment, pk=oop_id)
 
-    if request.method == 'POST':
-        if 'proceed' in request.POST:
-            payment_method = request.POST.get('payment_method')
-            total = 530  # Or calculate dynamically
+    if request.user.role not in ["admin", "collection_agent"]:
+        messages.error(request, "You do not have permission to verify payments.")
+        return redirect('documents-list')
 
-            if payment_method == 'gcash':
-                request.session['total'] = total
-                return redirect('gcash_payment')  # Redirect to GCash page
+    if oop.payment_status == OrderOfPayment.PaymentStatus.PAID:
+        # ✅ Just update status — no PDF generation here
+        oop.payment_status = OrderOfPayment.PaymentStatus.VERIFIED
+        oop.save()
 
-            elif payment_method == 'over-the-counter':
-                messages.info(request, "Over-the-counter payment not implemented yet.")
-                return redirect('payment_page')
+        messages.success(request, "✅ Payment verified successfully! You can now download the receipt.")
+        return redirect('documents-list')
 
-        elif 'resume' in request.POST:
-            messages.info(request, "You can resume later!")
-            return redirect('payment_page')
+    else:
+        messages.warning(request, "Payment must be marked as 'Paid' before verifying.")
+        return redirect('documents-list')
 
-    # GET request: render page with accreditation data
-    return render(request, 'payments/payment-page.html', {"accreditation": accreditation})
+@login_required
+def download_receipt(request, oop_id):
+    oop = get_object_or_404(OrderOfPayment, pk=oop_id)
 
+    # ✅ Only allow download if already verified
+    if oop.payment_status != OrderOfPayment.PaymentStatus.VERIFIED:
+        messages.warning(request, "Receipt is only available after verification.")
+        return redirect('documents-list')
 
-def gcash_payment(request):
-    total = request.session.get('total', 0)
-    form = GCashPaymentForm(request.POST or None, request.FILES or None)
+    # ✅ Generate PDF in memory
+    buffer = BytesIO()
+    p = canvas.Canvas(buffer, pagesize=A4)
 
-    if request.method == 'POST' and form.is_valid():
-        reference_number = form.cleaned_data['reference_number']
-        proof = form.cleaned_data['proof']
+    # Header
+    p.setFont("Helvetica-Bold", 14)
+    p.drawString(200, 800, "DTI Official Receipt")
+    p.setFont("Helvetica", 10)
+    p.drawString(50, 780, f"Reference Code: {oop.pk:06d}")
+    p.drawString(50, 765, f"Issue Date: {datetime.datetime.now().strftime('%d %b %Y %I:%M %p')}")
+    p.drawString(50, 750, f"Application Name: {oop.sales_promotion_permit_application.sponsor_name}")
+    p.drawString(50, 735, f"Particulars: Sales Promotion Permit Application")
+    p.drawString(50, 720, f"Total Amount: Php {oop.total_amount or 0:,.2f}")
+    p.drawString(50, 705, f"Application Fee: Php {(oop.total_amount or 0) - (oop.doc_stamp_amount or 0):,.2f}")
+    p.drawString(50, 690, f"Documentary Stamp Tax: Php {oop.doc_stamp_amount or 0:,.2f}")
+    p.drawString(50, 670, f"Verified By: {request.user.get_full_name()}")
 
-        messages.success(request, "Payment submitted successfully!")
-        return redirect('gcash_success')
+    p.setFont("Helvetica-Oblique", 9)
+    p.drawString(50, 640, "This is your official DTI receipt.")
+    p.drawString(50, 625, "Your transaction has been verified successfully.")
 
-    return render(request, 'payments/gcash_payment.html', {'total': total, 'form': form})
+    p.showPage()
+    p.save()
+    buffer.seek(0)
 
+    return FileResponse(buffer, as_attachment=True, filename=f"DTI_Receipt_{oop.pk}.pdf")
 
-def gcash_success(request):
-    return render(request, 'payments/gcash_success.html')

@@ -49,7 +49,6 @@ class BaseCreateView(
     FormSubmissionMixin,
     FormStepsMixin,
     FormsetMixin,
-    PreventAdminFormPostRequestMixin,
     RoleFormPageRestrictionMixin,
     CreateView
 ):
@@ -180,8 +179,72 @@ class CreateOrderOfPaymentView(BaseCreateView):
     form_class = OrderOfPaymentForm
     FIELD_GROUPS = ORDER_OF_PAYMENT_FIELD_GROUPS
     detail_groups = ORDER_OF_PAYMENT_DETAIL_GROUPS
-    allowed_roles = ['collection_agent']
+    allowed_roles = ['collection_agent','admin']
+    
+    def get_initial(self):
+        initial = super().get_initial()
+        sppa_id = self.request.GET.get('sppa')
+        if sppa_id:
+            try:
+                sppa = SalesPromotionPermitApplication.objects.get(pk=sppa_id, status='approved')
+                if hasattr(sppa, 'order_of_payment'):
+                    messages.error(self.request, "An Order of Payment already exists for this SPPA.")
+                    return {}
+                initial['sales_promotion_permit_application'] = sppa
+            except SalesPromotionPermitApplication.DoesNotExist:
+                messages.error(self.request, "Invalid or unapproved SPPA.")
+        return initial
+    
+    def form_valid(self, form):
+        # Accept SPPA id from:
+        #  - explicit field in POST: 'sales_promotion_permit_application'
+        #  - short POST param added by JS: 'sppa'
+        #  - fallback GET param: 'sppa'
+        sppa_val = (
+            self.request.POST.get('sales_promotion_permit_application')
+            or self.request.POST.get('sppa')
+            or self.request.GET.get('sppa')
+        )
 
+        if not sppa_val:
+            form.add_error(None, "Sales Promotion Application is missing.")
+            return self.form_invalid(form)
+
+        # Normalize to integer pk if possible
+        sppa_pk = None
+        try:
+            sppa_pk = int(sppa_val)
+        except (TypeError, ValueError):
+            # attempt to extract digits from a model repr if needed
+            import re
+            m = re.search(r'\d+', str(sppa_val))
+            if m:
+                try:
+                    sppa_pk = int(m.group())
+                except (TypeError, ValueError):
+                    sppa_pk = None
+
+        if not sppa_pk:
+            form.add_error(None, "Invalid Sales Promotion Application identifier.")
+            return self.form_invalid(form)
+
+        try:
+            sppa = SalesPromotionPermitApplication.objects.get(pk=sppa_pk, status='approved')
+        except SalesPromotionPermitApplication.DoesNotExist:
+            form.add_error(None, "Invalid or unapproved SPPA.")
+            return self.form_invalid(form)
+
+        # Prevent duplicate OOPs for the same SPPA (explicit query avoids relying on related_name)
+        if OrderOfPayment.objects.filter(sales_promotion_permit_application=sppa).exists():
+            form.add_error(None, "An Order of Payment already exists for this SPPA.")
+            return self.form_invalid(form)
+
+        # Link SPPA and user before saving
+        form.instance.sales_promotion_permit_application = sppa
+        form.instance.user = self.request.user
+
+        return super().form_valid(form)
+    
     def get_success_url(self):
         return reverse_lazy('order-of-payment', kwargs={'pk': self.object.pk})
 
