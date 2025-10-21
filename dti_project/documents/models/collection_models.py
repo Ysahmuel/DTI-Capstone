@@ -7,8 +7,19 @@ class CollectionReport(models.Model):
         'CollectionReportItem',
         related_name='collection_reports'
     )
+    dti_office = models.CharField(max_length=255, blank=True, null=True)
+    report_collection_date = models.DateField(null=True, blank=True)
+    report_no = models.CharField(max_length=255, blank=True, null=True)
     date_from = models.DateField(null=True, blank=True)
     date_to = models.DateField(null=True, blank=True)
+
+    # Summary
+    undeposited_last_report = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True, help_text="Undeposited Collections Last Report")
+    total = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    certification = models.TextField(blank=True, null=True)
+    name_of_collecting_officer = models.CharField(max_length=255, blank=True, null=True)
+    official_designation = models.CharField(max_length=255, blank=True, null=True) 
+
 
     def date_range_display(self):
         """Return a readable date range, preferring stored dates over calculated ones."""
@@ -53,41 +64,47 @@ class CollectionReportItem(models.Model):
     payor = models.CharField(max_length=255, blank=True, null=True)
     particulars = models.CharField(max_length=255, blank=True, null=True)
 
+    
     # Core amounts
     amount = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     stamp_tax = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
 
-    # BN Registration
-    bn_original = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
-    bn_renewal = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    # I. Other Service Income (628)
 
-    # Accreditation
+    ## 1. Main Header (Other service income)
+    # 1a. BN Registration
+    bn_original = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True, help_text="BN Original")
+    bn_renewal = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True, help_text="BN Renewal")
+
+    # 1b. Accreditation
     accreditation_original = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     accreditation_renewal = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     accreditation_filing_fee = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     truck_rebuilding_original = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     truck_rebuilding_renewal = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
 
-    # Sales Promo
+    # 1c. Sales Promo
     sales_promo_fee = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     sales_promo_revisions = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
 
-    # Licensing and Certifications
+    # 1d. Licensing and Certifications
     certification = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     bulk_sales = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     assessment_fee = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     license_fee = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
 
-    # PETC and Miscellaneous
+    # 1e. PETC and Miscellaneous
     petc_accreditation = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     bn_listings = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     confiscated_materials = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
 
-    # Admin and Surcharge
-    fines_penalties = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
-    surcharge_bn_reg = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
-    surcharge_accre = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
-    unserviceable = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    # 2. Fines and Penalties
+    # 2a. Admin 
+    fines_penalties = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True, help_text="Fines and Penalties (629)")
+
+    # 2b. Surcharge
+    surcharge_bn_reg = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True, help_text="Surcharge BN Registration")
+    surchage_accreditation = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True, help_text="Surcharge Accreditation")
 
     # Miscellaneous income (678)
     misc_income = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)

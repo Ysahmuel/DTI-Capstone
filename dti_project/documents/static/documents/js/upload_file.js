@@ -156,12 +156,23 @@ document.addEventListener("DOMContentLoaded", function () {
         
         // Add cancel functionality
         document.getElementById("cancel-upload-btn").addEventListener("click", function() {
-            if (confirm("Are you sure you want to cancel the upload?")) {
-                if (eventSource) {
-                    eventSource.close();
-                }
-                uploadFilesModal.style.display = "none";
-                resetForm();
+            if (confirm("Are you sure you want to cancel the upload? All uploaded data will be deleted.")) {
+                // Request cancellation
+                fetch(`/documents/cancel-upload/${sessionId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': form.querySelector('[name="csrfmiddlewaretoken"]').value,
+                        'X-Requested-With': 'XMLHttpRequest',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Cancellation requested');
+                    // SSE will handle the cancellation progress updates
+                })
+                .catch(error => {
+                    console.error('Cancellation error:', error);
+                });
             }
         });
     }
