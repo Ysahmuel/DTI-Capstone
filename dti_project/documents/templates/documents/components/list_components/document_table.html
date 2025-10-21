@@ -62,23 +62,29 @@
 
                                 {% else %}
                                     {% if request.user.role == 'admin' or request.user.role == 'collection_agent' %}
-                                        {% if oop.payment_status == 'pending' %}
-                                            <span class="payment-badge payment-badge-secondary">Awaiting Payment</span>
-                                        {% elif oop.payment_status == 'paid' %}
-                                            <a href="{% url 'verify-payment' oop.pk %}" class="payment-btn payment-btn-blue">Verify Payment</a>
-                                        {% elif oop.payment_status == 'verified' %}
-                                            <span class="payment-badge payment-badge-success">Paid & Verified</span>
-                                        {% else %}
-                                            <span class="payment-badge payment-badge-light">Unknown</span>
-                                        {% endif %}
+                                            {% if oop.payment_status == 'awaiting' %}
+                                                <span class="payment-badge payment-badge-secondary">Awaiting Payment</span>
+                                            {% elif oop.payment_status == 'paid' %}
+                                                <a href="{% url 'verify-payment' oop.pk %}" class="payment-btn payment-btn-blue">Verify Payment</a>
+                                            {% elif oop.payment_status == 'verified' %}
+                                                <div class="payment-status-vertical">
+                                                    <span class="payment-badge payment-badge-success">Paid & Verified</span>
+                                                    <a href="{% url 'download-receipt' oop.pk %}" class="payment-btn payment-btn-blue">Download Receipt</a>
+                                                </div>
+                                            {% else %}
+                                                <span class="payment-badge payment-badge-light">Unknown</span>
+                                            {% endif %}
 
                                     {% else %}
-                                        {% if oop.payment_status == 'pending' %}
+                                        {% if oop.payment_status == 'awaiting' %}
                                             <a href="{% url 'payment-page' oop.pk %}" class="payment-btn payment-btn-green">Pay</a>
                                         {% elif oop.payment_status == 'paid' %}
                                             <span class="payment-badge payment-badge-info">Pending Verification</span>
                                         {% elif oop.payment_status == 'verified' %}
-                                            <span class="payment-badge payment-badge-success">Paid</span>
+                                            <div class="payment-status-horizontal">
+                                                <span class="payment-badge payment-badge-success">Paid</span>
+                                                <a href="{% url 'download-receipt' oop.pk %}" class="payment-btn payment-btn-blue">Download Receipt</a>
+                                            </div>
                                         {% else %}
                                             <span class="payment-badge payment-badge-light">Unknown</span>
                                         {% endif %}

@@ -303,7 +303,7 @@ class OrderOfPaymentForm(BaseCustomForm):
     class Meta:
         model = OrderOfPayment
         fields = '__all__'
-        exclude = ['status', 'date', 'user','payment_status']
+        exclude = ['status', 'date', 'user','payment_status', 'total_amount']
         widgets = {
             'sales_promotion_permit_application': forms.HiddenInput(),
         }

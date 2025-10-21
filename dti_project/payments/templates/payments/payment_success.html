@@ -1,0 +1,17 @@
+{% extends 'dashboard/layout.html' %}
+{% block body %}
+<div class="payment-success-page">
+    <div class="payment-card">
+        <div class="payment-card-header payment-card-header-success">
+            Payment Successful
+        </div>
+        <div class="payment-card-body">
+            <p>Your payment has been received successfully.</p>
+            <p>Our team will verify your transaction shortly.</p>
+            <a href="{% url 'all-documents' %}" class="payment-btn payment-btn-green">
+                Return to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock body %}

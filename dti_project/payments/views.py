@@ -1,6 +1,11 @@
 from django.contrib.auth.decorators import login_required
 import requests
 import base64
+from django.http import FileResponse
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+from io import BytesIO
+import datetime
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
@@ -10,17 +15,8 @@ def payment_page(request, oop_id):
     oop = get_object_or_404(OrderOfPayment, pk=oop_id)
     sppa = oop.sales_promotion_permit_application
 
-    # Compute totals
-    remark_fields = [
-        "discount_amount", "premium_amount", "raffle_amount",
-        "contest_amount", "redemption_amount", "games_amount",
-        "beauty_contest_amount", "home_solicitation_amount",
-        "amendments_amount"
-    ]
-    subtotal = sum(getattr(oop, f, 0) or 0 for f in remark_fields)
-    doc_stamp_fee = oop.doc_stamp_amount or 0
-    total_amount = subtotal + doc_stamp_fee
-
+    total_amount = oop.total_amount or oop.calculate_total()
+    
     # Display data
     context = {
         "oop": oop,
@@ -30,8 +26,8 @@ def payment_page(request, oop_id):
         "transaction_type": "Application",
         "applicant_name": sppa.sponsor_authorized_rep,
         "citizenship": "Filipino",
-        "processing_fee": subtotal,
-        "doc_stamp_fee": doc_stamp_fee,
+        "processing_fee": total_amount - oop.doc_stamp_amount,
+        "doc_stamp_fee": oop.doc_stamp_amount,
         "total_amount": total_amount,
     }
 
@@ -39,10 +35,12 @@ def payment_page(request, oop_id):
     if request.method == "POST" and "proceed" in request.POST:
         payment_method = request.POST.get("payment_method")
 
-        if payment_method == "gcash":
-            # Encode secret key for authorization header
-            key = base64.b64encode(settings.PAYMONGO_SECRET_KEY.encode()).decode()
+    # Payment handling
+    if request.method == "POST" and "proceed" in request.POST:
+        payment_method = request.POST.get("payment_method")
 
+        if payment_method == "gcash":
+            key = base64.b64encode(settings.PAYMONGO_SECRET_KEY.encode()).decode()
             headers = {
                 "accept": "application/json",
                 "content-type": "application/json",
@@ -52,7 +50,7 @@ def payment_page(request, oop_id):
             data = {
                 "data": {
                     "attributes": {
-                        "amount": int(total_amount * 100),  # in centavos
+                        "amount": int(total_amount * 100),  # centavos
                         "currency": "PHP",
                         "type": "gcash",
                         "redirect": {
@@ -96,10 +94,50 @@ def verify_payment(request, oop_id):
         return redirect('documents-list')
 
     if oop.payment_status == OrderOfPayment.PaymentStatus.PAID:
+        # ✅ Just update status — no PDF generation here
         oop.payment_status = OrderOfPayment.PaymentStatus.VERIFIED
         oop.save()
-        messages.success(request, "✅ Payment verified successfully!")
+
+        messages.success(request, "✅ Payment verified successfully! You can now download the receipt.")
+        return redirect('documents-list')
+
     else:
         messages.warning(request, "Payment must be marked as 'Paid' before verifying.")
-    
-    return redirect('all-documents')
+        return redirect('documents-list')
+
+@login_required
+def download_receipt(request, oop_id):
+    oop = get_object_or_404(OrderOfPayment, pk=oop_id)
+
+    # ✅ Only allow download if already verified
+    if oop.payment_status != OrderOfPayment.PaymentStatus.VERIFIED:
+        messages.warning(request, "Receipt is only available after verification.")
+        return redirect('documents-list')
+
+    # ✅ Generate PDF in memory
+    buffer = BytesIO()
+    p = canvas.Canvas(buffer, pagesize=A4)
+
+    # Header
+    p.setFont("Helvetica-Bold", 14)
+    p.drawString(200, 800, "DTI Official Receipt")
+    p.setFont("Helvetica", 10)
+    p.drawString(50, 780, f"Reference Code: {oop.pk:06d}")
+    p.drawString(50, 765, f"Issue Date: {datetime.datetime.now().strftime('%d %b %Y %I:%M %p')}")
+    p.drawString(50, 750, f"Application Name: {oop.sales_promotion_permit_application.sponsor_name}")
+    p.drawString(50, 735, f"Particulars: Sales Promotion Permit Application")
+    p.drawString(50, 720, f"Total Amount: Php {oop.total_amount or 0:,.2f}")
+    p.drawString(50, 705, f"Application Fee: Php {(oop.total_amount or 0) - (oop.doc_stamp_amount or 0):,.2f}")
+    p.drawString(50, 690, f"Documentary Stamp Tax: Php {oop.doc_stamp_amount or 0:,.2f}")
+    p.drawString(50, 670, f"Verified By: {request.user.get_full_name()}")
+
+    p.setFont("Helvetica-Oblique", 9)
+    p.drawString(50, 640, "This is your official DTI receipt.")
+    p.drawString(50, 625, "Your transaction has been verified successfully.")
+
+    p.showPage()
+    p.save()
+    buffer.seek(0)
+
+    return FileResponse(buffer, as_attachment=True, filename=f"DTI_Receipt_{oop.pk}.pdf")
+
