@@ -48,3 +48,7 @@ from .excel_views import (
 from .action_views import (
     ApproveDocumentsView
 )
+
+from .pdf_views import (
+    view_oop,
+    )
