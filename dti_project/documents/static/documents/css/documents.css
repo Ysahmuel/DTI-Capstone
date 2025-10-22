@@ -527,6 +527,11 @@
     gap: 0.5rem;
 }
 
+.documents-table button {
+  border: none;
+  outline: none;
+}
+
 .documents-table-header .actions button {
     background-color: white;
     border: solid 1px var(--border-color);
