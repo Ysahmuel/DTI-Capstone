@@ -70,9 +70,11 @@ logger = logging.getLogger(__name__)
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import get_user_model
+from django.utils import timezone  # # Added for date comparison
 from .forms import AddStaffForm
 
 User = get_user_model()
+
 
 def add_staff(request):
     if request.method == 'POST':
@@ -82,8 +84,14 @@ def add_staff(request):
             last_name = form.cleaned_data['last_name']
             address = form.cleaned_data.get('default_address', '')
             phone = form.cleaned_data.get('default_phone', '')
+            birthday = form.cleaned_data.get('birthday')
 
-            # ✅ Generate unique email
+            today = timezone.localdate()
+            if birthday >= today:
+                form.add_error('birthday', 'Birthday must be in the past.')
+                return render(request, 'users/add_staff.html', {'form': form})
+
+            # Generate unique email
             base_email = f"{last_name.lower()}.dti.agent@gmail.com"
             email = base_email
             counter = 1
@@ -92,9 +100,11 @@ def add_staff(request):
                 counter += 1
 
             username = email.split('@')[0]
-            password = f"{last_name.capitalize()}123"
 
-            # Create staff user
+            # 🔐 Generate password in the format LastnameYYYYMMDD
+            formatted_birthday = birthday.strftime("%Y%m%d")
+            password = f"{last_name.capitalize()}{formatted_birthday}"
+
             user = User.objects.create_user(
                 username=username,
                 first_name=first_name,
@@ -107,11 +117,9 @@ def add_staff(request):
 
             user.default_address = address
             user.default_phone = phone
+            user.birthday = birthday
             user.save()
 
-            print("DEBUG: Popup data passed to template!")
-
-            # ✅ Return same page with popup
             return render(request, 'users/add_staff.html', {
                 'form': AddStaffForm(),
                 'show_popup': True,
@@ -125,10 +133,6 @@ def add_staff(request):
     return render(request, 'users/add_staff.html', {'form': form})
 
 
-def delete_new_staff(request, user_id):
-    User.objects.filter(id=user_id).delete()
-    messages.success(request, "Newly created account deleted.")
-    return redirect('staff_accounts')
 
 
 

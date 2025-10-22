@@ -4,6 +4,7 @@
 {% block title %}Add Staff{% endblock %}
 
 {% block extra_css %}
+{% load static %}
 <link rel="stylesheet" href="{% static 'users/css/add_staff.css' %}">
 {% endblock %}
 
@@ -27,22 +28,19 @@
         {{ form.default_address }}
       </div>
       <div class="form-group">
-  <label for="id_default_phone">Contact Number</label>
-  <input
-    type="tel"
-    id="id_default_phone"
-    name="default_phone"
-    pattern="\d{11}"
-    maxlength="11"
-    inputmode="numeric"
-    required
-    oninput="this.value = this.value.replace(/\D/g, '').slice(0, 11);"
-  />
-</div>
+          <label for="id_default_phone">Contact Number</label>
+              {{ form.default_phone }}
 
-
-
-
+              {% if form.default_phone.errors %}
+          <div class="form-error">
+              {{ form.default_phone.errors.0 }}
+          </div>
+          {% endif %}
+          </div>
+      <div class="form-group">
+        <label for="id_birthday">Birthday</label>
+        {{ form.birthday }}
+      </div>
 
       <button type="submit" class="btn btn-primary">Create Staff Account</button>
     </form>
@@ -70,15 +68,5 @@
 {% endblock %}
 
 {% block extra_js %}
-{% if show_popup %}
-<script>
-  // Just to be sure popup is visible
-  document.addEventListener('DOMContentLoaded', function () {
-    const popup = document.getElementById('successPopup');
-    if (popup) {
-      popup.classList.add('active');
-    }
-  });
-</script>
-{% endif %}
+<script src="{% static 'users/js/add_staff.js' %}"></script>
 {% endblock %}
