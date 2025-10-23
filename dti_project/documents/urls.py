@@ -51,4 +51,5 @@ urlpatterns = [
     # ACTION VIEWS
     path('approve-documents', views.ApproveDocumentsView.as_view(), name='approve-documents'),
     path('verify-payment/<int:oop_id>/', verify_payment, name='verify-payment'),
+    path('oop/view/<int:oop_id>/', views.view_oop, name='view-oop'),
 ]

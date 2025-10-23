@@ -95,5 +95,5 @@ class OrderOfPayment(DraftModel, models.Model):
     def get_absolute_url(self):
         return reverse("order-of-payment", args=[self.pk])
     
-    def get_updatete_url(self):
+    def get_update_url(self):
         return reverse("update-order-of-payment", args=[self.pk])
