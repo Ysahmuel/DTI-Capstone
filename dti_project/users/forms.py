@@ -7,18 +7,53 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.text import slugify
 from django import forms
 from .models import User
+from datetime import date
 
 
 class AddStaffForm(forms.ModelForm):
+    birthday = forms.DateField(
+        required=True,
+        widget=forms.DateInput(
+            attrs={
+                'type': 'date',
+                'class': 'form-control',
+                'max': date.today().replace(year=date.today().year - 15).isoformat(),
+            }
+        )
+    )
+
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'default_address', 'default_phone']
+        fields = ['first_name', 'last_name', 'default_address', 'default_phone', 'birthday']
         widgets = {
-            'first_name': forms.TextInput(attrs={'placeholder': 'First Name', 'class': 'form-control'}),
-            'last_name': forms.TextInput(attrs={'placeholder': 'Last Name', 'class': 'form-control'}),
-            'default_address': forms.TextInput(attrs={'placeholder': 'Address', 'class': 'form-control'}),
-            'default_phone': forms.TextInput(attrs={'placeholder': 'Contact Number', 'class': 'form-control'}),
+            'first_name': forms.TextInput(attrs={
+                'placeholder': 'First Name', 'class': 'form-control'
+            }),
+            'last_name': forms.TextInput(attrs={
+                'placeholder': 'Last Name', 'class': 'form-control'
+            }),
+            'default_address': forms.TextInput(attrs={
+                'placeholder': 'Address', 'class': 'form-control'
+            }),
+            'default_phone': forms.TextInput(attrs={
+                'placeholder': 'Contact Number',
+                'class': 'form-control',
+                'type': 'tel',
+                'pattern': r'\d{11}',
+                'maxlength': '11',
+                'inputmode': 'numeric',
+                'oninput': "this.value = this.value.replace(/\\D/g, '').slice(0, 11);"
+            }),
         }
+
+    def clean_default_phone(self):
+        phone = self.cleaned_data.get('default_phone', '')
+        if not phone.isdigit() or len(phone) != 11:
+            raise forms.ValidationError("Phone number must be exactly 11 digits.")
+        return phone
+
+
+
 
 
 class CustomLoginForm(AuthenticationForm):
