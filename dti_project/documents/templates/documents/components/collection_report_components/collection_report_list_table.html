@@ -4,14 +4,16 @@
     <thead>
         <tr>
             <th>Report Name</th>
-            <th>Date From</th>
-            <th>Date to</th>
+            <th>Number of Records</th>
+            <th>Report Duration</th>
         </tr>
     </thead>
     <tbody>
         {% for report in collection_reports %}
         <tr class="document-value-row" data-href="{{ report.get_absolute_url }}">
             <td>{{ report }}</td>
+            <td>{{ report.report_items.count }}</td>
+            <td>{{ report.report_duration }}</td>
         </tr>
         {% empty %}
         <tr>

@@ -1,3 +1,4 @@
+from datetime import timedelta
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
@@ -42,6 +43,28 @@ class CollectionReport(models.Model):
             return first_date.strftime("%b %d, %Y")
         else:
             return f"{first_date.strftime('%b %d, %Y')} - {last_date.strftime('%b %d, %Y')}"
+        
+    def report_duration(self):
+        """Determine if the report is daily, monthly, or yearly based on report item dates."""
+        dates = self.report_items.values_list('date', flat=True)
+        
+        if not dates:
+            return "Unknown"
+        
+        # Get the earliest and latest dates
+        first_date = min(dates)
+        last_date = max(dates)
+
+        # Calculate the date difference
+        date_diff = last_date - first_date
+
+        # Determine report type
+        if date_diff <= timedelta(days=1):
+            return "Daily"
+        elif date_diff <= timedelta(days=30 * 2):  # Approx 2 months
+            return "Monthly"
+        else:
+            return "Yearly"
 
     def __str__(self):
         return f"Report ({self.date_range_display()})"
