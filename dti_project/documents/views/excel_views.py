@@ -328,23 +328,23 @@ class ProcessUploadView(View):
                     cell_lower = cell_text.lower()
                     
                     # Look for "Name and Signature of Collecting Officer" label (exact match, same logic as designation)
-                    if cell_lower == 'name and signature of collecting officer':
+                    if cell_lower == 'name and signature of collection officer':
                         # The actual name should be in the row ABOVE
                         name_cell = ws.cell(row=cell.row - 1, column=cell.column)
                         if name_cell.value:
                             name_text = str(name_cell.value).strip()
                             # Skip if it looks like an underline or empty
                             if name_text and name_text not in ['_', '__', '___', '____', '_____', '______'] and not all(c in '_ ' for c in name_text):
-                                metadata['name_and_signature_of_collecting_officer'] = name_text
+                                metadata['name_and_signature_of_collection_officer'] = name_text
                                 print(f"DEBUG - Found officer name: {name_text}")
                         
                         # Also check 2 rows above in case there's an underline row
-                        if not metadata['name_and_signature_of_collecting_officer']:
+                        if not metadata['name_and_signature_of_collection_officer']:
                             name_cell_2 = ws.cell(row=cell.row - 2, column=cell.column)
                             if name_cell_2.value:
                                 name_text = str(name_cell_2.value).strip()
                                 if name_text and not all(c in '_ ' for c in name_text):
-                                    metadata['name_and_signature_of_collecting_officer'] = name_text
+                                    metadata['name_and_signature_of_collection_officer'] = name_text
                                     print(f"DEBUG - Found officer name (2 rows up): {name_text}")
                     
                     # Look for "Official Designation" label (exact match)
