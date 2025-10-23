@@ -18,7 +18,7 @@ class CollectionReport(models.Model):
     undeposited_last_report = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True, help_text="Undeposited Collections Last Report")
     total = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     certification = models.TextField(blank=True, null=True)
-    name_and_signature_of_collecting_officer = models.CharField(max_length=255, blank=True, null=True)
+    name_and_signature_of_collection_officer = models.CharField(max_length=255, blank=True, null=True)
     official_designation = models.CharField(max_length=255, blank=True, null=True) 
 
 
