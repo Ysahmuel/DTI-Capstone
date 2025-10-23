@@ -328,7 +328,7 @@ class ProcessUploadView(View):
                     cell_lower = cell_text.lower()
                     
                     # Look for "Name and Signature of Collecting Officer" label (exact match, same logic as designation)
-                    if cell_lower == 'name and signature of collection officer':
+                    if cell_lower == 'name and signature of collecting officer':
                         # The actual name should be in the row ABOVE
                         name_cell = ws.cell(row=cell.row - 1, column=cell.column)
                         if name_cell.value:
