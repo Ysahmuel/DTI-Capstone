@@ -1,6 +1,7 @@
 from django.db import models
 from django.forms import ValidationError
 from django.urls import reverse
+from documents.nationality_choices import NATIONALITY_CHOICES
 from ..models.base_models import BaseApplication, DraftModel, PeriodModel
 from django.utils import timezone
 from users.models import User
@@ -34,7 +35,7 @@ class PersonalDataSheet(DraftModel, models.Model):
     position = models.CharField(max_length=50)
     sex = models.CharField(choices=GENDER_CHOICES, max_length=20)
     civil_status = models.CharField(choices=CIVIL_STATUS_CHOICES, max_length=30)
-    nationality = models.CharField(max_length=30)
+    nationality = models.CharField(max_length=30, choices=NATIONALITY_CHOICES)
     date_of_birth = models.DateField()
     current_address = models.TextField()
     contact_number = models.CharField(max_length=20)
