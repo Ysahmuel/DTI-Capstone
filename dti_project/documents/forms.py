@@ -20,13 +20,11 @@ class SortForm(forms.Form):
 
 class BaseCustomForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)  # Extract user if passed
+        user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
 
-        # --- Field formatting ---
         if hasattr(self, 'fields'):
             for name, field in self.fields.items():
-
                 label_text = field.label if field.label else name.replace('_', ' ').title()
                 if field.required:
                     field.label = f"{label_text} <span class='required-label'>*</span>"
@@ -34,19 +32,19 @@ class BaseCustomForm(forms.ModelForm):
                 else:
                     field.label = label_text
 
-                # Date fields
+                # --- Date fields ---
                 if isinstance(field, forms.DateField):
                     field.widget = forms.DateInput(attrs={'type': 'date'})
 
-                # Textarea rows
+                # --- Textareas ---
                 if isinstance(field.widget, forms.Textarea):
                     field.widget.attrs['rows'] = 4
 
-                # Add common class
+                # --- Common class ---
                 existing_classes = field.widget.attrs.get('class', '')
                 field.widget.attrs['class'] = f"{existing_classes} form-group".strip()
 
-                # Numeric fields
+                # --- Numeric-only fields ---
                 numerical_fields = [
                     'tax_identification_number',
                     'contact_number',
@@ -56,9 +54,8 @@ class BaseCustomForm(forms.ModelForm):
                     'zip_code',
                 ]
 
-                future_only_dates = [
-                    'promo_period_end',
-                ]
+                future_only_dates = ['promo_period_end']
+
                 if name in numerical_fields:
                     field.widget.attrs.update({
                         'inputmode': 'numeric',
@@ -98,28 +95,41 @@ class BaseCustomForm(forms.ModelForm):
 
                 if name in future_only_dates:
                     field.validators.append(self.generate_date_not_in_past_validator('Promo Period End'))
-                    field.widget.attrs['min'] = date.today().isoformat()  # prevents past dates in the browser
+                    field.widget.attrs['min'] = date.today().isoformat()
+
+                # --- Letter-only fields ---
+                letter_only_fields = [
+                    'first_name',
+                    'middle_name',
+                    'last_name',
+                    'full_name',
+                    'nationality',
+                ]
+
+                if name in letter_only_fields:
+                    field.widget.attrs.update({
+                        'pattern': r"[A-Za-zÀ-ÖØ-öø-ÿ' -]+",
+                        'title': "Letters, spaces, hyphens, and apostrophes only",
+                        'oninput': "this.value=this.value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ' -]/g,'')",
+                    })
 
         # --- Auto-fill user fields ---
         if user:
-            # Check if extra fields exist on a profile
             profile = getattr(user, 'profile', None)
-
             user_field_map = {
-                'full_name': 'get_full_name',  # method 
+                'full_name': 'get_full_name',
                 'first_name': 'first_name',
                 'last_name': 'last_name',
                 'email': 'email',
-                'email_address': 'email',               # alias
-                'mobile_number': 'default_phone',     # profile field
-                'contact_number': 'default_phone',    # alias
-                'current_address': 'default_address',         # profile field
-                'address': 'default_address',                 # alias
+                'email_address': 'email',
+                'mobile_number': 'default_phone',
+                'contact_number': 'default_phone',
+                'current_address': 'default_address',
+                'address': 'default_address',
             }
 
             for field_name, attr_name in user_field_map.items():
                 if field_name in self.fields and not self.initial.get(field_name):
-                    # First try profile, fallback to user
                     value = ''
                     if profile and hasattr(profile, attr_name):
                         value = getattr(profile, attr_name, '')
@@ -127,22 +137,23 @@ class BaseCustomForm(forms.ModelForm):
                         value = getattr(user, attr_name, '')
                     self.fields[field_name].initial = value
 
+    # --- Validation methods ---
     def validate_contact_number(self, value):
         if not re.fullmatch(r'\d{11}', str(value)):
             raise forms.ValidationError("Contact/Mobile number must be exactly 11 digits.")
-        
+
     def validate_telephone_number(self, value):
         if not re.fullmatch(r'\d{10}', str(value)):
             raise forms.ValidationError("Telephone number must be exactly 10 digits.")
-        
+
     def validate_zip_code(self, value):
         if not re.fullmatch(r'\d{4}', str(value)):
-            raise forms.ValidationError("Zip code number must be exactly 4 digits.")
-        
+            raise forms.ValidationError("Zip code must be exactly 4 digits.")
+
     def validate_tax_identification_number(self, value):
         if not re.fullmatch(r'\d{9,12}', str(value)):
             raise forms.ValidationError("Tax Identification Number must be between 9 to 12 digits.")
-        
+
     def generate_date_not_in_future_validator(self, field_label):
         def validator(value):
             if value > date.today():
