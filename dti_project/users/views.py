@@ -85,12 +85,22 @@ import random
 # -----------------------------
 # FORGOT PASSWORD
 # -----------------------------
+from django.views import View
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .forms import ForgotPasswordForm
+from .models import User  # adjust import as needed
+
 class ForgotPasswordView(View):
     template_name = 'users/forgot_password.html'
 
     def get(self, request):
         form = ForgotPasswordForm()
-        return render(request, self.template_name, {'form': form})
+        return render(request, self.template_name, {
+            'form': form,
+            'verification_type': 'reset_password',  # tell JS this is password reset
+            'verification_sent': False
+        })
 
     def post(self, request):
         form = ForgotPasswordForm(request.POST)
@@ -100,24 +110,34 @@ class ForgotPasswordView(View):
                 user = User.objects.get(email=email)
             except User.DoesNotExist:
                 messages.error(request, "Email not found.")
-                return render(request, self.template_name, {'form': form})
+                return render(request, self.template_name, {
+                    'form': form,
+                    'verification_type': 'reset_password',
+                    'verification_sent': False
+                })
 
-            # Generate OTP and store in user
+            # Generate OTP and store in user (adjust method to your model)
             user.generate_secure_otp_code()
             user.save()
             request.session['pending_verification_user'] = user.id
 
-            # Log OTP for testing
+            # Log OTP for debugging
             print(f"[DEBUG] Verification code for {email}: {user.verification_code}")
 
             # Show verification modal
             return render(request, self.template_name, {
                 'form': form,
-                'show_verification_modal': True,
-                'email': email,
+                'verification_type': 'reset_password',
+                'verification_sent': True,
+                'email': email
             })
 
-        return render(request, self.template_name, {'form': form})
+        # Form invalid
+        return render(request, self.template_name, {
+            'form': form,
+            'verification_type': 'reset_password',
+            'verification_sent': False
+        })
 
 
 # -----------------------------
@@ -390,6 +410,7 @@ class CustomRegisterView(FormSubmissionMixin, CreateView):
         if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return JsonResponse({
                 'success': True,
+                'verification_type': 'registration',
                 'message': 'Registration successful! Please enter the verification code.',
                 'show_verification': True,
                 'masked_email': self.mask_email(user.email),

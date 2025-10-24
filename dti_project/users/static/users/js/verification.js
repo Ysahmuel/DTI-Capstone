@@ -208,27 +208,65 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // USE EVENT DELEGATION FOR VERIFY BUTTON
     // This will work even if the button is hidden when the page loads
+   document.addEventListener('DOMContentLoaded', function() {
+    // Get verification type from body data attribute
+    const verificationType = document.body.dataset.verificationType || 'register';
+    
+    // CSRF token helper
+    function getCSRFToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
+
+    // Auto-advance & paste for code inputs
+    const modal = document.querySelector('.verification-container');
+    if (modal) {
+        const codeInputs = modal.querySelectorAll('.code-input');
+
+        codeInputs.forEach((input, index) => {
+            // Auto-advance on input
+            input.addEventListener('input', function(e) {
+                if (e.target.value.length > 1) e.target.value = e.target.value.slice(0, 1);
+                if (e.target.value && index < codeInputs.length - 1) {
+                    codeInputs[index + 1].focus();
+                }
+            });
+
+            // Backspace to previous input
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                    e.preventDefault();
+                    codeInputs[index - 1].focus();
+                    codeInputs[index - 1].value = '';
+                }
+            });
+
+            // Paste full code
+            input.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const pasteData = e.clipboardData.getData('text').replace(/\D/g, '');
+                for (let i = 0; i < pasteData.length && (index + i) < codeInputs.length; i++) {
+                    codeInputs[index + i].value = pasteData[i];
+                }
+                const nextEmpty = Math.min(index + pasteData.length, codeInputs.length - 1);
+                codeInputs[nextEmpty].focus();
+            });
+        });
+    }
+
+    // Verify button click
     document.addEventListener('click', async function(e) {
-        // Check if the clicked element is the verify button
         if (e.target.matches('.btn-verify')) {
             e.preventDefault();
-            
-            console.log('=== VERIFY BUTTON CLICKED ===');
-            
-            // Get code inputs from the modal (they might be different from the initial codeInputs)
-            const modalCodeInputs = document.querySelectorAll('.code-input');
+
+            const modalCodeInputs = document.querySelectorAll('.verification-container .code-input');
             const code = Array.from(modalCodeInputs).map(input => input.value).join('');
 
-            console.log('Collected code:', code);
-            console.log('Code length:', code.length);
-
-            if (code.length != 6) {
+            if (code.length !== 6) {
                 alert("Please enter the full 6-digit code.");
                 return;
             }
 
             try {
-                console.log('Sending verification request...');
                 const response = await fetch('/users/verify-user/', {
                     method: "POST",
                     headers: {
@@ -239,13 +277,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     body: new URLSearchParams({ code: code })
                 });
 
-                console.log('Response status:', response.status);
                 const data = await response.json();
-                console.log('Response data:', data);
 
                 if (data.success) {
                     alert("✅ Verification successful!");
-                    window.location.href = data.redirect || "/dashboard/";
+
+                    // Conditional redirect based on verification type
+                    let redirectUrl = "/dashboard/"; // default for registration
+                    if (verificationType === "reset_password") {
+                        redirectUrl = document.body.dataset.resetPasswordUrl;
+                    }
+
+                    window.location.href = redirectUrl;
                 } else {
                     alert("❌ " + (data.error || data.message || "Verification failed"));
                 }
@@ -256,6 +299,48 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+
+    // Resend countdown logic
+    const resendBtn = document.getElementById('resend-btn');
+    const countdownEl = document.getElementById('countdown');
+    const resendWrapper = document.getElementById('resendWrapper');
+
+    function startCountdown(seconds = 30) {
+        if (!resendWrapper || !resendBtn || !countdownEl) return;
+
+        resendWrapper.style.display = 'inline';
+        resendBtn.style.display = 'none';
+        countdownEl.textContent = seconds;
+
+        const timer = setInterval(() => {
+            seconds--;
+            countdownEl.textContent = seconds;
+            if (seconds <= 0) {
+                clearInterval(timer);
+                resendWrapper.style.display = 'none';
+                resendBtn.style.display = 'inline';
+            }
+        }, 1000);
+    }
+
+    if (resendBtn) {
+        resendBtn.addEventListener('click', async function() {
+            try {
+                const response = await fetch('/users/resend-code/', {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': getCSRFToken() }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    startCountdown(30);
+                    alert('Code resent!');
+                }
+            } catch(err) { console.error(err); }
+        });
+    }
+
+});
+
 
     function getCSRFToken() {
         const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]");
