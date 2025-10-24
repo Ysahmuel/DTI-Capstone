@@ -10,6 +10,16 @@ from .models import User
 from datetime import date
 
 
+class ForgotPasswordForm(forms.Form):
+    email = forms.EmailField()
+
+
+class ResetPasswordForm(forms.Form):
+    password = forms.CharField(widget=forms.PasswordInput, label="New Password")
+    confirm_password = forms.CharField(widget=forms.PasswordInput, label="Confirm Password")
+
+
+
 class AddStaffForm(forms.ModelForm):
     birthday = forms.DateField(
         required=True,

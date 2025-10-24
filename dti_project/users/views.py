@@ -27,6 +27,11 @@ from django.contrib.auth.models import User
 from django.db import IntegrityError
 import random, string
 from .forms import AddStaffForm
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth import get_user_model
+from django.utils import timezone 
+from .forms import AddStaffForm
 
 from documents.models import (
     # Base models
@@ -66,13 +71,100 @@ logger = logging.getLogger(__name__)
 # Create your views here.
 
 
-#add staff view
-from django.shortcuts import render, redirect
+#forgot password view
+# users/views.py
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views import View
 from django.contrib import messages
-from django.contrib.auth import get_user_model
-from django.utils import timezone  # # Added for date comparison
-from .forms import AddStaffForm
+from django.contrib.auth import login
+from django.urls import reverse
+from .forms import ForgotPasswordForm, ResetPasswordForm
+from .models import User  # adjust if your User model is custom
+import random
 
+# -----------------------------
+# FORGOT PASSWORD
+# -----------------------------
+class ForgotPasswordView(View):
+    template_name = 'users/forgot_password.html'
+
+    def get(self, request):
+        form = ForgotPasswordForm()
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        form = ForgotPasswordForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                messages.error(request, "Email not found.")
+                return render(request, self.template_name, {'form': form})
+
+            # Generate OTP and store in user
+            user.generate_secure_otp_code()
+            user.save()
+            request.session['pending_verification_user'] = user.id
+
+            # Log OTP for testing
+            print(f"[DEBUG] Verification code for {email}: {user.verification_code}")
+
+            # Show verification modal
+            return render(request, self.template_name, {
+                'form': form,
+                'show_verification_modal': True,
+                'email': email,
+            })
+
+        return render(request, self.template_name, {'form': form})
+
+
+# -----------------------------
+# RESET PASSWORD
+# -----------------------------
+class ResetPasswordView(View):
+    template_name = 'users/reset_password.html'
+
+    def get(self, request):
+        if 'reset_email' not in request.session:
+            return redirect('forgot_password')
+        form = ResetPasswordForm()
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        if 'reset_email' not in request.session:
+            return redirect('forgot_password')
+
+        form = ResetPasswordForm(request.POST)
+        if form.is_valid():
+            password = form.cleaned_data['password']
+            confirm_password = form.cleaned_data['confirm_password']
+
+            if password != confirm_password:
+                return render(request, self.template_name, {
+                    'form': form,
+                    'error': "Passwords do not match."
+                })
+
+            email = request.session.pop('reset_email')
+            try:
+                user = User.objects.get(email=email)
+                user.set_password(password)
+                user.save()
+                return redirect('sign-in')
+            except User.DoesNotExist:
+                return redirect('forgot_password')
+
+        return render(request, self.template_name, {'form': form})
+
+
+
+
+
+
+
+#add staff view
 User = get_user_model()
 
 
