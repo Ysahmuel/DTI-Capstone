@@ -1,3 +1,4 @@
+import re
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.forms import UserCreationForm
@@ -74,8 +75,24 @@ class CustomLoginForm(AuthenticationForm):
         return getattr(self, 'user_cache', None)
 
 class CustomUserCreationForm(UserCreationForm):
-    first_name = forms.CharField(required=True)
-    last_name = forms.CharField(required=True)
+    first_name = forms.CharField(
+        required=True,
+        widget=forms.TextInput(attrs={
+            "oninput": "this.value=this.value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ' -]/g,'')",
+            "pattern": "[A-Za-zÀ-ÖØ-öø-ÿ' -]+",
+            "title": "Letters, spaces, hyphens, and apostrophes only",
+            "placeholder": "Enter First Name",
+        })
+    )
+    last_name = forms.CharField(
+        required=True,
+        widget=forms.TextInput(attrs={
+            "oninput": "this.value=this.value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ' -]/g,'')",
+            "pattern": "[A-Za-zÀ-ÖØ-öø-ÿ' -]+",
+            "title": "Letters, spaces, hyphens, and apostrophes only",
+            "placeholder": "Enter Last Name",
+        })
+    )
     email = forms.EmailField(required=True)
     default_phone = forms.CharField(required=True, label="Phone Number")
     default_address = forms.CharField(required=True, label="Address")
@@ -92,6 +109,19 @@ class CustomUserCreationForm(UserCreationForm):
             'password2',
         ]
 
+    # --- Server-side validation (still necessary for security) ---
+    def clean_first_name(self):
+        first_name = self.cleaned_data.get('first_name', '')
+        if not re.fullmatch(r"[A-Za-zÀ-ÖØ-öø-ÿ' -]+", first_name):
+            raise forms.ValidationError("First name must contain only letters, spaces, hyphens, or apostrophes.")
+        return first_name
+
+    def clean_last_name(self):
+        last_name = self.cleaned_data.get('last_name', '')
+        if not re.fullmatch(r"[A-Za-zÀ-ÖØ-öø-ÿ' -]+", last_name):
+            raise forms.ValidationError("Last name must contain only letters, spaces, hyphens, or apostrophes.")
+        return last_name
+
     def save(self, commit=True):
         user = super().save(commit=False)
         user.first_name = self.cleaned_data['first_name']
@@ -99,7 +129,7 @@ class CustomUserCreationForm(UserCreationForm):
         user.email = self.cleaned_data['email']
         user.default_phone = self.cleaned_data['default_phone']
         user.default_address = self.cleaned_data['default_address']
-        user.role == 'business_owner'
+        user.role = 'business_owner'  # fixed from '==' to '='
 
         # Generate unique username
         base_username = slugify(f"{user.first_name}.{user.last_name}")
