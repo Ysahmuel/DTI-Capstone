@@ -663,9 +663,25 @@ class ProcessUploadView(View):
                     created_reports.append(report)
                     wb.close()
 
-                # Send final completion message
+                # ENSURE 100% IS SHOWN BEFORE COMPLETION MESSAGE
                 redirect_url = reverse("collection-report", args=[created_reports[-1].pk]) if created_reports else reverse("all-documents")
                 
+                # First, send 100% progress update
+                yield self._sse_message({
+                    'status': 'processing',
+                    'current_row': total_rows,
+                    'total_rows': total_rows,
+                    'current_file': len(file_data_list),
+                    'total_files': len(file_data_list),
+                    'percentage': 100,
+                    'message': 'Finalizing...'
+                })
+                
+                # Add a small delay to ensure UI updates
+                import time
+                time.sleep(0.3)
+                
+                # Then send completion message
                 yield self._sse_message({
                     'status': 'complete',
                     'current_row': total_rows,
