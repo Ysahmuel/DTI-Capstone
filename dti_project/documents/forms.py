@@ -17,7 +17,6 @@ class SortForm(forms.Form):
     ]
 
     sort_by = forms.ChoiceField(choices=SORT_CHOICES, required=False, label='sort_by')
-
 class BaseCustomForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
@@ -68,10 +67,27 @@ class BaseCustomForm(forms.ModelForm):
                     field.widget.attrs['maxlength'] = 11
                     field.widget.attrs['placeholder'] = 'Enter Mobile Number (11 digits)'
 
-                if name == 'date_of_birth':
-                    field.validators.append(self.generate_date_not_in_future_validator("Date of Birth"))
-                    field.widget.attrs['max'] = date.today().isoformat()
-                    field.widget.attrs['placeholder'] = 'Enter Date of Birth'
+                # --- Date of Birth / Birthday (must be 18+) ---
+                if name in ['date_of_birth', 'birthday']:
+                    field.validators.append(self.validate_minimum_age_18)
+                    eighteen_years_ago = date.today().replace(year=date.today().year - 18)
+                    field.widget.attrs.update({
+                        'type': 'date',
+                        'max': eighteen_years_ago.isoformat(),
+                        'value': eighteen_years_ago.isoformat(),
+                        'placeholder': 'Select Date of Birth (Must be 18+)',
+                        # Immediate browser feedback
+                        'oninput': """
+                            const today = new Date();
+                            const cutoff = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+                            const inputDate = new Date(this.value);
+                            if (inputDate > cutoff) {
+                                this.setCustomValidity('You must be at least 18 years old.');
+                            } else {
+                                this.setCustomValidity('');
+                            }
+                        """,
+                    })
 
                 if name == 'date_established':
                     field.validators.append(self.generate_date_not_in_future_validator("Date Established"))
@@ -105,7 +121,6 @@ class BaseCustomForm(forms.ModelForm):
                     'full_name',
                     'nationality',
                 ]
-
                 if name in letter_only_fields:
                     field.widget.attrs.update({
                         'pattern': r"[A-Za-zÀ-ÖØ-öø-ÿ' -]+",
@@ -127,7 +142,6 @@ class BaseCustomForm(forms.ModelForm):
                 'current_address': 'default_address',
                 'address': 'default_address',
             }
-
             for field_name, attr_name in user_field_map.items():
                 if field_name in self.fields and not self.initial.get(field_name):
                     value = ''
@@ -154,6 +168,12 @@ class BaseCustomForm(forms.ModelForm):
         if not re.fullmatch(r'\d{9,12}', str(value)):
             raise forms.ValidationError("Tax Identification Number must be between 9 to 12 digits.")
 
+    def validate_minimum_age_18(self, value):
+        today = date.today()
+        eighteen_years_ago = today.replace(year=today.year - 18)
+        if value > eighteen_years_ago:
+            raise forms.ValidationError("You must be at least 18 years old.")
+
     def generate_date_not_in_future_validator(self, field_label):
         def validator(value):
             if value > date.today():
@@ -165,7 +185,6 @@ class BaseCustomForm(forms.ModelForm):
             if value < date.today():
                 raise forms.ValidationError(f'{field_label} cannot be in the past.')
         return validator
-
 
 class SalesPromotionPermitApplicationForm(BaseCustomForm):
     class Meta:
