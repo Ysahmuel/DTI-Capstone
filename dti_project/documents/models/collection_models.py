@@ -6,21 +6,34 @@ from django.utils import timezone
 class CollectionReport(models.Model):
     report_items = models.ManyToManyField(
         'CollectionReportItem',
-        related_name='collection_reports'
+        related_name='collection_reports',
+        blank=True  # Allow empty reports for daily auto-creation
     )
     dti_office = models.CharField(max_length=255, blank=True, null=True)
-    report_collection_date = models.DateField(null=True, blank=True)
-    report_no = models.CharField(max_length=255, blank=True, null=True)
+    report_collection_date = models.DateField(null=True, blank=True, unique=True)  # Add unique constraint
+    report_no = models.CharField(max_length=255, blank=True, null=True, unique=True)  # Should be unique
     date_from = models.DateField(null=True, blank=True)
     date_to = models.DateField(null=True, blank=True)
 
     # Summary
-    undeposited_last_report = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True, help_text="Undeposited Collections Last Report")
+    undeposited_last_report = models.DecimalField(
+        max_digits=12, 
+        decimal_places=2, 
+        blank=True, 
+        null=True, 
+        help_text="Undeposited Collections Last Report"
+    )
     total = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     certification = models.TextField(blank=True, null=True)
     name_of_collection_officer = models.CharField(max_length=255, blank=True, null=True)
     official_designation = models.CharField(max_length=255, blank=True, null=True) 
 
+    class Meta:
+        # Ensure only one report per day - use unique on field instead
+        ordering = ['-report_collection_date']
+        indexes = [
+            models.Index(fields=['-report_collection_date']),
+        ]
 
     def date_range_display(self):
         """Return a readable date range, preferring stored dates over calculated ones."""
@@ -32,8 +45,11 @@ class CollectionReport(models.Model):
                 return f"{self.date_from.strftime('%b %d, %Y')} - {self.date_to.strftime('%b %d, %Y')}"
         
         # Fall back to calculating from report items
-        dates = self.report_items.values_list('date', flat=True)
+        dates = list(self.report_items.values_list('date', flat=True).filter(date__isnull=False))
         if not dates:
+            # If no items with dates, use report_collection_date
+            if self.report_collection_date:
+                return self.report_collection_date.strftime("%b %d, %Y")
             return "No dates"
 
         first_date = min(dates)
@@ -46,10 +62,10 @@ class CollectionReport(models.Model):
         
     def report_duration(self):
         """Determine if the report is daily, monthly, or yearly based on report item dates."""
-        dates = self.report_items.values_list('date', flat=True)
+        dates = list(self.report_items.values_list('date', flat=True).filter(date__isnull=False))
         
         if not dates:
-            return "Unknown"
+            return "Daily"  # Default for empty reports (like auto-created daily reports)
         
         # Get the earliest and latest dates
         first_date = min(dates)
@@ -67,7 +83,24 @@ class CollectionReport(models.Model):
             return "Yearly"
 
     def __str__(self):
-        return f"Report ({self.date_range_display()})"
+        """Display report based on duration type"""
+        duration = self.report_duration()
+        
+        if duration == "Yearly":
+            # For yearly reports, just show the year
+            if self.date_from:
+                return f"Report {self.date_from.year}"
+            elif self.report_collection_date:
+                return f"Report {self.report_collection_date.year}"
+            else:
+                # Fall back to getting year from report items
+                dates = list(self.report_items.values_list('date', flat=True).filter(date__isnull=False))
+                if dates:
+                    return f"Report {min(dates).year}"
+                return "Yearly Report"
+        else:
+            # For daily and monthly, show full date range
+            return f"Report ({self.date_range_display()})"
 
     def delete(self, *args, **kwargs):
         # Delete all associated report items first
