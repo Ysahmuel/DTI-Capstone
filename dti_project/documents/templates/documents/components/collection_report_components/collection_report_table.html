@@ -19,10 +19,6 @@
             <td>{{ item.particulars }}</td>
             <td>{{ item.amount }}</td>
         </tr>
-        {% empty %}
-        <tr>
-            <td colspan="6">No documents found for this file.</td>
-        </tr>
         {% endfor %}
     </tbody>
 </table>
