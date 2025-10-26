@@ -1,6 +1,9 @@
 from django.utils import timezone
 from django.contrib import messages
 from .models.collection_models import CollectionReport
+from django.utils import timezone
+from django.contrib import messages
+from documents.models.collection_models import CollectionReport
 
 class DailyCollectionReportMiddleware:
     """
@@ -17,7 +20,7 @@ class DailyCollectionReportMiddleware:
 
         # Only run for authenticated collection agents
         if request.user.is_authenticated and self.is_collection_agent(request.user):
-            created_report = self.ensure_daily_report_exists()
+            created_report = self.ensure_daily_report_exists(request.user)
 
         response = self.get_response(request)
 
@@ -35,7 +38,7 @@ class DailyCollectionReportMiddleware:
         """Check if the user is a collection agent."""
         return hasattr(user, "role") and user.role == "collection_agent"
 
-    def ensure_daily_report_exists(self):
+    def ensure_daily_report_exists(self, user):
         """Create today's collection report if it doesn't exist."""
         today = timezone.localdate()
         year_short = today.strftime("%y")
@@ -44,14 +47,18 @@ class DailyCollectionReportMiddleware:
         # 🔢 Report number format: YY-DDD (zero-padded to 3 digits)
         report_no = f"{year_short}-{day_of_year:03d}"
 
-        # Create the report if not yet existing
+        # Check if report already exists for this user today
         report, created = CollectionReport.objects.get_or_create(
             report_collection_date=today,
+            collection_agent=user,
             defaults={
                 "report_no": report_no,
-                "dti_office": "DTI Provincial Office",
+                "date_from": today,
+                "date_to": today,
+                "dti_office": user.dti_office or "DTI Albay Provincial Office",
+                "official_designation": user.official_designation or "Special Collecting Officer",
+                "name_and_signature_of_collection_office": f"{user.first_name} {user.last_name}".strip(),
                 "certification": self.get_default_certification(),
-                "official_designation": "Special Collecting Officer",
             },
         )
 
