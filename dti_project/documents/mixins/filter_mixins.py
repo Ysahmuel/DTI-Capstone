@@ -143,3 +143,125 @@ class FilterableDocumentMixin:
             context["CIVIL_STATUS_CHOICES"] = getattr(PersonalDataSheet, "CIVIL_STATUS_CHOICES", [])
 
         return context
+
+class FilterCollectionReportListMixin:
+    """
+    Adds filtering for CollectionReport objects.
+    Supports:
+      - report_collection_date range (start_date / end_date)
+      - duration_type (Daily, Monthly, Yearly) computed via model.report_duration()
+    """
+
+    def apply_filters(self, qs):
+        request = self.request
+
+        # --- Filter params ---
+        start_date = request.GET.get("start_date")
+        end_date = request.GET.get("end_date")
+        duration_type = request.GET.get("duration_type")
+
+        filters = Q()
+
+        # --- Date filters (based on report_collection_date) ---
+        if start_date:
+            filters &= Q(report_collection_date__gte=start_date)
+        if end_date:
+            filters &= Q(report_collection_date__lte=end_date)
+
+        # Apply DB-side filters first
+        qs = qs.filter(filters).distinct()
+
+        # --- Duration Type filter (computed via model method) ---
+        if duration_type:
+            # Build list of matching IDs (computed property can't be queried in DB)
+            matching_ids = [
+                r.id for r in qs if r.report_duration().lower() == duration_type.lower()
+            ]
+            # Keep it a queryset so pagination/order_by/etc still work
+            qs = qs.filter(id__in=matching_ids)
+
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        request = self.request
+
+        # Preserve selected filter values
+        context.update({
+            "selected_start_date": request.GET.get("start_date", ""),
+            "selected_end_date": request.GET.get("end_date", ""),
+            "selected_duration_type": request.GET.get("duration_type", ""),
+        })
+
+        # Compute min/max report_collection_date for date input min/max attributes
+        qs_all = self.model.objects.filter(report_collection_date__isnull=False)
+        if qs_all.exists():
+            first = qs_all.order_by("report_collection_date").first().report_collection_date
+            last = qs_all.order_by("-report_collection_date").first().report_collection_date
+            # Date objects are fine in template, but we also provide ISO strings for min/max attributes
+            context["min_report_date"] = first
+            context["max_report_date"] = last
+            context["min_report_date_iso"] = first.isoformat()
+            context["max_report_date_iso"] = last.isoformat()
+        else:
+            context["min_report_date"] = ""
+            context["max_report_date"] = ""
+            context["min_report_date_iso"] = ""
+            context["max_report_date_iso"] = ""
+
+        return context
+
+
+class FilterCollectionReportListItemMixin:
+    """
+    Adds filtering for CollectionReportItem objects.
+    Supports date range, OR number, payor, RC code, and amount range filters.
+    """
+    def apply_filters(self, qs):
+        request = self.request
+
+        start_date = request.GET.get("start_date")
+        end_date = request.GET.get("end_date")
+        or_number = request.GET.get("number")
+        payor = request.GET.get("payor")
+        rc_code = request.GET.get("rc_code")
+        min_amount = request.GET.get("min_amount")
+        max_amount = request.GET.get("max_amount")
+
+        filters = Q()
+
+        # Handle date filters
+        if start_date:
+            filters &= Q(date__gte=start_date)
+        if end_date:
+            filters &= Q(date__lte=end_date)
+
+        # String search filters
+        if or_number:
+            filters &= Q(number__icontains=or_number)
+        if payor:
+            filters &= Q(payor__icontains=payor)
+        if rc_code:
+            filters &= Q(rc_code__icontains=rc_code)
+
+        # Numeric filters
+        if min_amount:
+            filters &= Q(amount__gte=min_amount)
+        if max_amount:
+            filters &= Q(amount__lte=max_amount)
+
+        return qs.filter(filters)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        request = self.request
+
+        context["selected_start_date"] = request.GET.get("start_date", "")
+        context["selected_end_date"] = request.GET.get("end_date", "")
+        context["selected_or_number"] = request.GET.get("number", "")
+        context["selected_payor"] = request.GET.get("payor", "")
+        context["selected_rc_code"] = request.GET.get("rc_code", "")
+        context["selected_min_amount"] = request.GET.get("min_amount", "")
+        context["selected_max_amount"] = request.GET.get("max_amount", "")
+
+        return context

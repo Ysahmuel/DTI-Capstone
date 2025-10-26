@@ -1,0 +1,86 @@
+<div class="modal-container" id="document-list-filters-container">
+    <div class="modal" id="document-list-filters-modal">
+        <header>
+            <h2>Advanced Filters</h2>
+            <button type="button" class="close-modal-btn">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </header>
+
+        <!-- Form -->
+        <form method="get" id="document-filters-form">
+
+            <!-- Duration Type -->
+            <section id="duration-type-filter">
+                <h4>Duration Type</h4>
+                <ul class="radio-filter-list">
+                    <li class="radio-filter-item">
+                        <label>
+                            <input type="radio" name="duration_type" value="Daily"
+                                {% if selected_duration_type == "Daily" %}checked{% endif %}>
+                            Daily
+                        </label>
+                    </li>
+                    <li class="radio-filter-item">
+                        <label>
+                            <input type="radio" name="duration_type" value="Monthly"
+                                {% if selected_duration_type == "Monthly" %}checked{% endif %}>
+                            Monthly
+                        </label>
+                    </li>
+                    <li class="radio-filter-item">
+                        <label>
+                            <input type="radio" name="duration_type" value="Yearly"
+                                {% if selected_duration_type == "Yearly" %}checked{% endif %}>
+                            Yearly
+                        </label>
+                    </li>
+                    <li class="radio-filter-item">
+                        <label>
+                            <input type="radio" name="duration_type" value=""
+                                {% if not selected_duration_type %}checked{% endif %}>
+                            All
+                        </label>
+                    </li>
+                </ul>
+            </section>
+
+            <!-- Report Collection Date -->
+            <section id="date-created-filter">
+                <h4>Report Collection Date</h4>
+                <div class="wrapper">
+                    <div class="form-group">
+                        <label for="start_date">Start Date</label>
+                        <input
+                            type="date"
+                            name="start_date"
+                            id="start_date"
+                            value="{{ selected_start_date }}"
+                            {% if min_report_date_iso %} min="{{ min_report_date_iso }}"{% endif %}
+                            {% if max_report_date_iso %} max="{{ max_report_date_iso }}"{% endif %}
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="end_date">End Date</label>
+                        <input
+                            type="date"
+                            name="end_date"
+                            id="end_date"
+                            value="{{ selected_end_date }}"
+                            {% if min_report_date_iso %} min="{{ min_report_date_iso }}"{% endif %}
+                            {% if max_report_date_iso %} max="{{ max_report_date_iso }}"{% endif %}
+                        >
+                    </div>
+                </div>
+                <p class="hint" style="margin: 1rem 0;">Available range: {% if min_report_date %}{{ min_report_date|date:"M d, Y" }}{% else %}—{% endif %} to {% if max_report_date %}{{ max_report_date|date:"M d, Y" }}{% else %}—{% endif %}</p>
+            </section>
+
+            <!-- Actions -->
+            <div class="actions">
+                <button type="reset" id="clear-btn">Clear</button>
+                <button type="submit" id="submit-btn">Apply</button>
+            </div>
+        </form>
+    </div>
+</div>

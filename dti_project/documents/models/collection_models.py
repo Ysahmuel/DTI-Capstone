@@ -23,6 +23,7 @@ class CollectionReport(models.Model):
         null=True, 
         help_text="Undeposited Collections Last Report"
     )
+    responsibility_center_code = models.CharField(blank=True, null=True)
     total = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     certification = models.TextField(blank=True, null=True)
     name_of_collection_officer = models.CharField(max_length=255, blank=True, null=True)
@@ -100,7 +101,7 @@ class CollectionReport(models.Model):
                 return "Yearly Report"
         else:
             # For daily and monthly, show full date range
-            return f"Report ({self.report_no}) - {self.report_collection_date}"
+            return f"Report ({self.report_no}) - {self.date_range_display()}"
 
     def delete(self, *args, **kwargs):
         # Delete all associated report items first
