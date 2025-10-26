@@ -68,7 +68,7 @@
                     </li>
                 {% endif %}
 
-                {% if user.role == 'collection_agent' or user.role == 'admin' %}
+                {% if user.role == 'collection_agent' %}
                     <li class="nav-item">
                         <a href="{% url 'collection-report-list' %}" class="nav-link">
                             <i class="fa-solid fa-file-invoice"></i>
