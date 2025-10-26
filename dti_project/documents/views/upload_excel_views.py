@@ -100,7 +100,6 @@ class UploadExcelView(View):
             'status': 'queued',
             'session_id': session_id
         })
-
 class ProcessUploadView(View):
     """
     Separate view that processes the upload.
@@ -560,7 +559,13 @@ class ProcessUploadView(View):
                     wb.close()
 
                 # ENSURE 100% IS SHOWN BEFORE COMPLETION MESSAGE
-                redirect_url = reverse("collection-report", args=[created_reports[-1].pk]) if created_reports else reverse("all-documents")
+                # If multiple files uploaded, redirect to list; otherwise to the single report
+                if len(created_reports) > 1:
+                    redirect_url = reverse("collection-report-list")
+                elif created_reports:
+                    redirect_url = reverse("collection-report", args=[created_reports[-1].pk])
+                else:
+                    redirect_url = reverse("all-documents")
                 
                 # First, send 100% progress update
                 yield self._sse_message({
@@ -612,7 +617,7 @@ class ProcessUploadView(View):
     def _sse_message(self, data):
         """Format data as SSE message"""
         return f"data: {json.dumps(data)}\n\n"
-
+    
 class UploadProgressStreamView(View):
     """Legacy view - kept for backwards compatibility but not used in new flow"""
     
