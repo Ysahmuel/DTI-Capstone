@@ -50,14 +50,11 @@ class DailyCollectionReportMiddleware:
         # Check if report already exists for this user today
         report, created = CollectionReport.objects.get_or_create(
             report_collection_date=today,
-            collection_agent=user,
+            name_of_collection_officer=user,
             defaults={
                 "report_no": report_no,
-                "date_from": today,
-                "date_to": today,
                 "dti_office": user.dti_office or "DTI Albay Provincial Office",
                 "official_designation": user.official_designation or "Special Collecting Officer",
-                "name_and_signature_of_collection_office": f"{user.first_name} {user.last_name}".strip(),
                 "certification": self.get_default_certification(),
             },
         )
