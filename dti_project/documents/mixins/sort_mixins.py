@@ -88,7 +88,37 @@ class SortCollectionReportListMixin:
         return context
     
 class SortCollectionReportListItemMixin:
-    pass
+    """
+    Adds sorting functionality for a queryset of CollectionReportItem objects.
+    Can be used with DetailView or ListView.
+    """
+
+    # This allows you to pass any queryset to sort_items
+    sortable_fields = {
+        "number": "number",
+        "payor": "payor",
+        "particulars": "particulars",
+        "amount": "amount",
+    }
+
+    def sort_items(self, qs):
+        sort_by = self.request.GET.get("sort_by")
+        order = self.request.GET.get("order", "asc")
+
+        sort_field = self.sortable_fields.get(sort_by, "id")  # default fallback
+
+        if order == "desc":
+            sort_field = f"-{sort_field}"
+
+        return qs.order_by(sort_field)
+
+    def get_sort_context(self):
+        """Return current sort info for template"""
+        return {
+            "sort_by": self.request.GET.get("sort_by", ""),
+            "order": self.request.GET.get("order", "asc"),
+        }
+
 
 class SortCollectionReportItemMixin:
     pass

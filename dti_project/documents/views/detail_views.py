@@ -1,5 +1,5 @@
 import re
-
+from ..mixins.sort_mixins import SortCollectionReportListItemMixin
 from ..mixins.permissions_mixins import RoleFormPageRestrictionMixin
 from ..models.collection_models import CollectionReport, CollectionReportItem
 from ..mixins.context_mixins import TabsSectionMixin
@@ -141,7 +141,12 @@ class ChecklistEvaluationSheetDetailView(LoginRequiredMixin, DetailView):
 
         return context
     
-class CollectionReportDetailView(RoleFormPageRestrictionMixin, LoginRequiredMixin, DetailView):
+class CollectionReportDetailView(
+    RoleFormPageRestrictionMixin,
+    SortCollectionReportListItemMixin,
+    LoginRequiredMixin,
+    DetailView
+):
     template_name = 'documents/collection_reports/collection_report.html'
     model = CollectionReport
     context_object_name = 'collection_report'
@@ -149,8 +154,17 @@ class CollectionReportDetailView(RoleFormPageRestrictionMixin, LoginRequiredMixi
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        collection_report = context['collection_report']
+
+        # Apply sorting via the mixin
+        items_qs = collection_report.report_items.all()
+        context['items'] = self.sort_items(items_qs)
+
+        # Add sorting info for template buttons/icons
+        context.update(self.get_sort_context())
 
         return context
+
     
 class CollectionReportItemDetailView(RoleFormPageRestrictionMixin, LoginRequiredMixin, DetailView):
     template_name = 'documents/collection_reports/collection_report_item.html'
