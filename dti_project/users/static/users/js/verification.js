@@ -1,265 +1,155 @@
-document.addEventListener('DOMContentLoaded', function() { 
-    const form = document.querySelector('#register-form')
-    const step3 = document.getElementById("step3"); 
-    const maskedOutput = document.getElementById("maskedOutput"); 
+document.addEventListener('DOMContentLoaded', function () {
+    // Select forgot-password form first
+    const form = document.querySelector('#forgot-password-form') || document.querySelector('#register-form');
+    const maskedOutput = document.getElementById("maskedOutput");
     const codeInputs = document.querySelectorAll('.code-input');
+    const resendBtn = document.getElementById("resend-btn");
+    let countdownTimer;
 
-    form.addEventListener('submit', async function(e) {
-        e.preventDefault();
+    // ----------------------
+    // Submit handler
+    // ----------------------
+    if (form) {
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const formData = new FormData(form);
 
-        const formData = new FormData(form)
-        
-        // Debug: Log form data
-        console.log("=== FORM DATA ===");
-        for (let [key, value] of formData.entries()) {
-            console.log(`${key}: ${value}`);
-        }
+            console.log("=== FORM DATA ===");
+            for (let [key, value] of formData.entries()) {
+                console.log(`${key}: ${value}`);
+            }
 
-        try {
-            const response = await fetch(form.action, {
-                method: "POST",
-                body: formData,
-                headers: {
-                    "X-Requested-With": "XMLHttpRequest",
-                    "X-CSRFToken": getCSRFToken(),
-                }
-            });
+            try {
+                const response = await fetch(form.action, {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        "X-CSRFToken": getCSRFToken(),
+                    }
+                });
 
-            console.log("Response status:", response.status);
-            const data = await response.json();
-            console.log("Response data:", data);
+                console.log("Response status:", response.status);
+                const data = await response.json();
+                console.log("Response data:", data);
 
-            if (data.success) {
-                // Show modal for OTP
-                const verificationContainer = document.querySelector('.verification-container');
-                if (verificationContainer) {
-                    verificationContainer.style.display = "flex";
-                }
-                if (maskedOutput) {
-                    maskedOutput.textContent = data.masked_email;
-                }
-                startCountdown(30);
+                if (data.success) {
+                    // Show verification modal
+                    const verificationContainer = document.querySelector('.verification-container');
+                    if (verificationContainer) {
+                        verificationContainer.style.display = "flex";
+                    }
 
-                const modalCodeInputs = document.querySelectorAll('.code-input');
-                modalCodeInputs.forEach((input) => (input.value = ""));
-                if (modalCodeInputs.length > 0) {
-                    modalCodeInputs[0].focus();
-                }
-            } else {
-                if (data.messages_html) {
-                    const alertsContainer = document.querySelector('.alerts-container');
-                    if (alertsContainer) {
-                        alertsContainer.outerHTML = data.messages_html;
+                    // Show masked email in modal
+                    if (maskedOutput && data.masked_email) {
+                        maskedOutput.textContent = data.masked_email;
+                    }
+
+                    startCountdown(30);
+
+                    // Clear and focus code inputs
+                    const modalCodeInputs = document.querySelectorAll('.code-input');
+                    modalCodeInputs.forEach(input => input.value = '');
+                    if (modalCodeInputs.length > 0) {
+                        modalCodeInputs[0].focus();
+                    }
+
+                } else {
+                    // Show error messages from backend if any
+                    if (data.messages_html) {
+                        const alertsContainer = document.querySelector('.alerts-container');
+                        if (alertsContainer) {
+                            alertsContainer.outerHTML = data.messages_html;
+                        } else {
+                            document.querySelector('.backdrop-layer')
+                                .insertAdjacentHTML('afterbegin', data.messages_html);
+                        }
                     } else {
-                        document.querySelector('.backdrop-layer')
-                            .insertAdjacentHTML('afterbegin', data.messages_html);
+                        alert("Something went wrong. Please try again.");
                     }
                 }
+            } catch (error) {
+                console.error("Error submitting form:", error);
+                alert("Something went wrong. Please try again.");
             }
-        } catch (error) {
-            console.error("Error submitting form:", error);
-            alert("Something went wrong.");
-        }
-    })
- 
-    let countdownTimer; 
+        });
+    }
 
-    const resendBtn = document.getElementById("resend-btn"); 
- 
-    function startCountdown(seconds = 30) { 
-        const countdownEl = document.getElementById("countdown"); 
+    // ----------------------
+    // Countdown timer
+    // ----------------------
+    function startCountdown(seconds = 30) {
+        const countdownEl = document.getElementById("countdown");
         const resendWrapper = document.getElementById("resendWrapper");
- 
         if (resendWrapper && resendBtn && countdownEl) {
-            resendWrapper.style.display = "inline"; 
-            resendBtn.style.display = "none"; 
-            countdownEl.textContent = seconds; 
-     
-            clearInterval(countdownTimer); 
-            countdownTimer = setInterval(() => { 
-                seconds--; 
-                countdownEl.textContent = seconds; 
-                if (seconds <= 0) { 
-                    clearInterval(countdownTimer); 
-                    resendWrapper.style.display = "none"; 
-                    resendBtn.style.display = "inline"; 
-                } 
+            resendWrapper.style.display = "inline";
+            resendBtn.style.display = "none";
+            countdownEl.textContent = seconds;
+
+            clearInterval(countdownTimer);
+            countdownTimer = setInterval(() => {
+                seconds--;
+                countdownEl.textContent = seconds;
+                if (seconds <= 0) {
+                    clearInterval(countdownTimer);
+                    resendWrapper.style.display = "none";
+                    resendBtn.style.display = "inline";
+                }
             }, 1000);
         }
     }
 
-    resendBtn.addEventListener('click', async function() {
-        const title = document.querySelector('#step3 .title') 
-        try {
-            const response = await fetch(`/users/resend-code/`, {
-                method: "POST",
-                headers: {
-                    'X-CSRFToken': getCSRFToken(),
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            });
+    // ----------------------
+    // Resend code button
+    // ----------------------
+    if (resendBtn) {
+        resendBtn.addEventListener('click', async function () {
+            try {
+                const response = await fetch(`/users/resend-code/`, {
+                    method: "POST",
+                    headers: {
+                        'X-CSRFToken': getCSRFToken(),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
 
-            const data = await response.json()
-            if (data.success) {
-                console.log('Code resent successfully')
-                startCountdown(30)
-
-                if (title) {
-                    title.textContent = 'Code resent, check your inbox'
+                const data = await response.json();
+                if (data.success) {
+                    console.log('Code resent successfully');
+                    startCountdown(30);
                 }
+            } catch (error) {
+                console.error('Error: failed to resend code', error);
             }
-        } catch (error) {
-            console.error('Error: failed to resend code')
-        }
-    })
+        });
+    }
 
-    // Auto-navigation logic for code inputs
+    // ----------------------
+    // Code input auto-navigation
+    // ----------------------
     codeInputs.forEach((input, index) => {
-        input.addEventListener('input', function(e) {
-            const value = e.target.value;
-            
-            // Only allow single digit
-            if (value.length > 1) {
-                e.target.value = value.slice(0, 1);
-            }
-            
-            // Move to next input if current is filled
+        input.addEventListener('input', function (e) {
+            e.target.value = e.target.value.replace(/\D/g, '');
             if (e.target.value.length === 1 && index < codeInputs.length - 1) {
                 codeInputs[index + 1].focus();
             }
         });
 
-        input.addEventListener('keydown', function(e) {
-            // Handle backspace
-            if (e.key === 'Backspace') {
-                // If current input is empty and not the first input, go to previous
-                if (e.target.value === '' && index > 0) {
-                    e.preventDefault();
-                    codeInputs[index - 1].focus();
-                    codeInputs[index - 1].value = '';
-                }
-                // If current input has value, just clear it (default behavior)
-                else if (e.target.value !== '') {
-                    e.target.value = '';
-                    e.preventDefault();
-                }
-            }
-            
-            // Handle arrow keys for navigation
-            if (e.key === 'ArrowLeft' && index > 0) {
-                e.preventDefault();
+        input.addEventListener('keydown', function (e) {
+            if (e.key === 'Backspace' && e.target.value === '' && index > 0) {
                 codeInputs[index - 1].focus();
             }
-            
-            if (e.key === 'ArrowRight' && index < codeInputs.length - 1) {
-                e.preventDefault();
-                codeInputs[index + 1].focus();
-            }
-            
-            // Only allow numeric input
-            if (!/[0-9]/.test(e.key) && 
-                !['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Enter'].includes(e.key)) {
-                e.preventDefault();
-            }
-        });
-
-        // Handle paste events
-        input.addEventListener('paste', function(e) {
-            e.preventDefault();
-            const pasteData = e.clipboardData.getData('text').replace(/\D/g, ''); // Only digits
-            
-            // Fill inputs starting from current position
-            for (let i = 0; i < pasteData.length && (index + i) < codeInputs.length; i++) {
-                codeInputs[index + i].value = pasteData[i];
-            }
-            
-            // Focus the next empty input or the last filled one
-            const nextEmptyIndex = Math.min(index + pasteData.length, codeInputs.length - 1);
-            codeInputs[nextEmptyIndex].focus();
         });
     });
- 
-    // Resend link handler
-    const resendLink = document.getElementById("resendLink");
-    if (resendLink) {
-        resendLink.onclick = (e) => { 
-            e.preventDefault(); 
-            alert("Code resent! (fake demo)"); 
-            startCountdown(30);
-            
-            // Clear all inputs and focus first one
-            const modalCodeInputs = document.querySelectorAll('.code-input');
-            modalCodeInputs.forEach(input => input.value = '');
-            if (modalCodeInputs.length > 0) {
-                modalCodeInputs[0].focus();
-            }
-        };
-    }
 
-    // Close modal handler
-    const closeModalBtn = document.getElementById('close-verification-modal-btn');
-    const verificationContainer = document.querySelector('.verification-container');
-
-    if (closeModalBtn && verificationContainer) {
-        closeModalBtn.addEventListener('click', function() {
-            verificationContainer.style.display = 'none';
-        })
-    }
-
-    // USE EVENT DELEGATION FOR VERIFY BUTTON
-    // This will work even if the button is hidden when the page loads
-   document.addEventListener('DOMContentLoaded', function() {
-    // Get verification type from body data attribute
-    const verificationType = document.body.dataset.verificationType || 'register';
-    
-    // CSRF token helper
-    function getCSRFToken() {
-        return document.querySelector('[name=csrfmiddlewaretoken]').value;
-    }
-
-    // Auto-advance & paste for code inputs
-    const modal = document.querySelector('.verification-container');
-    if (modal) {
-        const codeInputs = modal.querySelectorAll('.code-input');
-
-        codeInputs.forEach((input, index) => {
-            // Auto-advance on input
-            input.addEventListener('input', function(e) {
-                if (e.target.value.length > 1) e.target.value = e.target.value.slice(0, 1);
-                if (e.target.value && index < codeInputs.length - 1) {
-                    codeInputs[index + 1].focus();
-                }
-            });
-
-            // Backspace to previous input
-            input.addEventListener('keydown', function(e) {
-                if (e.key === 'Backspace' && !e.target.value && index > 0) {
-                    e.preventDefault();
-                    codeInputs[index - 1].focus();
-                    codeInputs[index - 1].value = '';
-                }
-            });
-
-            // Paste full code
-            input.addEventListener('paste', function(e) {
-                e.preventDefault();
-                const pasteData = e.clipboardData.getData('text').replace(/\D/g, '');
-                for (let i = 0; i < pasteData.length && (index + i) < codeInputs.length; i++) {
-                    codeInputs[index + i].value = pasteData[i];
-                }
-                const nextEmpty = Math.min(index + pasteData.length, codeInputs.length - 1);
-                codeInputs[nextEmpty].focus();
-            });
-        });
-    }
-
-    // Verify button click
-    document.addEventListener('click', async function(e) {
+    // ----------------------
+    // Verify code
+    // ----------------------
+    document.addEventListener('click', async function (e) {
         if (e.target.matches('.btn-verify')) {
             e.preventDefault();
-
-            const modalCodeInputs = document.querySelectorAll('.verification-container .code-input');
-            const code = Array.from(modalCodeInputs).map(input => input.value).join('');
+            const modalCodeInputs = document.querySelectorAll('.code-input');
+            const code = Array.from(modalCodeInputs).map(i => i.value).join('');
 
             if (code.length !== 6) {
                 alert("Please enter the full 6-digit code.");
@@ -278,17 +168,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
 
                 const data = await response.json();
-
                 if (data.success) {
                     alert("✅ Verification successful!");
-
-                    // Conditional redirect based on verification type
-                    let redirectUrl = "/dashboard/"; // default for registration
-                    if (verificationType === "reset_password") {
-                        redirectUrl = document.body.dataset.resetPasswordUrl;
+                    if (form && form.id === "forgot-password-form") {
+                        window.location.href = data.redirect || "/users/reset-password/";
+                    } else {
+                        window.location.href = data.redirect || "/dashboard/";
                     }
-
-                    window.location.href = redirectUrl;
                 } else {
                     alert("❌ " + (data.error || data.message || "Verification failed"));
                 }
@@ -300,55 +186,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Resend countdown logic
-    const resendBtn = document.getElementById('resend-btn');
-    const countdownEl = document.getElementById('countdown');
-    const resendWrapper = document.getElementById('resendWrapper');
-
-    function startCountdown(seconds = 30) {
-        if (!resendWrapper || !resendBtn || !countdownEl) return;
-
-        resendWrapper.style.display = 'inline';
-        resendBtn.style.display = 'none';
-        countdownEl.textContent = seconds;
-
-        const timer = setInterval(() => {
-            seconds--;
-            countdownEl.textContent = seconds;
-            if (seconds <= 0) {
-                clearInterval(timer);
-                resendWrapper.style.display = 'none';
-                resendBtn.style.display = 'inline';
-            }
-        }, 1000);
-    }
-
-    if (resendBtn) {
-        resendBtn.addEventListener('click', async function() {
-            try {
-                const response = await fetch('/users/resend-code/', {
-                    method: 'POST',
-                    headers: { 'X-CSRFToken': getCSRFToken() }
-                });
-                const data = await response.json();
-                if (data.success) {
-                    startCountdown(30);
-                    alert('Code resent!');
-                }
-            } catch(err) { console.error(err); }
-        });
-    }
-
-});
-
-
+    // ----------------------
+    // CSRF helper
+    // ----------------------
     function getCSRFToken() {
         const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]");
-        if (!csrfToken) {
-            console.error("CSRF token not found!");
-            return '';
-        }
-        return csrfToken.value;
+        return csrfToken ? csrfToken.value : '';
     }
-
 });
