@@ -5,7 +5,6 @@
         <tr>
             <th>Report Name</th>
             <th>Number of Records</th>
-            <th>Report Duration</th>
         </tr>
     </thead>
     <tbody>
@@ -13,7 +12,6 @@
         <tr class="document-value-row" data-href="{{ report.get_absolute_url }}">
             <td>{{ report }}</td>
             <td>{{ report.report_items.count }}</td>
-            <td>{{ report.report_duration }}</td>
         </tr>
         {% endfor %}
     </tbody>
