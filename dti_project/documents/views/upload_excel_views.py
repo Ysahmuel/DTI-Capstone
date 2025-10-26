@@ -104,6 +104,7 @@ class ProcessUploadView(View):
     """
     Separate view that processes the upload.
     This is called via AJAX and streams progress updates.
+    Merges data into existing reports if report_no and report_collection_date match.
     """
     
     @staticmethod
@@ -222,7 +223,7 @@ class ProcessUploadView(View):
                     cell_text = str(cell.value).strip()
                     cell_lower = cell_text.lower()
                     
-                    # Look for "Name and Signature of Collecting Officer" label (exact match, same logic as designation)
+                    # Look for "Name and Signature of Collecting Officer" label
                     if cell_lower == 'name and signature of collecting officer':
                         # The actual name should be in the row ABOVE
                         name_cell = ws.cell(row=cell.row - 1, column=cell.column)
@@ -231,7 +232,6 @@ class ProcessUploadView(View):
                             # Skip if it looks like an underline or empty
                             if name_text and name_text not in ['_', '__', '___', '____', '_____', '______'] and not all(c in '_ ' for c in name_text):
                                 metadata['name_of_collection_officer'] = name_text
-                                print(f"DEBUG - Found officer name: {name_text}")
                         
                         # Also check 2 rows above in case there's an underline row
                         if not metadata['name_of_collection_officer']:
@@ -240,9 +240,8 @@ class ProcessUploadView(View):
                                 name_text = str(name_cell_2.value).strip()
                                 if name_text and not all(c in '_ ' for c in name_text):
                                     metadata['name_of_collection_officer'] = name_text
-                                    print(f"DEBUG - Found officer name (2 rows up): {name_text}")
                     
-                    # Look for "Official Designation" label (exact match)
+                    # Look for "Official Designation" label
                     if cell_lower == 'official designation':
                         # The actual designation should be in the row ABOVE
                         designation_cell = ws.cell(row=cell.row - 1, column=cell.column)
@@ -251,7 +250,6 @@ class ProcessUploadView(View):
                             # Skip if it looks like an underline or empty
                             if designation_text and designation_text not in ['_', '__', '___', '____', '_____', '______'] and not all(c in '_ ' for c in designation_text):
                                 metadata['official_designation'] = designation_text
-                                print(f"DEBUG - Found designation: {designation_text}")
                         
                         # Also check 2 rows above in case there's an underline row
                         if not metadata['official_designation']:
@@ -260,17 +258,14 @@ class ProcessUploadView(View):
                                 designation_text = str(designation_cell_2.value).strip()
                                 if designation_text and not all(c in '_ ' for c in designation_text):
                                     metadata['official_designation'] = designation_text
-                                    print(f"DEBUG - Found designation (2 rows up): {designation_text}")
                     
                     # Look for "Special Collecting Officer" as a standalone value
                     if cell_lower == 'special collecting officer' and not metadata['official_designation']:
                         metadata['official_designation'] = 'Special Collecting Officer'
-                        print(f"DEBUG - Found designation: Special Collecting Officer")
         
         return metadata
     
     def get(self, request, session_id):   
-        print(f"ProcessUploadView GET called with session_id: {session_id}")  # DEBUG     
         def process_and_stream():
             try:
                 # Get files from cache
@@ -286,6 +281,7 @@ class ProcessUploadView(View):
                 })
 
                 created_reports = []
+                merged_reports = []
                 
                 # First pass: Count total rows
                 total_rows = 0
@@ -411,23 +407,79 @@ class ProcessUploadView(View):
                     if "date" not in field_map and any("date" in h for h in headers):
                         date_header = next(h for h in headers if "date" in h)
                         field_map[date_header] = "date"
-                    
-                    print(f"DEBUG - Headers: {headers}")
-                    print(f"DEBUG - Field map: {field_map}")
 
-                    # Create report with metadata
-                    report = CollectionReport.objects.create(
-                        dti_office=metadata['dti_office'],
-                        report_no=metadata['report_no'],
-                        report_collection_date=metadata['report_collection_date'],
-                        certification=metadata['certification'],
-                        name_of_collection_officer=metadata['name_of_collection_officer'],
-                        official_designation=metadata['official_designation']
-                    )
+                    # --- CHECK FOR EXISTING REPORT AND MERGE ---
+                    is_merge = False
+                    report = None
+                    
+                    # First, try to find existing report by report_no (primary check)
+                    if metadata['report_no']:
+                        try:
+                            report = CollectionReport.objects.filter(
+                                report_no=metadata['report_no']
+                            ).first()
+                            
+                            if report:
+                                is_merge = True
+                                print(f"DEBUG - Found existing report by report_no: {report.report_no}")
+                                
+                                yield self._sse_message({
+                                    'status': 'processing',
+                                    'message': f'Merging into existing report {report.report_no}...',
+                                    'current_filename': file_data['name']
+                                })
+                                
+                                # Update metadata if provided (optional)
+                                if metadata['report_collection_date'] and not report.report_collection_date:
+                                    report.report_collection_date = metadata['report_collection_date']
+                                if metadata['dti_office'] and not report.dti_office:
+                                    report.dti_office = metadata['dti_office']
+                                if metadata['certification'] and not report.certification:
+                                    report.certification = metadata['certification']
+                                if metadata['name_of_collection_officer'] and not report.name_of_collection_officer:
+                                    report.name_of_collection_officer = metadata['name_of_collection_officer']
+                                if metadata['official_designation'] and not report.official_designation:
+                                    report.official_designation = metadata['official_designation']
+                                report.save()
+                            
+                        except Exception as e:
+                            print(f"Error checking for existing report: {e}")
+                    
+                    # If no existing report found by report_no, also check by date as fallback
+                    if not report and metadata['report_collection_date']:
+                        try:
+                            report = CollectionReport.objects.filter(
+                                report_collection_date=metadata['report_collection_date']
+                            ).first()
+                            
+                            if report:
+                                is_merge = True
+                                print(f"DEBUG - Found existing report by date: {report.report_collection_date}")
+                                
+                                yield self._sse_message({
+                                    'status': 'processing',
+                                    'message': f'Merging into existing report for {report.report_collection_date}...',
+                                    'current_filename': file_data['name']
+                                })
+                        except Exception as e:
+                            print(f"Error checking for existing report by date: {e}")
+                    
+                    # Create new report only if no existing one found
+                    if not report:
+                        report = CollectionReport.objects.create(
+                            dti_office=metadata['dti_office'],
+                            report_no=metadata['report_no'],
+                            report_collection_date=metadata['report_collection_date'],
+                            certification=metadata['certification'],
+                            name_of_collection_officer=metadata['name_of_collection_officer'],
+                            official_designation=metadata['official_designation']
+                        )
+                        print(f"DEBUG - Created new report: {report.report_no} ({report.report_collection_date})")
                     
                     db_column_indices = [idx for idx, h in enumerate(headers) if h in field_map]
                     empty_row_count = 0
                     MAX_EMPTY_ROWS = 5
+                    items_added = 0
 
                     # Process rows
                     for row_index, row in enumerate(ws.iter_rows(min_row=header_row + 2, values_only=True), start=header_row + 2):
@@ -507,13 +559,11 @@ class ProcessUploadView(View):
                                 # Priority 1: Starts with 'BN-' or similar prefix (HIGHEST PRIORITY)
                                 if value_str.startswith(('BN-', 'RN-', 'OR-', 'AR-')):
                                     data['number'] = value_str
-                                    print(f"DEBUG - Found receipt number (prefix): {value_str}")
                                     break
                                 
-                                # Priority 2: Contains multiple hyphens (like BN-25-0140-0061-0009411-0009444)
+                                # Priority 2: Contains multiple hyphens
                                 if value_str.count('-') >= 2 and len(value_str) > 10:
                                     data['number'] = value_str
-                                    print(f"DEBUG - Found receipt number (hyphens): {value_str}")
                                     break
                             
                             # Priority 3: If still not found, look for number to the right of date column
@@ -535,11 +585,9 @@ class ProcessUploadView(View):
                                                     # Excel dates are typically 40000-50000 range, receipt numbers are much larger
                                                     if value == int(value) and int(value) > 100000:
                                                         data['number'] = str(int(value))
-                                                        print(f"DEBUG - Found receipt number (long int right of date): {value}")
                                                         break
                                                 elif value_str.isdigit() and len(value_str) >= 6:
                                                     data['number'] = value_str
-                                                    print(f"DEBUG - Found receipt number (digit string right of date): {value_str}")
                                                     break
                                             except:
                                                 continue
@@ -547,23 +595,44 @@ class ProcessUploadView(View):
                         if not data:
                             continue
 
+                        # --- PREVENT DUPLICATE ITEMS WHEN MERGING ---
+                        if is_merge and 'number' in data and data['number']:
+                            # Check if this item already exists in the report
+                            existing_item = report.report_items.filter(
+                                number=data['number'],
+                                date=data.get('date')
+                            ).first()
+                            
+                            if existing_item:
+                                print(f"DEBUG - Skipping duplicate item: {data['number']} on {data.get('date')}")
+                                continue  # Skip this item, it already exists
+
                         try:
                             with transaction.atomic():
                                 item = CollectionReportItem.objects.create(**data)
                                 report.report_items.add(item)
+                                items_added += 1
                         except Exception as e:
                             print(f"Failed to save row {row_index}: {e}")
                             continue
 
-                    created_reports.append(report)
+                    # Track which reports were created vs merged
+                    if is_merge:
+                        if report not in merged_reports:
+                            merged_reports.append(report)
+                        print(f"DEBUG - Merged {items_added} items into report {report.report_no}")
+                    else:
+                        created_reports.append(report)
+                        print(f"DEBUG - Created report {report.report_no} with {items_added} items")
+                    
                     wb.close()
 
-                # ENSURE 100% IS SHOWN BEFORE COMPLETION MESSAGE
-                # If multiple files uploaded, redirect to list; otherwise to the single report
-                if len(created_reports) > 1:
+                # Determine redirect URL
+                all_reports = created_reports + merged_reports
+                if len(all_reports) > 1:
                     redirect_url = reverse("collection-report-list")
-                elif created_reports:
-                    redirect_url = reverse("collection-report", args=[created_reports[-1].pk])
+                elif all_reports:
+                    redirect_url = reverse("collection-report", args=[all_reports[-1].pk])
                 else:
                     redirect_url = reverse("all-documents")
                 
@@ -582,6 +651,15 @@ class ProcessUploadView(View):
                 import time
                 time.sleep(0.3)
                 
+                # Build completion message
+                completion_parts = []
+                if created_reports:
+                    completion_parts.append(f'{len(created_reports)} new report(s) created')
+                if merged_reports:
+                    completion_parts.append(f'{len(merged_reports)} report(s) updated')
+                
+                completion_message = ' and '.join(completion_parts) if completion_parts else 'Upload complete!'
+                
                 # Then send completion message
                 yield self._sse_message({
                     'status': 'complete',
@@ -590,7 +668,7 @@ class ProcessUploadView(View):
                     'current_file': len(file_data_list),
                     'total_files': len(file_data_list),
                     'percentage': 100,
-                    'message': 'Upload complete!',
+                    'message': completion_message,
                     'redirect_url': redirect_url
                 })
 
