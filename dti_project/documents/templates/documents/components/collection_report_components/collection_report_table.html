@@ -77,10 +77,6 @@
             <td>{{ item.particulars }}</td>
             <td>{{ item.amount|floatformat:2 }}</td>
         </tr>
-        {% empty %}
-        <tr>
-            <td colspan="5" style="text-align:center;">No items found.</td>
-        </tr>
         {% endfor %}
     </tbody>
 </table>

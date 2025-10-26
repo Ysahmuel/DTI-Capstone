@@ -9,6 +9,9 @@
 {% endblock %}
 
 {% block body %}
+
+    {% include 'documents/components/collection_report_components/collection_report_filter_modal.html' %}
+
     <header class="document-details-header">
         <div class="column">
             <h1>Collection {{ collection_report }}</h1>

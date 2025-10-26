@@ -211,38 +211,39 @@ class FilterCollectionReportListMixin:
 
         return context
 
-
 class FilterCollectionReportListItemMixin:
     """
     Adds filtering for CollectionReportItem objects.
-    Supports date range, OR number, payor, RC code, and amount range filters.
+    Supports:
+    - Date range (date)
+    - Payor
+    - Particulars (dropdown based on existing values)
+    - Amount range
     """
+    
     def apply_filters(self, qs):
         request = self.request
 
         start_date = request.GET.get("start_date")
         end_date = request.GET.get("end_date")
-        or_number = request.GET.get("number")
         payor = request.GET.get("payor")
-        rc_code = request.GET.get("rc_code")
+        particulars = request.GET.get("particulars")
         min_amount = request.GET.get("min_amount")
         max_amount = request.GET.get("max_amount")
 
         filters = Q()
 
-        # Handle date filters
+        # Date range filter
         if start_date:
             filters &= Q(date__gte=start_date)
         if end_date:
             filters &= Q(date__lte=end_date)
 
         # String search filters
-        if or_number:
-            filters &= Q(number__icontains=or_number)
         if payor:
             filters &= Q(payor__icontains=payor)
-        if rc_code:
-            filters &= Q(rc_code__icontains=rc_code)
+        if particulars:
+            filters &= Q(particulars=particulars)  # exact match for dropdown
 
         # Numeric filters
         if min_amount:
@@ -256,11 +257,11 @@ class FilterCollectionReportListItemMixin:
         context = super().get_context_data(**kwargs)
         request = self.request
 
+        # Preserve selected filters in template
         context["selected_start_date"] = request.GET.get("start_date", "")
         context["selected_end_date"] = request.GET.get("end_date", "")
-        context["selected_or_number"] = request.GET.get("number", "")
         context["selected_payor"] = request.GET.get("payor", "")
-        context["selected_rc_code"] = request.GET.get("rc_code", "")
+        context["selected_particulars"] = request.GET.get("particulars", "")
         context["selected_min_amount"] = request.GET.get("min_amount", "")
         context["selected_max_amount"] = request.GET.get("max_amount", "")
 
