@@ -3,7 +3,7 @@ from django.views.generic import ListView
 from ..mixins.filter_mixins import FilterCollectionReportListMixin, FilterableDocumentMixin
 from ..mixins.counter_mixins import DocumentCountMixin
 from ..mixins.permissions_mixins import RoleFormPageRestrictionMixin, UserRoleMixin
-from ..mixins.sort_mixins import SortMixin  
+from ..mixins.sort_mixins import SortCollectionReportListMixin, SortMixin  
 from django.contrib.auth.mixins import LoginRequiredMixin
 from ..models import (
     ChecklistEvaluationSheet,
@@ -128,13 +128,14 @@ class ChecklistEvaluationSheetListView(BaseDocumentListView):
     context_object_name = "checklist_evaluation_sheets"
     active_doc_type = "checklist_evaluation_sheets"
     
-class CollectionReportListView(RoleFormPageRestrictionMixin, FilterCollectionReportListMixin, ListView):
+class CollectionReportListView(
+    RoleFormPageRestrictionMixin,
+    FilterCollectionReportListMixin,
+    SortCollectionReportListMixin,
+    ListView
+):
     model = CollectionReport
     template_name = "documents/collection_reports/collection_report_list.html"
     context_object_name = "collection_reports"
     active_doc_type = "collection_reports"
-    allowed_roles = ['collection_agent', 'admin']
-
-    def get_queryset(self):
-        qs = super().get_queryset()
-        return self.apply_filters(qs)
+    allowed_roles = ["collection_agent", "admin"]
