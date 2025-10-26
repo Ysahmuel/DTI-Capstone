@@ -88,8 +88,8 @@ class CollectionReport(models.Model):
         
         if duration == "Yearly":
             # For yearly reports, just show the year
-            if self.date_from:
-                return f"Report {self.date_from.year}"
+            if self.date_to:
+                return f"Report {self.date_to.year}"
             elif self.report_collection_date:
                 return f"Report {self.report_collection_date.year}"
             else:
@@ -100,7 +100,7 @@ class CollectionReport(models.Model):
                 return "Yearly Report"
         else:
             # For daily and monthly, show full date range
-            return f"Report ({self.date_range_display()})"
+            return f"Report ({self.report_no}) - {self.report_collection_date}"
 
     def delete(self, *args, **kwargs):
         # Delete all associated report items first
