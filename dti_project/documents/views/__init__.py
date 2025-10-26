@@ -37,17 +37,21 @@ from .list_views import (
     CollectionReportListView,
 )
 
-from .excel_views import (
+from .upload_excel_views import (
     UploadExcelView,
-    ExportDocumentsExcelView,
     ProcessUploadView,
     UploadProgressStreamView,
     CancelUploadView,
 )
 
+from .export_report_views import (
+    ExportDocumentsExcelView
+)
+
 from .action_views import (
     ApproveDocumentsView
 )
+
 
 from .pdf_views import (
     view_oop,
