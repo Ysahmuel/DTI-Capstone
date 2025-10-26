@@ -15,10 +15,6 @@
             <td>{{ report.report_items.count }}</td>
             <td>{{ report.report_duration }}</td>
         </tr>
-        {% empty %}
-        <tr>
-            <td colspan="6">No reports yet.</td>
-        </tr>
         {% endfor %}
     </tbody>
 </table>
