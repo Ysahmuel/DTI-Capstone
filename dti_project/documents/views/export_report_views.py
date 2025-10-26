@@ -138,7 +138,7 @@ class ExportDocumentsExcelView(LoginRequiredMixin, View):
             ws[f'B{current_row}'] = "Number"
             ws[f'C{current_row}'] = "Code"
             ws[f'D{current_row}'] = ""
-            ws[f'E{current_row}'] = "Payer"
+            ws[f'E{current_row}'] = "Payor"
             ws[f'F{current_row}'] = ""
             ws[f'G{current_row}'] = ""
             ws[f'H{current_row}'] = ""
@@ -161,7 +161,7 @@ class ExportDocumentsExcelView(LoginRequiredMixin, View):
                 ws[f'B{current_row}'] = item.number if item.number else ""
                 ws[f'C{current_row}'] = item.responsibility_code if item.responsibility_code else ""
                 ws[f'D{current_row}'] = ""
-                ws[f'E{current_row}'] = item.payer if item.payer else ""
+                ws[f'E{current_row}'] = item.payor if item.payor else ""
                 ws[f'F{current_row}'] = item.particulars if item.particulars else ""
                 ws[f'G{current_row}'] = ""
                 ws[f'H{current_row}'] = item.amount if item.amount else 0

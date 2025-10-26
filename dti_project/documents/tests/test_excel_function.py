@@ -10,11 +10,11 @@ def test_export_format():
     
     # Create sample data
     class MockItem:
-        def __init__(self, date, number, code, payer, particulars, amount):
+        def __init__(self, date, number, code, payor, particulars, amount):
             self.date = date
             self.number = number
             self.responsibility_code = code
-            self.payer = payer
+            self.payor = payor
             self.particulars = particulars
             self.amount = amount
     
@@ -149,7 +149,7 @@ def test_export_format():
     ws[f'B{current_row}'] = "Number"
     ws[f'C{current_row}'] = "Code"
     ws[f'D{current_row}'] = ""
-    ws[f'E{current_row}'] = "Payer"
+    ws[f'E{current_row}'] = "Payor"
     ws[f'F{current_row}'] = ""
     ws[f'G{current_row}'] = ""
     ws[f'H{current_row}'] = ""
@@ -169,7 +169,7 @@ def test_export_format():
         ws[f'B{current_row}'] = item.number
         ws[f'C{current_row}'] = item.responsibility_code
         ws[f'D{current_row}'] = ""
-        ws[f'E{current_row}'] = item.payer
+        ws[f'E{current_row}'] = item.payor
         ws[f'F{current_row}'] = item.particulars
         ws[f'G{current_row}'] = ""
         ws[f'H{current_row}'] = item.amount
