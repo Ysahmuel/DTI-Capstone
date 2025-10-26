@@ -4,6 +4,9 @@ from .models.collection_models import CollectionReport
 from django.utils import timezone
 from django.contrib import messages
 from documents.models.collection_models import CollectionReport
+from django.contrib import messages
+from django.utils import timezone
+from .models import CollectionReport  # assuming the CollectionReport model is imported
 
 class DailyCollectionReportMiddleware:
     """
@@ -28,7 +31,7 @@ class DailyCollectionReportMiddleware:
         if created_report and hasattr(request, "_messages") and not getattr(request, "_messages_added", False):
             messages.success(
                 request,
-                f"✅ A daily collection report ({created_report.report_no}) has been automatically created for today."
+                f"A daily collection report ({created_report.report_no}) has been automatically created for today."
             )
             request._messages_added = True
 
@@ -39,7 +42,7 @@ class DailyCollectionReportMiddleware:
         return hasattr(user, "role") and user.role == "collection_agent"
 
     def ensure_daily_report_exists(self, user):
-        """Create today's collection report if it doesn't exist."""
+        """Create today's collection report if it doesn't exist, return existing report if it does."""
         today = timezone.localdate()
         year_short = today.strftime("%y")
         day_of_year = today.timetuple().tm_yday  # 1–365 or 366
@@ -48,18 +51,26 @@ class DailyCollectionReportMiddleware:
         report_no = f"{year_short}-{day_of_year:03d}"
 
         # Check if report already exists for this user today
-        report, created = CollectionReport.objects.get_or_create(
+        existing_report = CollectionReport.objects.filter(
+            report_collection_date=today,
+            name_of_collection_officer=user
+        ).first()
+
+        # If report exists, return it without creating a new one
+        if existing_report:
+            return None  # No new report created
+
+        # If no report exists, create one
+        report = CollectionReport.objects.create(
             report_collection_date=today,
             name_of_collection_officer=user,
-            defaults={
-                "report_no": report_no,
-                "dti_office": user.dti_office or "DTI Albay Provincial Office",
-                "official_designation": user.official_designation or "Special Collecting Officer",
-                "certification": self.get_default_certification(),
-            },
+            report_no=report_no,
+            dti_office=user.dti_office or "DTI Albay Provincial Office",
+            official_designation=user.official_designation or "Special Collecting Officer",
+            certification=self.get_default_certification(),
         )
 
-        return report if created else None
+        return report
 
     def get_default_certification(self):
         """Default certification text."""
