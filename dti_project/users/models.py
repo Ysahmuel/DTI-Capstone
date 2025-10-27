@@ -44,6 +44,8 @@ class User(AbstractUser):
         help_text="Only applicable if the user is a collection agent."
     )
 
+    birthday = models.DateField(blank=True, null=True)
+    
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
 

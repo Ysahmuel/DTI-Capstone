@@ -13,6 +13,18 @@ from datetime import date
 class BaseUserForm(forms.ModelForm):
     """Base class for user forms with shared fields and validation."""
 
+class ForgotPasswordForm(forms.Form):
+    email = forms.EmailField()
+
+
+class ResetPasswordForm(forms.Form):
+    password = forms.CharField(widget=forms.PasswordInput, label="New Password")
+    confirm_password = forms.CharField(widget=forms.PasswordInput, label="Confirm Password")
+
+
+
+class AddStaffForm(forms.ModelForm):
+    birthday = forms.DateField(
     first_name = forms.CharField(
         required=True,
         widget=forms.TextInput(attrs={
@@ -145,3 +157,40 @@ class CustomUserCreationForm(UserCreationForm, BaseUserForm):
         if commit:
             user.save()
         return user
+
+class ProfileEditForm(forms.ModelForm):
+    birthday = forms.DateField(
+        required=True,
+        widget=forms.DateInput(
+            attrs={
+                'type': 'date',
+                'class': 'form-control',
+                'max': date.today().replace(year=date.today().year - 15).isoformat(),
+            }
+        ),
+        label="Birthday"
+    )
+
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email', 'profile_picture', 'default_address', 'default_phone', 'birthday']
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'default_address': forms.TextInput(attrs={'class': 'form-control'}),
+            'default_phone': forms.TextInput(attrs={
+                'class': 'form-control',
+                'type': 'tel',
+                'pattern': r'\d{11}',
+                'maxlength': '11',
+                'inputmode': 'numeric',
+                'oninput': "this.value = this.value.replace(/\\D/g, '').slice(0, 11);"
+            }),
+        }
+
+    def clean_default_phone(self):
+        phone = self.cleaned_data.get('default_phone', '')
+        if not phone.isdigit() or len(phone) != 11:
+            raise forms.ValidationError("Phone number must be exactly 11 digits.")
+        return phone

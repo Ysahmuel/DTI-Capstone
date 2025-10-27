@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('sign-in/', views.CustomLoginView.as_view(), name="sign-in"),
@@ -22,6 +23,12 @@ urlpatterns = [
     # Add Staff Account
     path('staff-accounts/add/', views.add_staff, name="add_staff"),
     path('staff-accounts/delete/<int:user_id>/', views.delete_new_staff, name='delete_new_staff'),
+
+    #Forgot Password
+    path('forgot-password/', views.ForgotPasswordView.as_view(), name='forgot_password'),
+    path('reset-password/', views.ResetPasswordView.as_view(), name='reset_password'),
+
+
 
 
 
