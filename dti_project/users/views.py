@@ -167,44 +167,75 @@ class ForgotPasswordView(View):
 # -----------------------------
 # RESET PASSWORD
 # -----------------------------
+from django.views import View
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import make_password
+from django.urls import reverse
+
+User = get_user_model()
+
 class ResetPasswordView(View):
     template_name = 'users/reset_password.html'
 
     def get(self, request):
-        if 'reset_email' not in request.session:
+        email = request.session.get('reset_email')
+        if not email:
+            messages.error(request, "Your session has expired. Please restart the password reset process.")
             return redirect('forgot_password')
-        form = ResetPasswordForm()
-        return render(request, self.template_name, {'form': form})
+        return render(request, self.template_name)
 
     def post(self, request):
-        if 'reset_email' not in request.session:
-            return redirect('forgot_password')
+        password = request.POST.get('password')
+        confirm_password = request.POST.get('confirm_password')
+        email = request.session.get('reset_email')
 
-        form = ResetPasswordForm(request.POST)
-        if form.is_valid():
-            password = form.cleaned_data['password']
-            confirm_password = form.cleaned_data['confirm_password']
+        if not email:
+            return JsonResponse({
+                'success': False,
+                'message': 'Session expired. Please restart the password reset process.'
+            })
 
-            if password != confirm_password:
-                return render(request, self.template_name, {
-                    'form': form,
-                    'error': "Passwords do not match."
-                })
+        if not password or not confirm_password:
+            return JsonResponse({
+                'success': False,
+                'message': 'Please fill out both password fields.'
+            })
 
-            email = request.session.pop('reset_email')
-            try:
-                user = User.objects.get(email=email)
-                user.set_password(password)
-                user.save()
-                return redirect('sign-in')
-            except User.DoesNotExist:
-                return redirect('forgot_password')
+        if password != confirm_password:
+            return JsonResponse({
+                'success': False,
+                'message': 'Passwords do not match.'
+            })
 
-        return render(request, self.template_name, {'form': form})
+        if len(password) < 8:
+            return JsonResponse({
+                'success': False,
+                'message': 'Password must be at least 8 characters long.'
+            })
 
+        try:
+            user = User.objects.get(email=email)
+            user.password = make_password(password)
+            user.save()
 
+            # ✅ Clean up session and add success message
+            request.session.pop('reset_email', None)
+            request.session.pop('pending_verification_user', None)
 
+            messages.success(request, "Your password has been successfully reset! You can now sign in.")
 
+            return JsonResponse({
+                'success': True,
+                'redirect': reverse('sign-in')
+            })
+
+        except User.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'message': 'No user account found for this email.'
+            })
 
 
 
@@ -475,10 +506,11 @@ class VerifyUserView(View):
             if verification_type == 'reset_password':
                 # For forgot password → reset flow
                 request.session['reset_email'] = user.email
+                del request.session['pending_verification_user']  # 🟢 clean session
                 return JsonResponse({
                     'success': True,
                     'message': 'Verification successful!',
-                    'redirect': '/users/reset-password/'
+                    'redirect': reverse('reset_password')
                 })
             else:
                 # For normal registration flow
