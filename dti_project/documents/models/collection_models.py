@@ -23,6 +23,22 @@ class CollectionReport(models.Model):
         null=True, 
         help_text="Undeposited Collections Last Report"
     )
+    undeposited_this_report = models.DecimalField(
+        max_digits=12, 
+        decimal_places=2, 
+        blank=True, 
+        null=True, 
+        help_text="Undeposited Collections This Report"
+    )
+
+    collections_this_report = models.DecimalField(
+        max_digits=12, 
+        decimal_places=2, 
+        blank=True, 
+        null=True, 
+        help_text="Collections per OR Numbers: "
+    )
+
     responsibility_center_code = models.CharField(blank=True, null=True)
     total = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     certification = models.TextField(blank=True, null=True)
