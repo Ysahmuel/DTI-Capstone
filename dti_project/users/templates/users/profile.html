@@ -48,6 +48,9 @@
             <p><strong>Phone:</strong> {{ profile.default_phone|default:"Not provided" }}</p>
 
             <p><strong>Address:</strong> {{ profile.default_address|default:"Not provided" }}</p>
+
+            <p><strong>Birthday:</strong> {{ profile.birthday|date:"M d, Y"|default:"N/A" }}</p>
+
         </div>
 
         <!-- Stats Section -->

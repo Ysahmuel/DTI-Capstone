@@ -339,7 +339,7 @@ def delete_new_staff(request, user_id):
 class SettingsView(LoginRequiredMixin, TemplateView):
     template_name = "users/settings.html"
 
-#Profile Detail and Edit Views
+#Profile Detail View
 class ProfileDetailView(DetailView):
     model = User
     template_name = "users/profile.html"
@@ -413,14 +413,19 @@ class BusinessOwnerListView(ListView):
         })
         return context
 
+#Profile Edit View
+from .forms import ProfileEditForm
+
 class ProfileEditView(UpdateView):
     model = User
-    fields = ['first_name', 'last_name', 'email', 'profile_picture', 'default_address', 'default_phone']
+    form_class = ProfileEditForm
     template_name = "users/profile_edit.html"
     context_object_name = "profile"
 
     def get_success_url(self):
         return reverse_lazy('profile', kwargs={'pk': self.object.pk})
+
+
 
 
 class CustomLoginView(FormSubmissionMixin, LoginView):

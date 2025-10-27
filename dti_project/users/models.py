@@ -31,6 +31,8 @@ class User(AbstractUser):
     default_address = models.CharField(max_length=255, blank=True, null=True)
     default_phone = models.CharField(max_length=11, blank=True, null=True)
 
+    birthday = models.DateField(blank=True, null=True)
+    
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
 

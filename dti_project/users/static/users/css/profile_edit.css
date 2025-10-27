@@ -207,6 +207,35 @@
     background: #fff;
 }
 
+/* Uniform style for date input (birthday field) */
+.profile-body input[type="date"] {
+    padding: 0.65rem 1rem;
+    border-radius: 0.6rem;
+    border: 1px solid #d1d5db;
+    font-size: 0.95rem;
+    transition: border 0.3s, box-shadow 0.3s;
+    width: 100%;
+    background: #fff;
+    color: #111827;
+    appearance: none; /* Removes default browser styling */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+/* Add same focus behavior as other fields */
+.profile-body input[type="date"]:focus {
+    outline: none;
+    border-color: var(--primary, #0f0853);
+    box-shadow: 0 0 0 4px rgba(15, 8, 83, 0.1);
+}
+
+/* Optional: calendar icon styling consistency */
+.profile-body input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    filter: invert(35%) sepia(50%) saturate(300%) hue-rotate(190deg);
+}
+
+
 .profile-body input:focus {
     outline: none;
     border-color: var(--primary, #0f0853);
