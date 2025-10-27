@@ -27,9 +27,22 @@ class User(AbstractUser):
     verification_code = models.CharField(max_length=6, blank=True, null=True)
     verification_code_expiration_date = models.DateTimeField(blank=True, null=True)
 
-    
     default_address = models.CharField(max_length=255, blank=True, null=True)
     default_phone = models.CharField(max_length=11, blank=True, null=True)
+    birthday = models.DateField(blank=True, null=True)
+
+    dti_office = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Only applicable if the user is a collection agent."
+    )
+    official_designation = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text="Only applicable if the user is a collection agent."
+    )
 
     birthday = models.DateField(blank=True, null=True)
     
@@ -66,7 +79,23 @@ class User(AbstractUser):
         return self.notifications.filter(is_read=False)
     
     def save(self, *args, **kwargs):
+        """
+        Automatically fill DTI office and official designation
+        if the user is a collection agent.
+        """
+        if self.role == self.Roles.COLLECTION_AGENT:
+            # Apply defaults only if empty
+            if not self.dti_office:
+                self.dti_office = "DTI Albay Provincial Office"
+            if not self.official_designation:
+                self.official_designation = "Special Collecting Officer"
+        else:
+            # Wipe these fields for non-collection agents
+            self.dti_office = None
+            self.official_designation = None
+
         # Force superusers to always be admin
         if self.is_superuser:
             self.role = self.Roles.ADMIN
+            
         super().save(*args, **kwargs)

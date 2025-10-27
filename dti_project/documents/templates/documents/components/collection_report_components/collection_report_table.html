@@ -3,13 +3,71 @@
 <table class="documents-table uploaded-files-table" style="margin-top: 0;">
     <thead>
         <tr>
+            <!-- Date column (static) -->
             <th>Date</th>
-            <th>Number</th>
-            <th>Payor</th>
-            <th>Particulars</th>
-            <th>Amount</th>
+
+            <!-- Number column -->
+            <th>
+                Number
+                <button type="button" class="sort-btn" data-sort="number"
+                        data-current-sort="{{ sort_by }}" data-current-order="{{ order }}">
+                    <i class="fa-solid
+                        {% if sort_by == 'number' %}
+                            {% if order == 'asc' %}fa-sort-up{% else %}fa-sort-down{% endif %}
+                        {% else %}
+                            fa-sort
+                        {% endif %}
+                    "></i>
+                </button>
+            </th>
+
+            <!-- Payor column -->
+            <th>
+                Payor
+                <button type="button" class="sort-btn" data-sort="payor"
+                        data-current-sort="{{ sort_by }}" data-current-order="{{ order }}">
+                    <i class="fa-solid
+                        {% if sort_by == 'payor' %}
+                            {% if order == 'asc' %}fa-sort-up{% else %}fa-sort-down{% endif %}
+                        {% else %}
+                            fa-sort
+                        {% endif %}
+                    "></i>
+                </button>
+            </th>
+
+            <!-- Particulars column -->
+            <th>
+                Particulars
+                <button type="button" class="sort-btn" data-sort="particulars"
+                        data-current-sort="{{ sort_by }}" data-current-order="{{ order }}">
+                    <i class="fa-solid
+                        {% if sort_by == 'particulars' %}
+                            {% if order == 'asc' %}fa-sort-up{% else %}fa-sort-down{% endif %}
+                        {% else %}
+                            fa-sort
+                        {% endif %}
+                    "></i>
+                </button>
+            </th>
+
+            <!-- Amount column -->
+            <th>
+                Amount
+                <button type="button" class="sort-btn" data-sort="amount"
+                        data-current-sort="{{ sort_by }}" data-current-order="{{ order }}">
+                    <i class="fa-solid
+                        {% if sort_by == 'amount' %}
+                            {% if order == 'asc' %}fa-sort-up{% else %}fa-sort-down{% endif %}
+                        {% else %}
+                            fa-sort
+                        {% endif %}
+                    "></i>
+                </button>
+            </th>
         </tr>
     </thead>
+
     <tbody>
         {% for item in items %}
         <tr class="document-value-row" data-href="{{ item.get_absolute_url }}">
@@ -17,11 +75,7 @@
             <td>{{ item.number }}</td>
             <td>{{ item.payor }}</td>
             <td>{{ item.particulars }}</td>
-            <td>{{ item.amount }}</td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="6">No documents found for this file.</td>
+            <td>{{ item.amount|floatformat:2 }}</td>
         </tr>
         {% endfor %}
     </tbody>

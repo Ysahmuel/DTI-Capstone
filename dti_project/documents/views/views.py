@@ -29,3 +29,7 @@ from .detail_views import (
     PersonalDataSheetDetailView,
     InspectionValidationReportDetailView
 )
+
+from .pdf_views import (
+    view_oop
+)

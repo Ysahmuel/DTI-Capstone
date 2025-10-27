@@ -15,7 +15,10 @@ class UserAdmin(BaseUserAdmin):
                 'profile_picture',
                 'is_verified',
                 'verification_code',
-                'verification_code_expiration_date'
+                'verification_code_expiration_date',
+                'birthday',
+                'dti_office',
+                'official_designation',
             ),
         }),
     )

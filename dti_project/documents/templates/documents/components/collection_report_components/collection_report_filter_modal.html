@@ -1,0 +1,96 @@
+<div class="modal-container" id="document-list-filters-container">
+    <div class="modal" id="document-list-filters-modal">
+        <header>
+            <h2>Advanced Filters</h2>
+            <button type="button" class="close-modal-btn">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </header>
+
+        <!-- Form -->
+        <form method="get" id="document-filters-form">
+
+            <!-- Payor Filter -->
+            <section id="payor-filter">
+                <h4>Payor</h4>
+                <div class="form-group">
+                    <input 
+                        type="text" 
+                        name="payor" 
+                        id="payor" 
+                        placeholder="Search by payor" 
+                        value="{{ selected_payor|default:'' }}"
+                    >
+                </div>
+            </section>
+
+            <!-- Particulars Filter -->
+            <section id="particulars-filter">
+                <h4>Particulars</h4>
+                <ul class="radio-filter-list">
+                    <!-- "All" option -->
+                    <li class="radio-filter-item">
+                        <label>
+                            <input type="radio" name="particulars" value=""
+                                {% if not selected_particulars %}checked{% endif %}>
+                            All
+                        </label>
+                    </li>
+
+                    <!-- Dynamic options -->
+                    {% for value in distinct_particulars %}
+                    <li class="radio-filter-item">
+                        <label>
+                            <input type="radio" name="particulars" value="{{ value }}"
+                                {% if selected_particulars == value %}checked{% endif %}>
+                            {{ value }}
+                        </label>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </section>
+
+
+            <!-- Report Collection Date Filter -->
+            <section id="date-created-filter">
+                <h4>Report Collection Date</h4>
+                <div class="wrapper">
+                    <div class="form-group">
+                        <label for="start_date">Start Date</label>
+                        <input
+                            type="date"
+                            name="start_date"
+                            id="start_date"
+                            value="{{ selected_start_date }}"
+                            {% if min_report_date_iso %} min="{{ min_report_date_iso }}"{% endif %}
+                            {% if max_report_date_iso %} max="{{ max_report_date_iso }}"{% endif %}
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="end_date">End Date</label>
+                        <input
+                            type="date"
+                            name="end_date"
+                            id="end_date"
+                            value="{{ selected_end_date }}"
+                            {% if min_report_date_iso %} min="{{ min_report_date_iso }}"{% endif %}
+                            {% if max_report_date_iso %} max="{{ max_report_date_iso }}"{% endif %}
+                        >
+                    </div>
+                </div>
+                <p class="hint" style="margin: 1rem 0;">
+                    Available range: {% if min_report_date %}{{ min_report_date|date:"M d, Y" }}{% else %}—{% endif %}
+                    to {% if max_report_date %}{{ max_report_date|date:"M d, Y" }}{% else %}—{% endif %}
+                </p>
+            </section>
+
+            <!-- Actions -->
+            <div class="actions">
+                <button type="reset" id="clear-btn">Clear</button>
+                <button type="submit" id="submit-btn">Apply</button>
+            </div>
+
+        </form>
+    </div>
+</div>

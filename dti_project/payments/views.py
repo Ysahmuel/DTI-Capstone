@@ -140,7 +140,8 @@ def verify_payment(request, oop_id):
 
     else:
         messages.warning(request, "Payment must be marked as 'Paid' before verifying.")
-        return redirect('documents-list')
+    
+    return redirect('all-documents')
 
 @login_required
 def download_receipt(request, oop_id):
@@ -189,5 +190,5 @@ def download_receipt(request, oop_id):
         send_user_notification(admin.id, notification)
 
 
-    return FileResponse(buffer, as_attachment=True, filename=f"DTI_Receipt_{oop.pk}.pdf")
+    return FileResponse(buffer, content_type='application/pdf', as_attachment=False)
 

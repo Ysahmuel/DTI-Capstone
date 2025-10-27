@@ -18,17 +18,36 @@
 
             <div class="form-scroll">
                 <div class="row">
+
                     <div class="form-group">
                         <label for="id_first_name">First Name</label>
-                        <input type="text" name="first_name" id="id_first_name"
-                            value="{{ form.first_name.value|default_if_none:'' }}" required>
+                        <input 
+                            type="text"
+                            name="first_name"
+                            id="id_first_name"
+                            value="{{ form.first_name.value|default_if_none:'' }}"
+                            required
+                            pattern="[A-Za-zÀ-ÖØ-öø-ÿ' -]+"
+                            title="Letters, spaces, hyphens, and apostrophes only"
+                            oninput="this.value = this.value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ' -]/g, '');"
+                        >
                     </div>
+
                     <div class="form-group">
                         <label for="id_last_name">Last Name</label>
-                        <input type="text" name="last_name" id="id_last_name"
-                            value="{{ form.last_name.value|default_if_none:'' }}" required>
+                        <input 
+                            type="text"
+                            name="last_name"
+                            id="id_last_name"
+                            value="{{ form.last_name.value|default_if_none:'' }}"
+                            required
+                            pattern="[A-Za-zÀ-ÖØ-öø-ÿ' -]+"
+                            title="Letters, spaces, hyphens, and apostrophes only"
+                            oninput="this.value = this.value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ' -]/g, '');"
+                        >
                     </div>
                 </div>
+                
                 <div class="form-group">
                     <label for="id_email">Email</label>
                     <input type="email" name="email" id="id_email" required

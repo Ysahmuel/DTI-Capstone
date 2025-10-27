@@ -29,6 +29,7 @@ from openpyxl.utils.datetime import from_excel
 from django.utils.dateparse import parse_date
 from django.http import JsonResponse
 from django.core.cache import cache
+from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 
 import os
 from ..models import (
@@ -39,111 +40,6 @@ from ..models import (
     SalesPromotionPermitApplication,
     ServiceRepairAccreditationApplication,
 )
-
-
-class ExportDocumentsExcelView(LoginRequiredMixin, View):
-    """
-    Export selected documents (via checkboxes) or all filtered documents to Excel.
-    Preserves grouped formatting, headers, styling, and filename date ranges.
-    """
-
-    def post(self, request, *args, **kwargs):
-        user = request.user
-        selected_docs = request.POST.getlist("documents")
-
-        # --- Collect documents by model ---
-        grouped = {}
-        if selected_docs:
-            # Use checkbox selection
-            grouped_ids = {}
-            for doc in selected_docs:
-                try:
-                    model_name, pk = doc.split(":")
-                    grouped_ids.setdefault(model_name.lower(), []).append(pk)
-                except ValueError:
-                    continue
-
-            for model_name, ids in grouped_ids.items():
-                model = EXPORT_MODEL_MAP.get(model_name)
-                if not model:
-                    continue
-                qs = UserRoleMixin.get_queryset_or_all(model, user).filter(pk__in=ids)
-                if qs.exists():
-                    grouped[model._meta.verbose_name_plural.title()] = list(qs)
-        else:
-            # If no checkboxes, export all (apply UserRoleMixin)
-            for model in EXPORT_MODEL_MAP.values():
-                qs = UserRoleMixin.get_queryset_or_all(model, user)
-                if qs.exists():
-                    grouped[model._meta.verbose_name_plural.title()] = list(qs)
-
-        # --- Create workbook ---
-        wb = Workbook()
-        wb.remove(wb.active)
-
-        for model_name, objs in grouped.items():
-            if not objs:
-                continue
-            # use your helper instead of hard truncation
-            sheet_title = shorten_name(model_name)
-            ws = wb.create_sheet(title=sheet_title)
-
-            fields = objs[0]._meta.fields
-            headers = [f.verbose_name.title() for f in fields]
-            ws.append(headers)
-
-            # Style headers
-            for col_num, header in enumerate(headers, 1):
-                cell = ws.cell(row=1, column=col_num)
-                cell.font = Font(bold=True)
-                cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-                cell.fill = PatternFill(start_color="DDDDDD", end_color="DDDDDD", fill_type="solid")
-
-            # Rows
-            for obj in objs:
-                row = []
-                for f in fields:
-                    val = getattr(obj, f.name, "")
-                    if isinstance(val, datetime.datetime):
-                        val = val.date()
-                    if val is None:
-                        val = ""
-                    row.append(to_title(str(val)))
-                ws.append(row)
-
-            # Auto-size columns
-            for col_num, col_cells in enumerate(ws.columns, 1):
-                max_length = 0
-                column = get_column_letter(col_num)
-                for cell in col_cells:
-                    if cell.value:
-                        max_length = max(max_length, len(str(cell.value)))
-                ws.column_dimensions[column].width = min(max_length + 2, 50)
-
-            # Freeze header
-            ws.freeze_panes = "A2"
-
-        # --- Filename with date range ---
-        dates = []
-        for objs in grouped.values():
-            for doc in objs:
-                d = getattr(doc, "date_filed", None) or getattr(doc, "date", None)
-                if d:
-                    if isinstance(d, datetime.datetime):
-                        d = d.date()
-                    dates.append(d)
-        min_date, max_date = (min(dates), max(dates)) if dates else (None, None)
-        date_part = f"{min_date}_{max_date}" if min_date and max_date else ""
-
-        filename = f"Documents_{date_part}.xlsx" if date_part else "Documents.xlsx"
-
-        response = HttpResponse(
-            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
-        safe_filename = quote(filename)
-        response["Content-Disposition"] = f"attachment; filename={safe_filename}; filename*=UTF-8''{safe_filename}"
-        wb.save(response)
-        return response
     
 class UploadExcelView(View):
     """
@@ -204,11 +100,11 @@ class UploadExcelView(View):
             'status': 'queued',
             'session_id': session_id
         })
-
 class ProcessUploadView(View):
     """
     Separate view that processes the upload.
     This is called via AJAX and streams progress updates.
+    Merges data into existing reports if report_no and report_collection_date match.
     """
     
     @staticmethod
@@ -232,14 +128,23 @@ class ProcessUploadView(View):
             'report_no': None,
             'report_collection_date': None,
             'certification': None,
-            'name_and_signature_of_collecting_officer': None,
+            'name_of_collection_officer': None,
             'official_designation': None,
         }
+        
+        print("\n" + "="*80)
+        print("METADATA EXTRACTION DEBUG")
+        print("="*80)
+        print(f"Header row: {header_row}")
+        print(f"Last data row (passed in): {last_data_row}")
+        print(f"Worksheet max row: {ws.max_row}")
+        print(f"Worksheet max column: {ws.max_column}")
         
         # Determine search boundary - only search BEFORE the data table header
         search_limit = header_row if header_row else min(10, ws.max_row + 1)
         
         # Search only header area for metadata (before data table)
+        print(f"\n--- Searching HEADER area (rows 1-{search_limit-1}) ---")
         for row_idx in range(1, search_limit):
             for cell in ws[row_idx]:
                 if not cell.value:
@@ -255,6 +160,7 @@ class ProcessUploadView(View):
                 # Extract DTI Office
                 if 'dti' in cell_lower and 'office' in cell_lower:
                     metadata['dti_office'] = cell_text
+                    print(f"✓ Found DTI Office at row {row_idx}: '{cell_text}'")
                 
                 # Extract Report No (but NOT Official Receipt No)
                 if ('report no' in cell_lower or 'report_no' in cell_lower) and 'receipt' not in cell_lower and 'official' not in cell_lower:
@@ -262,23 +168,27 @@ class ProcessUploadView(View):
                     parts = cell_text.split('.')
                     if len(parts) > 1:
                         metadata['report_no'] = parts[-1].strip()
+                        print(f"✓ Found Report No at row {row_idx}: '{metadata['report_no']}'")
                     else:
                         # Check adjacent cells
                         next_cell = ws.cell(row=cell.row, column=cell.column + 1)
                         if next_cell.value:
                             metadata['report_no'] = str(next_cell.value).strip()
+                            print(f"✓ Found Report No at row {row_idx} (adjacent cell): '{metadata['report_no']}'")
                 
                 # Extract Date (usually below DTI Office)
                 if not metadata['report_collection_date']:
                     # Check if this looks like a date
                     if isinstance(cell.value, datetime.datetime):
                         metadata['report_collection_date'] = cell.value.date()
+                        print(f"✓ Found Date at row {row_idx} (datetime): '{metadata['report_collection_date']}'")
                     elif isinstance(cell.value, str):
                         # Try to parse date formats
-                        for fmt in ['%m/%d/%Y', '%m-%d-%Y', '%Y-%m-%d', '%d/%m/%Y', '%d-%m-%Y']:
+                        for fmt in ['%m/%d/%Y', '%m-%d-%Y', '%Y-%m-%d', '%d/%m/%Y', '%d-%m-%Y', '%d-%b-%y', '%d-%b-%Y']:
                             try:
                                 parsed_date = datetime.datetime.strptime(cell_text, fmt).date()
                                 metadata['report_collection_date'] = parsed_date
+                                print(f"✓ Found Date at row {row_idx} (string): '{metadata['report_collection_date']}'")
                                 break
                             except:
                                 continue
@@ -289,21 +199,76 @@ class ProcessUploadView(View):
                                 base_date = datetime.datetime(1899, 12, 30)
                                 parsed_date = base_date + datetime.timedelta(days=cell.value)
                                 metadata['report_collection_date'] = parsed_date.date()
+                                print(f"✓ Found Date at row {row_idx} (serial): '{metadata['report_collection_date']}'")
                         except:
                             pass
         
-        # Search for certification text (in footer area AFTER data rows)
-        footer_start = last_data_row if last_data_row else max(0, ws.max_row - 30)
+        # DYNAMIC FOOTER DETECTION: Find where the data table actually ends
+        # Look for "CERTIFICATION" keyword or 3+ consecutive empty rows after header
+        print(f"\n--- Detecting actual footer start ---")
+        footer_start = None
+        
+        if header_row:
+            # Strategy 1: Look for "CERTIFICATION" keyword (most reliable)
+            for row_idx in range(header_row + 2, ws.max_row + 1):
+                # Check all cells in the row (for merged cells spanning columns)
+                row_text = []
+                for cell in ws[row_idx]:
+                    if cell.value:
+                        row_text.append(str(cell.value).strip().lower())
+                
+                combined_text = ' '.join(row_text)
+                if 'certification' in combined_text or 'i hereby certify' in combined_text:
+                    footer_start = row_idx
+                    print(f"✓ Found 'CERTIFICATION' marker at row {row_idx}")
+                    break
+            
+            # Strategy 2: Look for consistent empty rows (fallback)
+            if not footer_start:
+                empty_count = 0
+                for row_idx in range(header_row + 2, ws.max_row + 1):
+                    # Check if row has any substantial data in the first few columns
+                    has_data = False
+                    for col_idx in range(1, min(6, ws.max_column + 1)):
+                        cell = ws.cell(row=row_idx, column=col_idx)
+                        if cell.value:
+                            cell_text = str(cell.value).strip()
+                            # Ignore pure whitespace or underscores
+                            if cell_text and cell_text not in ['_', '__', '___', '____', '_____', '______'] and not all(c in '_ ' for c in cell_text):
+                                has_data = True
+                                break
+                    
+                    if not has_data:
+                        empty_count += 1
+                        if empty_count >= 3:
+                            footer_start = row_idx - 2  # Go back before the empty rows
+                            print(f"✓ Detected footer start at row {footer_start} (3+ empty rows)")
+                            break
+                    else:
+                        empty_count = 0
+        
+        # Fallback: Use a conservative estimate
+        if not footer_start:
+            footer_start = max(1, ws.max_row - 40)
+            print(f"⚠ Using fallback footer start: row {footer_start}")
+        
+        print(f"Final footer_start: {footer_start}")
+        print(f"\n--- Searching FOOTER area (rows {footer_start}-{ws.max_row}) ---")
+        
+        # Search for certification text (in footer area)
         certification_start = None
         
         for row_idx in range(footer_start, ws.max_row + 1):
+            # Check ALL cells in row (for merged cells)
+            row_text = []
             for cell in ws[row_idx]:
-                if cell.value and isinstance(cell.value, str):
-                    cell_lower = str(cell.value).lower()
-                    if 'i hereby certify' in cell_lower or 'certification' in cell_lower:
-                        certification_start = row_idx
-                        break
-            if certification_start:
+                if cell.value:
+                    row_text.append(str(cell.value).strip().lower())
+            
+            combined_text = ' '.join(row_text)
+            if 'i hereby certify' in combined_text or 'certification' in combined_text:
+                certification_start = row_idx
+                print(f"✓ Found Certification start at row {row_idx}")
                 break
         
         if certification_start:
@@ -319,63 +284,166 @@ class ProcessUploadView(View):
             
             if cert_lines:
                 metadata['certification'] = ' '.join(cert_lines)
+                print(f"✓ Certification text: '{metadata['certification'][:100]}...'")
         
-        # Search for collecting officer name and designation (in footer area AFTER data rows)
+        # Search for collecting officer name and designation (in footer area)
+        # Build a map of ALL non-empty cells in the footer for easier searching
+        print(f"\n--- Building footer cell map ---")
+        footer_cells = {}
         for row_idx in range(footer_start, ws.max_row + 1):
-            for cell in ws[row_idx]:
-                if cell.value and isinstance(cell.value, str):
+            for col_idx in range(1, ws.max_column + 1):
+                cell = ws.cell(row=row_idx, column=col_idx)
+                if cell.value:
                     cell_text = str(cell.value).strip()
-                    cell_lower = cell_text.lower()
+                    if cell_text and cell_text not in ['_', '__', '___', '____', '_____', '______']:
+                        footer_cells[(row_idx, col_idx)] = cell_text
+                        print(f"  Cell ({row_idx}, {col_idx}): '{cell_text}'")
+        
+        print(f"\n--- Searching for Name and Designation ---")
+        # Now search for the labels
+        for row_idx in range(footer_start, ws.max_row + 1):
+            # Collect all values in this row (to handle merged cells)
+            row_values = []
+            for col_idx in range(1, ws.max_column + 1):
+                if (row_idx, col_idx) in footer_cells:
+                    row_values.append((col_idx, footer_cells[(row_idx, col_idx)]))
+            
+            # Check each cell in the row
+            for col_idx, cell_text in row_values:
+                cell_lower = cell_text.lower()
+                
+                # Look for "Name and Signature of Collecting Officer" label
+                if 'name and signature of collecting officer' in cell_lower or 'name and signature' in cell_lower:
+                    print(f"\n→ Found 'Name and Signature...' label at ({row_idx}, {col_idx})")
                     
-                    # Look for "Name and Signature of Collecting Officer" label (exact match, same logic as designation)
-                    if cell_lower == 'name and signature of collecting officer':
-                        # The actual name should be in the row ABOVE
-                        name_cell = ws.cell(row=cell.row - 1, column=cell.column)
-                        if name_cell.value:
-                            name_text = str(name_cell.value).strip()
-                            # Skip if it looks like an underline or empty
-                            if name_text and name_text not in ['_', '__', '___', '____', '_____', '______'] and not all(c in '_ ' for c in name_text):
-                                metadata['name_and_signature_of_collecting_officer'] = name_text
-                                print(f"DEBUG - Found officer name: {name_text}")
-                        
-                        # Also check 2 rows above in case there's an underline row
-                        if not metadata['name_and_signature_of_collecting_officer']:
-                            name_cell_2 = ws.cell(row=cell.row - 2, column=cell.column)
-                            if name_cell_2.value:
-                                name_text = str(name_cell_2.value).strip()
-                                if name_text and not all(c in '_ ' for c in name_text):
-                                    metadata['name_and_signature_of_collecting_officer'] = name_text
-                                    print(f"DEBUG - Found officer name (2 rows up): {name_text}")
+                    # Strategy 1: Check the row ABOVE in the SAME column
+                    if (row_idx - 1, col_idx) in footer_cells:
+                        name_text = footer_cells[(row_idx - 1, col_idx)]
+                        print(f"  Strategy 1: Checking ({row_idx - 1}, {col_idx}): '{name_text}'")
+                        if 'name and signature' not in name_text.lower():
+                            metadata['name_of_collection_officer'] = name_text
+                            print(f"  ✓ FOUND NAME: '{name_text}'")
                     
-                    # Look for "Official Designation" label (exact match)
-                    if cell_lower == 'official designation':
-                        # The actual designation should be in the row ABOVE
-                        designation_cell = ws.cell(row=cell.row - 1, column=cell.column)
-                        if designation_cell.value:
-                            designation_text = str(designation_cell.value).strip()
-                            # Skip if it looks like an underline or empty
-                            if designation_text and designation_text not in ['_', '__', '___', '____', '_____', '______'] and not all(c in '_ ' for c in designation_text):
-                                metadata['official_designation'] = designation_text
-                                print(f"DEBUG - Found designation: {designation_text}")
-                        
-                        # Also check 2 rows above in case there's an underline row
-                        if not metadata['official_designation']:
-                            designation_cell_2 = ws.cell(row=cell.row - 2, column=cell.column)
-                            if designation_cell_2.value:
-                                designation_text = str(designation_cell_2.value).strip()
-                                if designation_text and not all(c in '_ ' for c in designation_text):
+                    # Strategy 2: Check 2 rows above
+                    if not metadata['name_of_collection_officer'] and (row_idx - 2, col_idx) in footer_cells:
+                        name_text = footer_cells[(row_idx - 2, col_idx)]
+                        print(f"  Strategy 2: Checking ({row_idx - 2}, {col_idx}): '{name_text}'")
+                        if 'name and signature' not in name_text.lower():
+                            metadata['name_of_collection_officer'] = name_text
+                            print(f"  ✓ FOUND NAME: '{name_text}'")
+                    
+                    # Strategy 3: Search ALL cells above in ALL columns (for merged cells)
+                    if not metadata['name_of_collection_officer']:
+                        print(f"  Strategy 3: Searching all columns in rows above...")
+                        for check_row in range(max(footer_start, row_idx - 3), row_idx):
+                            for check_col in range(1, ws.max_column + 1):
+                                if (check_row, check_col) in footer_cells:
+                                    potential_name = footer_cells[(check_row, check_col)]
+                                    potential_lower = potential_name.lower()
+                                    # Check if this looks like a name (not a label)
+                                    if (potential_name and 
+                                        'name and signature' not in potential_lower and
+                                        'official designation' not in potential_lower and
+                                        'certification' not in potential_lower and
+                                        'certify' not in potential_lower and
+                                        'summary' not in potential_lower and
+                                        'total' not in potential_lower and
+                                        len(potential_name) > 5):
+                                        print(f"    Checking ({check_row}, {check_col}): '{potential_name}' - MATCH!")
+                                        metadata['name_of_collection_officer'] = potential_name
+                                        break
+                            if metadata['name_of_collection_officer']:
+                                break
+                    
+                    if not metadata['name_of_collection_officer']:
+                        print(f"  ✗ Could not find name")
+                
+                # Look for "Official Designation" label
+                if 'official designation' in cell_lower:
+                    print(f"\n→ Found 'Official Designation' label at ({row_idx}, {col_idx})")
+                    
+                    # Strategy 1: Check the row ABOVE in the SAME column
+                    if (row_idx - 1, col_idx) in footer_cells:
+                        designation_text = footer_cells[(row_idx - 1, col_idx)]
+                        print(f"  Strategy 1: Checking ({row_idx - 1}, {col_idx}): '{designation_text}'")
+                        if 'official designation' not in designation_text.lower():
+                            metadata['official_designation'] = designation_text
+                            print(f"  ✓ FOUND DESIGNATION: '{designation_text}'")
+                    
+                    # Strategy 2: Check 2 rows above
+                    if not metadata['official_designation'] and (row_idx - 2, col_idx) in footer_cells:
+                        designation_text = footer_cells[(row_idx - 2, col_idx)]
+                        print(f"  Strategy 2: Checking ({row_idx - 2}, {col_idx}): '{designation_text}'")
+                        if 'official designation' not in designation_text.lower():
+                            metadata['official_designation'] = designation_text
+                            print(f"  ✓ FOUND DESIGNATION: '{designation_text}'")
+                    
+                    # Strategy 3: Check SAME ROW in ALL columns to the LEFT (merged cell scenario)
+                    if not metadata['official_designation']:
+                        print(f"  Strategy 3: Checking same row, all columns to the left...")
+                        for check_col in range(1, col_idx):
+                            if (row_idx, check_col) in footer_cells:
+                                designation_text = footer_cells[(row_idx, check_col)]
+                                designation_lower = designation_text.lower()
+                                print(f"    Checking ({row_idx}, {check_col}): '{designation_text}'")
+                                # Make sure it's not the label itself
+                                if ('official designation' not in designation_lower and
+                                    'name and signature' not in designation_lower and
+                                    'certification' not in designation_lower and
+                                    len(designation_text) > 3):
                                     metadata['official_designation'] = designation_text
-                                    print(f"DEBUG - Found designation (2 rows up): {designation_text}")
+                                    print(f"    ✓ FOUND DESIGNATION: '{designation_text}'")
+                                    break
                     
-                    # Look for "Special Collecting Officer" as a standalone value
-                    if cell_lower == 'special collecting officer' and not metadata['official_designation']:
-                        metadata['official_designation'] = 'Special Collecting Officer'
-                        print(f"DEBUG - Found designation: Special Collecting Officer")
+                    # Strategy 4: Check column to the RIGHT
+                    if not metadata['official_designation'] and (row_idx, col_idx + 1) in footer_cells:
+                        designation_text = footer_cells[(row_idx, col_idx + 1)]
+                        print(f"  Strategy 4: Checking ({row_idx}, {col_idx + 1}): '{designation_text}'")
+                        if 'official designation' not in designation_text.lower():
+                            metadata['official_designation'] = designation_text
+                            print(f"  ✓ FOUND DESIGNATION: '{designation_text}'")
+                    
+                    # Strategy 5: Search ALL nearby cells (within 3 rows above/below and all columns)
+                    if not metadata['official_designation']:
+                        print(f"  Strategy 5: Searching all nearby cells...")
+                        for check_row in range(max(footer_start, row_idx - 3), min(ws.max_row + 1, row_idx + 2)):
+                            for check_col in range(1, ws.max_column + 1):
+                                if (check_row, check_col) in footer_cells:
+                                    potential_designation = footer_cells[(check_row, check_col)]
+                                    potential_lower = potential_designation.lower()
+                                    # Check if this looks like a designation
+                                    if (potential_designation and 
+                                        'official designation' not in potential_lower and
+                                        'name and signature' not in potential_lower and
+                                        'certification' not in potential_lower and
+                                        'certify' not in potential_lower and
+                                        'summary' not in potential_lower and
+                                        'total' not in potential_lower and
+                                        len(potential_designation) > 5):
+                                        print(f"    Checking ({check_row}, {check_col}): '{potential_designation}' - MATCH!")
+                                        metadata['official_designation'] = potential_designation
+                                        break
+                            if metadata['official_designation']:
+                                break
+                    
+                    if not metadata['official_designation']:
+                        print(f"  ✗ Could not find designation")
+                
+                # Look for "Special Collecting Officer" as a standalone value (fallback)
+                if cell_lower == 'special collecting officer' and not metadata['official_designation']:
+                    metadata['official_designation'] = 'Special Collecting Officer'
+                    print(f"✓ Found standalone 'Special Collecting Officer' at ({row_idx}, {col_idx})")
+        
+        print("\n" + "="*80)
+        print("FINAL METADATA RESULTS:")
+        print("="*80)
+        for key, value in metadata.items():
+            print(f"{key}: {value}")
+        print("="*80 + "\n")
         
         return metadata
     
     def get(self, request, session_id):   
-        print(f"ProcessUploadView GET called with session_id: {session_id}")  # DEBUG     
         def process_and_stream():
             try:
                 # Get files from cache
@@ -391,6 +459,7 @@ class ProcessUploadView(View):
                 })
 
                 created_reports = []
+                merged_reports = []
                 
                 # First pass: Count total rows
                 total_rows = 0
@@ -517,22 +586,85 @@ class ProcessUploadView(View):
                         date_header = next(h for h in headers if "date" in h)
                         field_map[date_header] = "date"
                     
-                    print(f"DEBUG - Headers: {headers}")
-                    print(f"DEBUG - Field map: {field_map}")
+                    # Map RC Code or Responsibility Center Code
+                    if "responsibility_center_code" not in field_map:
+                        for h in headers:
+                            if h == "rc_code" or h == "responsibility_center_code":
+                                field_map[h] = "responsibility_center_code"
+                                break
 
-                    # Create report with metadata
-                    report = CollectionReport.objects.create(
-                        dti_office=metadata['dti_office'],
-                        report_no=metadata['report_no'],
-                        report_collection_date=metadata['report_collection_date'],
-                        certification=metadata['certification'],
-                        name_and_signature_of_collecting_officer=metadata['name_and_signature_of_collecting_officer'],
-                        official_designation=metadata['official_designation']
-                    )
+                    # --- CHECK FOR EXISTING REPORT AND MERGE ---
+                    is_merge = False
+                    report = None
+                    
+                    # First, try to find existing report by report_no (primary check)
+                    if metadata['report_no']:
+                        try:
+                            report = CollectionReport.objects.filter(
+                                report_no=metadata['report_no']
+                            ).first()
+                            
+                            if report:
+                                is_merge = True
+                                print(f"DEBUG - Found existing report by report_no: {report.report_no}")
+                                
+                                yield self._sse_message({
+                                    'status': 'processing',
+                                    'message': f'Merging into existing report {report.report_no}...',
+                                    'current_filename': file_data['name']
+                                })
+                                
+                                # Update metadata if provided (optional)
+                                if metadata['report_collection_date'] and not report.report_collection_date:
+                                    report.report_collection_date = metadata['report_collection_date']
+                                if metadata['dti_office'] and not report.dti_office:
+                                    report.dti_office = metadata['dti_office']
+                                if metadata['certification'] and not report.certification:
+                                    report.certification = metadata['certification']
+                                if metadata['name_of_collection_officer'] and not report.name_of_collection_officer:
+                                    report.name_of_collection_officer = metadata['name_of_collection_officer']
+                                if metadata['official_designation'] and not report.official_designation:
+                                    report.official_designation = metadata['official_designation']
+                                report.save()
+                            
+                        except Exception as e:
+                            print(f"Error checking for existing report: {e}")
+                    
+                    # If no existing report found by report_no, also check by date as fallback
+                    if not report and metadata['report_collection_date']:
+                        try:
+                            report = CollectionReport.objects.filter(
+                                report_collection_date=metadata['report_collection_date']
+                            ).first()
+                            
+                            if report:
+                                is_merge = True
+                                print(f"DEBUG - Found existing report by date: {report.report_collection_date}")
+                                
+                                yield self._sse_message({
+                                    'status': 'processing',
+                                    'message': f'Merging into existing report for {report.report_collection_date}...',
+                                    'current_filename': file_data['name']
+                                })
+                        except Exception as e:
+                            print(f"Error checking for existing report by date: {e}")
+                    
+                    # Create new report only if no existing one found
+                    if not report:
+                        report = CollectionReport.objects.create(
+                            dti_office=metadata['dti_office'],
+                            report_no=metadata['report_no'],
+                            report_collection_date=metadata['report_collection_date'],
+                            certification=metadata['certification'],
+                            name_of_collection_officer=metadata['name_of_collection_officer'],
+                            official_designation=metadata['official_designation']
+                        )
+                        print(f"DEBUG - Created new report: {report.report_no} ({report.report_collection_date})")
                     
                     db_column_indices = [idx for idx, h in enumerate(headers) if h in field_map]
                     empty_row_count = 0
                     MAX_EMPTY_ROWS = 5
+                    items_added = 0
 
                     # Process rows
                     for row_index, row in enumerate(ws.iter_rows(min_row=header_row + 2, values_only=True), start=header_row + 2):
@@ -612,13 +744,11 @@ class ProcessUploadView(View):
                                 # Priority 1: Starts with 'BN-' or similar prefix (HIGHEST PRIORITY)
                                 if value_str.startswith(('BN-', 'RN-', 'OR-', 'AR-')):
                                     data['number'] = value_str
-                                    print(f"DEBUG - Found receipt number (prefix): {value_str}")
                                     break
                                 
-                                # Priority 2: Contains multiple hyphens (like BN-25-0140-0061-0009411-0009444)
+                                # Priority 2: Contains multiple hyphens
                                 if value_str.count('-') >= 2 and len(value_str) > 10:
                                     data['number'] = value_str
-                                    print(f"DEBUG - Found receipt number (hyphens): {value_str}")
                                     break
                             
                             # Priority 3: If still not found, look for number to the right of date column
@@ -640,11 +770,9 @@ class ProcessUploadView(View):
                                                     # Excel dates are typically 40000-50000 range, receipt numbers are much larger
                                                     if value == int(value) and int(value) > 100000:
                                                         data['number'] = str(int(value))
-                                                        print(f"DEBUG - Found receipt number (long int right of date): {value}")
                                                         break
                                                 elif value_str.isdigit() and len(value_str) >= 6:
                                                     data['number'] = value_str
-                                                    print(f"DEBUG - Found receipt number (digit string right of date): {value_str}")
                                                     break
                                             except:
                                                 continue
@@ -652,20 +780,72 @@ class ProcessUploadView(View):
                         if not data:
                             continue
 
+                        # --- PREVENT DUPLICATE ITEMS WHEN MERGING ---
+                        if is_merge and 'number' in data and data['number']:
+                            # Check if this item already exists in the report
+                            existing_item = report.report_items.filter(
+                                number=data['number'],
+                                date=data.get('date')
+                            ).first()
+                            
+                            if existing_item:
+                                print(f"DEBUG - Skipping duplicate item: {data['number']} on {data.get('date')}")
+                                continue  # Skip this item, it already exists
+
                         try:
                             with transaction.atomic():
                                 item = CollectionReportItem.objects.create(**data)
                                 report.report_items.add(item)
+                                items_added += 1
                         except Exception as e:
                             print(f"Failed to save row {row_index}: {e}")
                             continue
 
-                    created_reports.append(report)
+                    # Track which reports were created vs merged
+                    if is_merge:
+                        if report not in merged_reports:
+                            merged_reports.append(report)
+                        print(f"DEBUG - Merged {items_added} items into report {report.report_no}")
+                    else:
+                        created_reports.append(report)
+                        print(f"DEBUG - Created report {report.report_no} with {items_added} items")
+                    
                     wb.close()
 
-                # Send final completion message
-                redirect_url = reverse("collection-report", args=[created_reports[-1].pk]) if created_reports else reverse("all-documents")
+                # Determine redirect URL
+                all_reports = created_reports + merged_reports
+                if len(all_reports) > 1:
+                    redirect_url = reverse("collection-report-list")
+                elif all_reports:
+                    redirect_url = reverse("collection-report", args=[all_reports[-1].pk])
+                else:
+                    redirect_url = reverse("all-documents")
                 
+                # First, send 100% progress update
+                yield self._sse_message({
+                    'status': 'processing',
+                    'current_row': total_rows,
+                    'total_rows': total_rows,
+                    'current_file': len(file_data_list),
+                    'total_files': len(file_data_list),
+                    'percentage': 100,
+                    'message': 'Finalizing...'
+                })
+                
+                # Add a small delay to ensure UI updates
+                import time
+                time.sleep(0.3)
+                
+                # Build completion message
+                completion_parts = []
+                if created_reports:
+                    completion_parts.append(f'{len(created_reports)} new report(s) created')
+                if merged_reports:
+                    completion_parts.append(f'{len(merged_reports)} report(s) updated')
+                
+                completion_message = ' and '.join(completion_parts) if completion_parts else 'Upload complete!'
+                
+                # Then send completion message
                 yield self._sse_message({
                     'status': 'complete',
                     'current_row': total_rows,
@@ -673,7 +853,7 @@ class ProcessUploadView(View):
                     'current_file': len(file_data_list),
                     'total_files': len(file_data_list),
                     'percentage': 100,
-                    'message': 'Upload complete!',
+                    'message': completion_message,
                     'redirect_url': redirect_url
                 })
 
@@ -700,7 +880,7 @@ class ProcessUploadView(View):
     def _sse_message(self, data):
         """Format data as SSE message"""
         return f"data: {json.dumps(data)}\n\n"
-
+    
 class UploadProgressStreamView(View):
     """Legacy view - kept for backwards compatibility but not used in new flow"""
     

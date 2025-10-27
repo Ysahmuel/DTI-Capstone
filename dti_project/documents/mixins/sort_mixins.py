@@ -1,4 +1,5 @@
 import datetime
+from django.db.models import Count
 
 class SortMixin:
     """
@@ -50,3 +51,74 @@ class SortMixin:
         context['sort_by'] = sort_by
         context['order'] = order
         return context
+    
+class SortCollectionReportListMixin:
+    """
+    Adds sorting functionality to CollectionReport list views.
+    Supports sorting by:
+    - 'number': Report number or report_collection_date
+    - 'records': Number of report items
+    """
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+
+        sort_by = self.request.GET.get("sort_by")
+        order = self.request.GET.get("order", "asc")
+
+        # Annotate with record count for sorting
+        qs = qs.annotate(record_count=Count("report_items"))
+
+        if sort_by == "number":
+            sort_fields = ["report_no", "report_collection_date"]
+        elif sort_by == "records":
+            sort_fields = ["record_count"]
+        else:
+            sort_fields = ["-report_collection_date"]  # Default: latest first
+
+        if order == "desc":
+            sort_fields = [f"-{field}" for field in sort_fields]
+
+        return qs.order_by(*sort_fields)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["sort_by"] = self.request.GET.get("sort_by", "")
+        context["order"] = self.request.GET.get("order", "asc")
+        return context
+    
+class SortCollectionReportListItemMixin:
+    """
+    Adds sorting functionality for a queryset of CollectionReportItem objects.
+    Can be used with DetailView or ListView.
+    """
+
+    # This allows you to pass any queryset to sort_items
+    sortable_fields = {
+        "number": "number",
+        "payor": "payor",
+        "particulars": "particulars",
+        "amount": "amount",
+    }
+
+    def sort_items(self, qs):
+        sort_by = self.request.GET.get("sort_by")
+        order = self.request.GET.get("order", "asc")
+
+        sort_field = self.sortable_fields.get(sort_by, "id")  # default fallback
+
+        if order == "desc":
+            sort_field = f"-{sort_field}"
+
+        return qs.order_by(sort_field)
+
+    def get_sort_context(self):
+        """Return current sort info for template"""
+        return {
+            "sort_by": self.request.GET.get("sort_by", ""),
+            "order": self.request.GET.get("order", "asc"),
+        }
+
+
+class SortCollectionReportItemMixin:
+    pass

@@ -44,7 +44,28 @@
                             {{ document.user }}
                         {% endif %}
                     </td>
-                    <td>{{ document.status|titlecase }}</td>
+                    <!-- Status column -->
+                    <td>
+                        {# Status badge #}
+                        {% if document.status == "draft" %}
+                            <span class="status-badge status-badge-draft">Draft</span>
+                        {% elif document.status in "submitted submitted_paid submitted_unpaid" %}
+                            <span class="status-badge status-badge-submitted">Submitted</span>
+                        {% elif document.status == "approved" %}
+                            <span class="status-badge status-badge-approved">Approved</span>
+                        {% endif %}
+
+                        {# Row-level approve button for submitted documents #}
+                        {% if request.user.role != 'business_owner' and document.status in "submitted submitted_paid submitted_unpaid" %}
+                            <form method="POST" action="{% url 'approve-documents' %}" style="display:inline; margin-left: 8px;">
+                                {% csrf_token %}
+                                <input type="hidden" name="documents" value="{{ document.model_name }}:{{ document.id }}">
+                                <button type="submit" class="approve-btn">Approve</button>
+                            </form>
+                        {% endif %}
+                    </td>
+
+
                     <td>
                         {% if document.date %}
                             {{ document.date }}
@@ -69,7 +90,8 @@
                                             {% elif oop.payment_status == 'verified' %}
                                                 <div class="payment-status-vertical">
                                                     <span class="payment-badge payment-badge-success">Paid & Verified</span>
-                                                    <a href="{% url 'download-receipt' oop.pk %}" class="payment-btn payment-btn-blue">Download Receipt</a>
+                                                    
+                                                    <a href="{% url 'download-receipt' oop.pk %}" target="_blank" class="payment-btn payment-btn-blue" onclick="event.stopPropagation();">Download Receipt</a>
                                                 </div>
                                             {% else %}
                                                 <span class="payment-badge payment-badge-light">Unknown</span>
@@ -104,7 +126,7 @@
                                 {% else %}
                                     {% with document.order_of_payment as oop %}
                                         {% if oop %}
-                                            <a href="{% url 'update-order-of-payment' oop.pk %}" class="oop-btn oop-view">View OOP</a>
+                                            <a href="{% url 'view-oop' oop.pk %}" target="_blank" class="oop-btn oop-view" onclick="event.stopPropagation();">Download OOP</a>
                                         {% else %}
                                             <a href="{% url 'create-order-of-payment' %}?sppa={{ document.pk }}" class="oop-btn oop-create" onclick="event.stopPropagation();">Create OOP</a>
                                         {% endif %}

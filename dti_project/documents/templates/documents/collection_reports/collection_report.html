@@ -9,6 +9,9 @@
 {% endblock %}
 
 {% block body %}
+
+    {% include 'documents/components/collection_report_components/collection_report_filter_modal.html' %}
+
     <header class="document-details-header">
         <div class="column">
             <h1>Collection {{ collection_report }}</h1>
@@ -40,19 +43,31 @@
                 </li>
             {% endif %}
 
-            <li>
-                <strong>Date from: </strong>
-                <p>{{ collection_report.date_from }}</p>
-            </li>
-            <li>
-                <strong>Date to:</strong>
-                <p>{{ collection_report.date_to }}</p>
-            </li>
+            {% if collection_report.responsibility_center_code %}
+                <li>
+                    <strong>Responsibility Center Code </strong>
+                    <p>{{ collection_report.report_responsibility_center_code }}</p>
+                </li>
+            {% endif %}
 
-            {% if collection_report.name_and_signature_of_collection_officer %}
+            {% if collection_report.date_from %}
+                <li>
+                    <strong>Date from: </strong>
+                    <p>{{ collection_report.date_from }}</p>
+                </li>
+            {% endif %}
+            
+            {% if collection_report.date_to %}
+                <li>
+                    <strong>Date to:</strong>
+                    <p>{{ collection_report.date_to }}</p>
+                </li>
+            {% endif %}
+
+            {% if collection_report.name_of_collection_officer %}
                 <li>
                     <strong>Name of Collection Officer:</strong>
-                    <p>{{ collection_report.name_and_signature_of_collection_officer }}</p>
+                    <p>{{ collection_report.name_of_collection_officer }}</p>
                 </li>
             {% endif %}
 
@@ -66,7 +81,8 @@
     </div>
     
     <div class="upload-report-container">
-        {% include 'documents/components/collection_report_components/collection_report_table.html' with items=collection_report.report_items.all %}
+        {% include 'documents/components/collection_report_components/collection_report_header.html' %}
+        {% include 'documents/components/collection_report_components/collection_report_table.html' with items=items %}
     </div>
 
 {% endblock %}
