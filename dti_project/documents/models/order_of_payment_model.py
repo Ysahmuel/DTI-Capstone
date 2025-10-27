@@ -6,6 +6,9 @@ from django.utils import timezone
 from ..model_choices import REMARKS_CHOICES
 from ..utils.model_helpers import remark_amount_fields
 from users.models import User
+from django.utils import timezone
+import random
+import string
 
 
 
@@ -31,6 +34,9 @@ class OrderOfPayment(DraftModel, models.Model):
     account_officer_date = models.DateField(null=True, blank=True)
     account_officer_signature = models.ImageField(upload_to='signatures/', null=True, blank=True)
 
+    payment_code = models.CharField(max_length=20, blank=True, null=True, unique=True)
+    acknowledgment_generated_at = models.DateTimeField(blank=True, null=True)
+    
     # Dynamically include remark-amount fields
     locals().update(remark_amount_fields('discount'))
     locals().update(remark_amount_fields('premium'))
@@ -76,16 +82,24 @@ class OrderOfPayment(DraftModel, models.Model):
         ]
         subtotal = sum((getattr(self, f, 0) or 0) for f in remark_fields)
         return Decimal(subtotal) + (self.doc_stamp_amount or Decimal('0.00'))
-
+    
+    # --- AUTO PAYMENT CODE GENERATION ---
     def save(self, *args, **kwargs):
-        # compute total_amount before saving
         try:
             self.total_amount = self.calculate_total()
         except Exception:
-            # fallback to 0.00 if calculation fails for any reason
             self.total_amount = Decimal('0.00')
+
+        def generate_payment_code():
+            return ''.join(random.choices(string.ascii_uppercase + string.digits, k=15))
+
+        # Generate payment code when verified
+        if self.payment_status == self.PaymentStatus.VERIFIED and not self.payment_code:
+            self.payment_code = generate_payment_code()
+            self.acknowledgment_generated_at = timezone.now()
+
         super().save(*args, **kwargs)
-    
+        
     class Meta:
         verbose_name_plural = 'Orders of Payment'
 
