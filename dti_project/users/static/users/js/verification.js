@@ -156,6 +156,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
+            // determine verification type
+            const verification_type = (form && form.id === "forgot-password-form")
+                ? "reset_password"
+                : "registration";
+
             try {
                 const response = await fetch('/users/verify-user/', {
                     method: "POST",
@@ -164,17 +169,20 @@ document.addEventListener('DOMContentLoaded', function () {
                         "X-CSRFToken": getCSRFToken(),
                         "X-Requested-With": "XMLHttpRequest",
                     },
-                    body: new URLSearchParams({ code: code })
+                    body: new URLSearchParams({
+                        code: code,
+                        verification_type: verification_type
+                    })
                 });
 
                 const data = await response.json();
                 if (data.success) {
                     alert("✅ Verification successful!");
-                    if (form && form.id === "forgot-password-form") {
-                        window.location.href = data.redirect || "/users/reset-password/";
-                    } else {
-                        window.location.href = data.redirect || "/dashboard/";
-                    }
+                    window.location.href = data.redirect || (
+                        verification_type === "reset_password"
+                            ? "/users/reset-password/"
+                            : "/dashboard/"
+                    );
                 } else {
                     alert("❌ " + (data.error || data.message || "Verification failed"));
                 }
