@@ -3,9 +3,44 @@
 <table class="documents-table uploaded-files-table">
     <thead>
         <tr>
-            <th>Report Name</th>
-            <th>Number of Records</th>
-            <th>Report Duration</th>
+            <th>
+            Report No. and Date
+            <button
+                id="sort-by-number-btn"
+                type="button"
+                class="sort-btn"
+                data-sort="number"
+                data-current-sort="{{ sort_by }}"
+                data-current-order="{{ order }}"
+            >
+                <i class="fa-solid 
+                {% if sort_by == 'number' %}
+                    {% if order == 'asc' %}fa-sort-up{% else %}fa-sort-down{% endif %}
+                {% else %}
+                    fa-sort
+                {% endif %}
+                "></i>
+            </button>
+            </th>
+            <th>
+            Number of Records
+            <button
+                id="sort-by-records-btn"
+                type="button"
+                class="sort-btn"
+                data-sort="records"
+                data-current-sort="{{ sort_by }}"
+                data-current-order="{{ order }}"
+            >
+                <i class="fa-solid 
+                {% if sort_by == 'records' %}
+                    {% if order == 'asc' %}fa-sort-up{% else %}fa-sort-down{% endif %}
+                {% else %}
+                    fa-sort
+                {% endif %}
+                "></i>
+            </button>
+            </th>
         </tr>
     </thead>
     <tbody>
@@ -13,8 +48,10 @@
         <tr class="document-value-row" data-href="{{ report.get_absolute_url }}">
             <td>{{ report }}</td>
             <td>{{ report.report_items.count }}</td>
-            <td>{{ report.report_duration }}</td>
         </tr>
+        {% empty %}
+        <tr><td colspan="2">No reports found.</td></tr>
         {% endfor %}
     </tbody>
 </table>
+

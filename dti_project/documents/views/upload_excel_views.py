@@ -132,10 +132,19 @@ class ProcessUploadView(View):
             'official_designation': None,
         }
         
+        print("\n" + "="*80)
+        print("METADATA EXTRACTION DEBUG")
+        print("="*80)
+        print(f"Header row: {header_row}")
+        print(f"Last data row (passed in): {last_data_row}")
+        print(f"Worksheet max row: {ws.max_row}")
+        print(f"Worksheet max column: {ws.max_column}")
+        
         # Determine search boundary - only search BEFORE the data table header
         search_limit = header_row if header_row else min(10, ws.max_row + 1)
         
         # Search only header area for metadata (before data table)
+        print(f"\n--- Searching HEADER area (rows 1-{search_limit-1}) ---")
         for row_idx in range(1, search_limit):
             for cell in ws[row_idx]:
                 if not cell.value:
@@ -151,6 +160,7 @@ class ProcessUploadView(View):
                 # Extract DTI Office
                 if 'dti' in cell_lower and 'office' in cell_lower:
                     metadata['dti_office'] = cell_text
+                    print(f"✓ Found DTI Office at row {row_idx}: '{cell_text}'")
                 
                 # Extract Report No (but NOT Official Receipt No)
                 if ('report no' in cell_lower or 'report_no' in cell_lower) and 'receipt' not in cell_lower and 'official' not in cell_lower:
@@ -158,23 +168,27 @@ class ProcessUploadView(View):
                     parts = cell_text.split('.')
                     if len(parts) > 1:
                         metadata['report_no'] = parts[-1].strip()
+                        print(f"✓ Found Report No at row {row_idx}: '{metadata['report_no']}'")
                     else:
                         # Check adjacent cells
                         next_cell = ws.cell(row=cell.row, column=cell.column + 1)
                         if next_cell.value:
                             metadata['report_no'] = str(next_cell.value).strip()
+                            print(f"✓ Found Report No at row {row_idx} (adjacent cell): '{metadata['report_no']}'")
                 
                 # Extract Date (usually below DTI Office)
                 if not metadata['report_collection_date']:
                     # Check if this looks like a date
                     if isinstance(cell.value, datetime.datetime):
                         metadata['report_collection_date'] = cell.value.date()
+                        print(f"✓ Found Date at row {row_idx} (datetime): '{metadata['report_collection_date']}'")
                     elif isinstance(cell.value, str):
                         # Try to parse date formats
-                        for fmt in ['%m/%d/%Y', '%m-%d-%Y', '%Y-%m-%d', '%d/%m/%Y', '%d-%m-%Y']:
+                        for fmt in ['%m/%d/%Y', '%m-%d-%Y', '%Y-%m-%d', '%d/%m/%Y', '%d-%m-%Y', '%d-%b-%y', '%d-%b-%Y']:
                             try:
                                 parsed_date = datetime.datetime.strptime(cell_text, fmt).date()
                                 metadata['report_collection_date'] = parsed_date
+                                print(f"✓ Found Date at row {row_idx} (string): '{metadata['report_collection_date']}'")
                                 break
                             except:
                                 continue
@@ -185,21 +199,76 @@ class ProcessUploadView(View):
                                 base_date = datetime.datetime(1899, 12, 30)
                                 parsed_date = base_date + datetime.timedelta(days=cell.value)
                                 metadata['report_collection_date'] = parsed_date.date()
+                                print(f"✓ Found Date at row {row_idx} (serial): '{metadata['report_collection_date']}'")
                         except:
                             pass
         
-        # Search for certification text (in footer area AFTER data rows)
-        footer_start = last_data_row if last_data_row else max(0, ws.max_row - 30)
+        # DYNAMIC FOOTER DETECTION: Find where the data table actually ends
+        # Look for "CERTIFICATION" keyword or 3+ consecutive empty rows after header
+        print(f"\n--- Detecting actual footer start ---")
+        footer_start = None
+        
+        if header_row:
+            # Strategy 1: Look for "CERTIFICATION" keyword (most reliable)
+            for row_idx in range(header_row + 2, ws.max_row + 1):
+                # Check all cells in the row (for merged cells spanning columns)
+                row_text = []
+                for cell in ws[row_idx]:
+                    if cell.value:
+                        row_text.append(str(cell.value).strip().lower())
+                
+                combined_text = ' '.join(row_text)
+                if 'certification' in combined_text or 'i hereby certify' in combined_text:
+                    footer_start = row_idx
+                    print(f"✓ Found 'CERTIFICATION' marker at row {row_idx}")
+                    break
+            
+            # Strategy 2: Look for consistent empty rows (fallback)
+            if not footer_start:
+                empty_count = 0
+                for row_idx in range(header_row + 2, ws.max_row + 1):
+                    # Check if row has any substantial data in the first few columns
+                    has_data = False
+                    for col_idx in range(1, min(6, ws.max_column + 1)):
+                        cell = ws.cell(row=row_idx, column=col_idx)
+                        if cell.value:
+                            cell_text = str(cell.value).strip()
+                            # Ignore pure whitespace or underscores
+                            if cell_text and cell_text not in ['_', '__', '___', '____', '_____', '______'] and not all(c in '_ ' for c in cell_text):
+                                has_data = True
+                                break
+                    
+                    if not has_data:
+                        empty_count += 1
+                        if empty_count >= 3:
+                            footer_start = row_idx - 2  # Go back before the empty rows
+                            print(f"✓ Detected footer start at row {footer_start} (3+ empty rows)")
+                            break
+                    else:
+                        empty_count = 0
+        
+        # Fallback: Use a conservative estimate
+        if not footer_start:
+            footer_start = max(1, ws.max_row - 40)
+            print(f"⚠ Using fallback footer start: row {footer_start}")
+        
+        print(f"Final footer_start: {footer_start}")
+        print(f"\n--- Searching FOOTER area (rows {footer_start}-{ws.max_row}) ---")
+        
+        # Search for certification text (in footer area)
         certification_start = None
         
         for row_idx in range(footer_start, ws.max_row + 1):
+            # Check ALL cells in row (for merged cells)
+            row_text = []
             for cell in ws[row_idx]:
-                if cell.value and isinstance(cell.value, str):
-                    cell_lower = str(cell.value).lower()
-                    if 'i hereby certify' in cell_lower or 'certification' in cell_lower:
-                        certification_start = row_idx
-                        break
-            if certification_start:
+                if cell.value:
+                    row_text.append(str(cell.value).strip().lower())
+            
+            combined_text = ' '.join(row_text)
+            if 'i hereby certify' in combined_text or 'certification' in combined_text:
+                certification_start = row_idx
+                print(f"✓ Found Certification start at row {row_idx}")
                 break
         
         if certification_start:
@@ -215,53 +284,162 @@ class ProcessUploadView(View):
             
             if cert_lines:
                 metadata['certification'] = ' '.join(cert_lines)
+                print(f"✓ Certification text: '{metadata['certification'][:100]}...'")
         
-        # Search for collecting officer name and designation (in footer area AFTER data rows)
+        # Search for collecting officer name and designation (in footer area)
+        # Build a map of ALL non-empty cells in the footer for easier searching
+        print(f"\n--- Building footer cell map ---")
+        footer_cells = {}
         for row_idx in range(footer_start, ws.max_row + 1):
-            for cell in ws[row_idx]:
-                if cell.value and isinstance(cell.value, str):
+            for col_idx in range(1, ws.max_column + 1):
+                cell = ws.cell(row=row_idx, column=col_idx)
+                if cell.value:
                     cell_text = str(cell.value).strip()
-                    cell_lower = cell_text.lower()
+                    if cell_text and cell_text not in ['_', '__', '___', '____', '_____', '______']:
+                        footer_cells[(row_idx, col_idx)] = cell_text
+                        print(f"  Cell ({row_idx}, {col_idx}): '{cell_text}'")
+        
+        print(f"\n--- Searching for Name and Designation ---")
+        # Now search for the labels
+        for row_idx in range(footer_start, ws.max_row + 1):
+            # Collect all values in this row (to handle merged cells)
+            row_values = []
+            for col_idx in range(1, ws.max_column + 1):
+                if (row_idx, col_idx) in footer_cells:
+                    row_values.append((col_idx, footer_cells[(row_idx, col_idx)]))
+            
+            # Check each cell in the row
+            for col_idx, cell_text in row_values:
+                cell_lower = cell_text.lower()
+                
+                # Look for "Name and Signature of Collecting Officer" label
+                if 'name and signature of collecting officer' in cell_lower or 'name and signature' in cell_lower:
+                    print(f"\n→ Found 'Name and Signature...' label at ({row_idx}, {col_idx})")
                     
-                    # Look for "Name and Signature of Collecting Officer" label
-                    if cell_lower == 'name and signature of collecting officer':
-                        # The actual name should be in the row ABOVE
-                        name_cell = ws.cell(row=cell.row - 1, column=cell.column)
-                        if name_cell.value:
-                            name_text = str(name_cell.value).strip()
-                            # Skip if it looks like an underline or empty
-                            if name_text and name_text not in ['_', '__', '___', '____', '_____', '______'] and not all(c in '_ ' for c in name_text):
-                                metadata['name_of_collection_officer'] = name_text
-                        
-                        # Also check 2 rows above in case there's an underline row
-                        if not metadata['name_of_collection_officer']:
-                            name_cell_2 = ws.cell(row=cell.row - 2, column=cell.column)
-                            if name_cell_2.value:
-                                name_text = str(name_cell_2.value).strip()
-                                if name_text and not all(c in '_ ' for c in name_text):
-                                    metadata['name_of_collection_officer'] = name_text
+                    # Strategy 1: Check the row ABOVE in the SAME column
+                    if (row_idx - 1, col_idx) in footer_cells:
+                        name_text = footer_cells[(row_idx - 1, col_idx)]
+                        print(f"  Strategy 1: Checking ({row_idx - 1}, {col_idx}): '{name_text}'")
+                        if 'name and signature' not in name_text.lower():
+                            metadata['name_of_collection_officer'] = name_text
+                            print(f"  ✓ FOUND NAME: '{name_text}'")
                     
-                    # Look for "Official Designation" label
-                    if cell_lower == 'official designation':
-                        # The actual designation should be in the row ABOVE
-                        designation_cell = ws.cell(row=cell.row - 1, column=cell.column)
-                        if designation_cell.value:
-                            designation_text = str(designation_cell.value).strip()
-                            # Skip if it looks like an underline or empty
-                            if designation_text and designation_text not in ['_', '__', '___', '____', '_____', '______'] and not all(c in '_ ' for c in designation_text):
-                                metadata['official_designation'] = designation_text
-                        
-                        # Also check 2 rows above in case there's an underline row
-                        if not metadata['official_designation']:
-                            designation_cell_2 = ws.cell(row=cell.row - 2, column=cell.column)
-                            if designation_cell_2.value:
-                                designation_text = str(designation_cell_2.value).strip()
-                                if designation_text and not all(c in '_ ' for c in designation_text):
+                    # Strategy 2: Check 2 rows above
+                    if not metadata['name_of_collection_officer'] and (row_idx - 2, col_idx) in footer_cells:
+                        name_text = footer_cells[(row_idx - 2, col_idx)]
+                        print(f"  Strategy 2: Checking ({row_idx - 2}, {col_idx}): '{name_text}'")
+                        if 'name and signature' not in name_text.lower():
+                            metadata['name_of_collection_officer'] = name_text
+                            print(f"  ✓ FOUND NAME: '{name_text}'")
+                    
+                    # Strategy 3: Search ALL cells above in ALL columns (for merged cells)
+                    if not metadata['name_of_collection_officer']:
+                        print(f"  Strategy 3: Searching all columns in rows above...")
+                        for check_row in range(max(footer_start, row_idx - 3), row_idx):
+                            for check_col in range(1, ws.max_column + 1):
+                                if (check_row, check_col) in footer_cells:
+                                    potential_name = footer_cells[(check_row, check_col)]
+                                    potential_lower = potential_name.lower()
+                                    # Check if this looks like a name (not a label)
+                                    if (potential_name and 
+                                        'name and signature' not in potential_lower and
+                                        'official designation' not in potential_lower and
+                                        'certification' not in potential_lower and
+                                        'certify' not in potential_lower and
+                                        'summary' not in potential_lower and
+                                        'total' not in potential_lower and
+                                        len(potential_name) > 5):
+                                        print(f"    Checking ({check_row}, {check_col}): '{potential_name}' - MATCH!")
+                                        metadata['name_of_collection_officer'] = potential_name
+                                        break
+                            if metadata['name_of_collection_officer']:
+                                break
+                    
+                    if not metadata['name_of_collection_officer']:
+                        print(f"  ✗ Could not find name")
+                
+                # Look for "Official Designation" label
+                if 'official designation' in cell_lower:
+                    print(f"\n→ Found 'Official Designation' label at ({row_idx}, {col_idx})")
+                    
+                    # Strategy 1: Check the row ABOVE in the SAME column
+                    if (row_idx - 1, col_idx) in footer_cells:
+                        designation_text = footer_cells[(row_idx - 1, col_idx)]
+                        print(f"  Strategy 1: Checking ({row_idx - 1}, {col_idx}): '{designation_text}'")
+                        if 'official designation' not in designation_text.lower():
+                            metadata['official_designation'] = designation_text
+                            print(f"  ✓ FOUND DESIGNATION: '{designation_text}'")
+                    
+                    # Strategy 2: Check 2 rows above
+                    if not metadata['official_designation'] and (row_idx - 2, col_idx) in footer_cells:
+                        designation_text = footer_cells[(row_idx - 2, col_idx)]
+                        print(f"  Strategy 2: Checking ({row_idx - 2}, {col_idx}): '{designation_text}'")
+                        if 'official designation' not in designation_text.lower():
+                            metadata['official_designation'] = designation_text
+                            print(f"  ✓ FOUND DESIGNATION: '{designation_text}'")
+                    
+                    # Strategy 3: Check SAME ROW in ALL columns to the LEFT (merged cell scenario)
+                    if not metadata['official_designation']:
+                        print(f"  Strategy 3: Checking same row, all columns to the left...")
+                        for check_col in range(1, col_idx):
+                            if (row_idx, check_col) in footer_cells:
+                                designation_text = footer_cells[(row_idx, check_col)]
+                                designation_lower = designation_text.lower()
+                                print(f"    Checking ({row_idx}, {check_col}): '{designation_text}'")
+                                # Make sure it's not the label itself
+                                if ('official designation' not in designation_lower and
+                                    'name and signature' not in designation_lower and
+                                    'certification' not in designation_lower and
+                                    len(designation_text) > 3):
                                     metadata['official_designation'] = designation_text
+                                    print(f"    ✓ FOUND DESIGNATION: '{designation_text}'")
+                                    break
                     
-                    # Look for "Special Collecting Officer" as a standalone value
-                    if cell_lower == 'special collecting officer' and not metadata['official_designation']:
-                        metadata['official_designation'] = 'Special Collecting Officer'
+                    # Strategy 4: Check column to the RIGHT
+                    if not metadata['official_designation'] and (row_idx, col_idx + 1) in footer_cells:
+                        designation_text = footer_cells[(row_idx, col_idx + 1)]
+                        print(f"  Strategy 4: Checking ({row_idx}, {col_idx + 1}): '{designation_text}'")
+                        if 'official designation' not in designation_text.lower():
+                            metadata['official_designation'] = designation_text
+                            print(f"  ✓ FOUND DESIGNATION: '{designation_text}'")
+                    
+                    # Strategy 5: Search ALL nearby cells (within 3 rows above/below and all columns)
+                    if not metadata['official_designation']:
+                        print(f"  Strategy 5: Searching all nearby cells...")
+                        for check_row in range(max(footer_start, row_idx - 3), min(ws.max_row + 1, row_idx + 2)):
+                            for check_col in range(1, ws.max_column + 1):
+                                if (check_row, check_col) in footer_cells:
+                                    potential_designation = footer_cells[(check_row, check_col)]
+                                    potential_lower = potential_designation.lower()
+                                    # Check if this looks like a designation
+                                    if (potential_designation and 
+                                        'official designation' not in potential_lower and
+                                        'name and signature' not in potential_lower and
+                                        'certification' not in potential_lower and
+                                        'certify' not in potential_lower and
+                                        'summary' not in potential_lower and
+                                        'total' not in potential_lower and
+                                        len(potential_designation) > 5):
+                                        print(f"    Checking ({check_row}, {check_col}): '{potential_designation}' - MATCH!")
+                                        metadata['official_designation'] = potential_designation
+                                        break
+                            if metadata['official_designation']:
+                                break
+                    
+                    if not metadata['official_designation']:
+                        print(f"  ✗ Could not find designation")
+                
+                # Look for "Special Collecting Officer" as a standalone value (fallback)
+                if cell_lower == 'special collecting officer' and not metadata['official_designation']:
+                    metadata['official_designation'] = 'Special Collecting Officer'
+                    print(f"✓ Found standalone 'Special Collecting Officer' at ({row_idx}, {col_idx})")
+        
+        print("\n" + "="*80)
+        print("FINAL METADATA RESULTS:")
+        print("="*80)
+        for key, value in metadata.items():
+            print(f"{key}: {value}")
+        print("="*80 + "\n")
         
         return metadata
     
@@ -407,6 +585,13 @@ class ProcessUploadView(View):
                     if "date" not in field_map and any("date" in h for h in headers):
                         date_header = next(h for h in headers if "date" in h)
                         field_map[date_header] = "date"
+                    
+                    # Map RC Code or Responsibility Center Code
+                    if "responsibility_center_code" not in field_map:
+                        for h in headers:
+                            if h == "rc_code" or h == "responsibility_center_code":
+                                field_map[h] = "responsibility_center_code"
+                                break
 
                     # --- CHECK FOR EXISTING REPORT AND MERGE ---
                     is_merge = False

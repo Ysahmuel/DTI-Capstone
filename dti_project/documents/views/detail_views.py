@@ -1,5 +1,7 @@
 import re
 
+from ..mixins.filter_mixins import FilterCollectionReportListItemMixin
+from ..mixins.sort_mixins import SortCollectionReportListItemMixin
 from ..mixins.permissions_mixins import RoleFormPageRestrictionMixin
 from ..models.collection_models import CollectionReport, CollectionReportItem
 from ..mixins.context_mixins import TabsSectionMixin
@@ -141,7 +143,13 @@ class ChecklistEvaluationSheetDetailView(LoginRequiredMixin, DetailView):
 
         return context
     
-class CollectionReportDetailView(RoleFormPageRestrictionMixin, LoginRequiredMixin, DetailView):
+class CollectionReportDetailView(
+    RoleFormPageRestrictionMixin,
+    FilterCollectionReportListItemMixin,
+    SortCollectionReportListItemMixin,
+    LoginRequiredMixin,
+    DetailView
+):
     template_name = 'documents/collection_reports/collection_report.html'
     model = CollectionReport
     context_object_name = 'collection_report'
@@ -149,8 +157,25 @@ class CollectionReportDetailView(RoleFormPageRestrictionMixin, LoginRequiredMixi
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        collection_report = context['collection_report']
+
+        # Start with all items
+        items_qs = collection_report.report_items.all()
+
+        # Apply filtering
+        items_qs = self.apply_filters(items_qs)
+
+        # Apply sorting
+        context['items'] = self.sort_items(items_qs)
+
+        # Add sorting info for template buttons/icons
+        context.update(self.get_sort_context())
+
+        # Populate distinct particulars for the dropdown
+        context['distinct_particulars'] = collection_report.report_items.values_list('particulars', flat=True).distinct()
 
         return context
+
     
 class CollectionReportItemDetailView(RoleFormPageRestrictionMixin, LoginRequiredMixin, DetailView):
     template_name = 'documents/collection_reports/collection_report_item.html'
