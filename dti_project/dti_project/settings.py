@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,10 +23,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-td$o4dni7vqty0^p(!*ub*j_#o#c@ux3ox=6zli)2(4v(3yrd-'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
-PAYMONGO_SECRET_KEY = "sk_test_nyLZiyRtD6gQJxzNJRfVkb7P"
-PAYMONGO_PUBLIC_KEY = "pk_test_UfWkc1a16Lm6LiC11jkSK9r3"
+PAYMONGO_SECRET_KEY = os.getenv('PAYMONGO_SECRET_KEY')
+PAYMONGO_PUBLIC_KEY = os.getenv('PAYMONGO_PUBLIC_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -51,6 +54,7 @@ INSTALLED_APPS = [
     'payments',
     'locations',
     'rest_framework',
+    'social_django',
 ]
 
 MIDDLEWARE = [
@@ -63,7 +67,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
-    'documents.middleware.DailyCollectionReportMiddleware',
+    'social_django.middleware.SocialAuthExceptionMiddleware',
 ]
 
 CACHES = {
@@ -101,8 +105,12 @@ ASGI_APPLICATION = "dti_project.asgi.application"
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'dti_project',       # your database name
+        'USER': 'postgres',           # your PostgreSQL username
+        'PASSWORD': 'Prince0l@guer@123',  # your PostgreSQL password
+        'HOST': 'localhost',          # or your server address
+        'PORT': '5433',               # default PostgreSQL port
     }
 }
 
@@ -162,11 +170,51 @@ LOGIN_URL = 'users/sign-in'
 AUTH_USER_MODEL = 'users.User'
 
 AUTHENTICATION_BACKENDS = [
+    'social_core.backends.google.GoogleOAuth2',
     'users.backends.EmailBackend',
+    'django.contrib.auth.backends.ModelBackend', # Default login
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
+
+TIME_ZONE = "Asia/Manila"
+USE_TZ = True
+
+# Make sure social_django works with templates
+TEMPLATES[0]['OPTIONS']['context_processors'] += [
+    'social_django.context_processors.backends',
+    'social_django.context_processors.login_redirect',
+]
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.getenv('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY')
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.getenv('SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET')
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
+
+LOGIN_URL = 'sign-in'
+LOGOUT_URL = 'logout'
+LOGIN_REDIRECT_URL = '/'  # or your home/dashboard page
+LOGOUT_REDIRECT_URL = 'sign-in'
+
+SOCIAL_AUTH_PIPELINE = (
+    'social_core.pipeline.social_auth.social_details',
+    'social_core.pipeline.social_auth.social_uid',
+    'social_core.pipeline.social_auth.auth_allowed',
+    'social_core.pipeline.social_auth.social_user',
+    'users.pipeline.prevent_auto_create',  # 👈 We'll add this custom step
+    'social_core.pipeline.user.get_username',
+    'social_core.pipeline.user.create_user',
+    'social_core.pipeline.social_auth.associate_user',
+    'users.pipeline.prevent_overwrite_user_details',  # 👈 Custom step to prevent overwriting
+    'social_core.pipeline.social_auth.load_extra_data',
+    'social_core.pipeline.user.user_details',
+)
 
 CHANNEL_LAYERS = {
     "default": {
