@@ -75,9 +75,8 @@ class CollectionReportItemAdmin(admin.ModelAdmin):
 
 @admin.register(SalesPromotionPermitApplication)
 class SalesPromotionAdmin(StatusModelAdmin):
-    list_display = ("promo_title", "payment_status_for_owner")
-    search_fields = ("promo_title", "sponsor_name", "advertising_agency_name")
-    
+    list_display = ("promo_title","payment_status_for_owner")
+    search_fields = ("promo_title","sponsor_name", "advertising_agency_name")
     def payment_status_for_owner(self, obj):
         oop = getattr(obj, 'order_of_payment', None)
         if oop and oop.payment_status in ["paid", "verified"]:
@@ -164,16 +163,16 @@ class OrderOfPaymentAdmin(StatusModelAdmin):
     list_display = (
         "id",
         "sales_promotion_permit_application",
+        "reference_code",
         "total_amount",
         "payment_status",
         "status",
         "date",
     )
+    readonly_fields = ("reference_code",)
     list_filter = ("payment_status", "status", "date")
     search_fields = ("sales_promotion_permit_application__sponsor_name",)
     ordering = ("-date",)
-
-    # Makes Save buttons appear both at top and bottom
     save_on_top = True
 
 
