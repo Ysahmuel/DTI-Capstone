@@ -49,10 +49,11 @@ from .export_report_views import (
 )
 
 from .action_views import (
-    ApproveDocumentsView
+    ApproveDocumentsView,
+    mark_all_notifications_as_read
 )
 
 
 from .pdf_views import (
     view_oop,
-    )
+)
