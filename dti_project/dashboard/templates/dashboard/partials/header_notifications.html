@@ -4,7 +4,9 @@
   <div class="notifications-container">
     <div class="notifications-header">
       <h3>Notifications</h3>
-      <button id="mark-all-as-read-btn">Mark all as read</button>
+      {% if user.new_notifications.count %}
+        <button id="mark-all-as-read-btn">Mark all as read</button>
+      {% endif %}
     </div>
     <ul class="notifications-list">
       {% for notification in user.new_notifications %}
