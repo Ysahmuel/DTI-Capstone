@@ -9,6 +9,11 @@ from django.contrib.contenttypes.models import ContentType
 import random
 import string
 
+def generate_reference_code():
+    prefix = ''.join(random.choices(string.ascii_uppercase, k=4))
+    suffix = ''.join(random.choices(string.digits, k=10))
+    return f"{prefix}{suffix}"
+
 class SalesPromotionPermitApplication(DraftModel, BaseApplication):
     class Meta:
         verbose_name = "Sales Promotion Permit Application"
@@ -57,13 +62,8 @@ class SalesPromotionPermitApplication(DraftModel, BaseApplication):
 
     def get_update_url(self):
         return reverse("update-sales-promotion", args=[self.pk])
-    
-    def generate_reference_code():
-        prefix = ''.join(random.choices(string.ascii_uppercase, k=4))
-        suffix = ''.join(random.choices(string.digits, k=10))
-        return f"{prefix}{suffix}"
 
-    reference_code = models.CharField(max_length=20, unique=True, default=generate_reference_code)
+    reference_code = models.CharField(max_length=20, blank=True, null=True, default=generate_reference_code)
     
     def save(self, *args, **kwargs):
         is_new = self._state.adding
