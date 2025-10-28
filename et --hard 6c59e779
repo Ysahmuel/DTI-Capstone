@@ -1,0 +1,116 @@
+[33m4157a92e[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m Reinitialize gitignore at project root
+[33md49caec2[m Clean up: stop tracking ignored files
+[33mbb4e4de5[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Clean up ignored files and update .gitignore
+[33m6c59e779[m changed nationality field for pds into choice field
+[33m102f91b6[m added optional birthday field for user model
+[33m7079ee90[m updated "nationality" field in PDS to use a dropdown
+[33md216eaaf[m updated birthday fields for document forms to only accepted minimum age of 18 years old
+[33m5d875cb8[m added base class for user forms, added restriction for add staff form name fields to only accept non numerical chgaracters
+[33m6ba1fba2[m updated "date to" and "date from" fields to be hidden if value is empty
+[33m6441a703[m updated base form to prevent numbers from being inputted for name fields
+[33ma756988c[m updated register form and template to prevent user from inputting numbers on first and last naem fields
+[33md8fc6f9f[m updated ProcessUploadView to ensure percentage shows 100% first before showing the "Upload COmplete" message
+[33mca481a9f[m changed 'name of collecting officer' in process uplaod view
+[33mf6a936ac[m CHANGED FUCKING FIELD NAME OF COLLECTION OFFICER BWISIT NA DB GRABE ERROR
+[33mc261bcd7[m reverted collection_officer field name change
+[33m81615582[m renamed "collecting_officer" field to "collection_officer"
+[33m40a2578c[m added report frequency method and column to report list table
+[33mdedbb7ca[m fixed ColelctionReportListView parent classes
+[33md225b417[m Merge pull request #32 from vnc-afk/main
+[33m02debcb1[m Merge pull request #31 from Ysahmuel/main
+[33m2b84a174[m Merge branch 'RoelVillaluz:main' into main
+[33m6c915177[m status column has approved button/pdf preview in new page
+[33meedcf3b0[m updated add staff
+[33m2a169666[m Merge pull request #30 from Ysahmuel/main
+[33mffb39934[m Merge branch 'main' of https://github.com/RoelVillaluz/DTI-Capstone
+[33m80c73ed0[m changed service-checklist group to use flex wrap to minimize whitespace
+[33me429de24[m removed border and outline for documents table button
+[33m7b643259[m merged vince and sam changes
+[33m93363a9e[m popup working
+[33mecc0e4f5[m Merge pull request #29 from Ysahmuel/main
+[33m297fd8c4[m Merge pull request #28 from vnc-afk/main
+[33m52191e04[m Merge branch 'RoelVillaluz:main' into main
+[33m4c729b30[m payment admin registered and notifications
+[33m17f39f57[m Merge branch 'main' of https://github.com/RoelVillaluz/DTI-Capstone
+[33m9795ad24[m added summary details to collection summary
+[33m9ee03c4a[m changed text for empty collection report table
+[33mf31d7531[m removed margin from colelction report table
+[33m177f1200[m changed field lookups for official designation and special collecting officer and name of collecting officer for excel view
+[33m616734df[m created pagination mixin
+[33m76244a15[m updated name and signature field
+[33m1174d7df[m added collections css
+[33m24cc9c56[m added allowed_roles for colelction report list view
+[33m466ee2b1[m db
+[33mbde42b50[m renamed collection report name of officer field
+[33m5c627951[m Merge pull request #27 from vnc-afk/main
+[33mda955a4c[m Merge branch 'RoelVillaluz:main' into main
+[33m69e52a7e[m payment working with pdf downloadable receipt
+[33m12cc8480[m Merge pull request #26 from vnc-afk/main
+[33m9cb13d61[m payment working (no receipt)
+[33m92312ac4[m improved upload reprot to parse additional fields such as : official designation, report no. , dti office.
+[33m3042e0ef[m Added add_staff function, still work in progress
+[33mff8c2a1e[m reverted excel upload and process view and collection models
+[33m8f5aac4b[m improved UploadExcelView to be able to parse new fields: deposit, collection officer name,total, undeposited collections
+[33m9c8e44de[m added deposit field to report item
+[33m6e999833[m improved UploadExcelView to parse certification text and be able to more intelligently recognize headers regardless of where they are located
+[33m233781be[m added role form restriction to collection report views
+[33m0b010aeb[m added cerficiation, collecting officer fields to collection report model
+[33m0a46f59d[m created detial view for collection report item
+[33m58cc4ef5[m remvoed upload button from doc list header
+[33m64bde422[m created collection report item and template
+[33m74529ac9[m created collectionReportListVIew
+[33m97f3b099[m added report.get_absolute_url to tr link
+[33mb8e139c5[m changed template name to 'collection_report_item_table'
+[33ma63ee31f[m added collection_report_item_table
+[33m90a004e8[m created collection report detail view and template
+[33mbcda8acb[m added date from and date to to collection model
+[33m6dce8648[m added side navbar link to colelction report list
+[33mc2068797[m updated collection report admin to delete all report items when parent is deleted
+[33mae445ef8[m changed collection-report url and view location
+[33m081bbd98[m changed progress-container styling
+[33m71af336b[m fixed bug actions class not disappaering when progress is displayed
+[33m93d5cb78[m added real time progress tracking of excel file upload
+[33me5aa1cba[m created collection report detail view
+[33ma79e8ba4[m created CollectionReportAdmin
+[33m7de71a21[m updated uploadReportView to redirect to collection-report and show actual data fields from excel
+[33m62e96f51[m created collection_report html
+[33m1b7ac89e[m imported collectionReport model
+[33m725f5ac0[m changed uploadExcelView to match actuial DTI format
+[33md9bb100e[m created model: CollectionReport
+[33m5e298497[m changed collectionReportItem list display
+[33me8b26406[m altered models
+[33m67fee2ba[m created collection models and admin page for that model
+[33meaab1e3e[m added sorting feature for document table
+[33mc95330de[m added coverage and civil status filters
+[33m16ed1a1b[m changed document filter modal heading to: 'Advanced Filters'
+[33m9de54bdf[m improved DRY in filterMixin: used mapping for model_specific_filters insteaed of repeatedly using "if" statements
+[33m1391701b[m updated modal to have max width
+[33m6e3c2cdf[m added form of organization filters
+[33mf491076d[m added asset size filters
+[33ma7e8d46d[m added social classification filters
+[33me4b45486[m added service category filters
+[33m22847f00[m changed checkbox filter class name and added radio filter css styling
+[33m3d89da58[m added application types filters
+[33m61ca940c[m added radio button handling for filters.js
+[33m6590b709[m added safe search in user filters
+[33mc801a67d[m updated checkbox filter item js selector to match updated class names
+[33m49fe1972[m modularized 'user search' filters into own partial template
+[33m225f06b0[m modularized 'status' filters into own partial template
+[33mef1990c7[m modularized 'date' filters into own partial template
+[33mcea95111[m adding padding-right to document filters form and sections
+[33m8203f3a3[m added indices to barangay model
+[33m1ce66c00[m added indices to service accreditation model
+[33mc30b45df[m added user first name and last name search filters
+[33ma1848955[m updated dashboard to order by datetime
+[33m6b1d1d5d[m updated models to use datetime field instead of date field for date/date filed
+[33m70630e78[m fixed location dropdown fields resulting in submission error (choices dont get recognized)
+[33m2ec7fc18[m updated location api views to get only values for faster performance
+[33m17232801[m updated service accreditation form to make location querysets none at first reload for faster page load
+[33mc5193525[m changed ordering of service repair locations (regions to barangays)
+[33m4c78bc15[m improved locations admin
+[33mc0c1953b[m added indexes to location models
+[33m2cc4db3e[m added location dropdown js
+[33mdab34091[m updated service repair location fields to use foreign key for locations
+[33m38707a41[m added locations related data for dropdown
+[33m22547293[m added error message for temporary excel file upload
+[33m28272442[m prevents choosing d
