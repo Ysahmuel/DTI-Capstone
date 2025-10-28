@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let allFiles = [];
     let eventSource = null;
     let sessionId = null;
+    let isProcessing = false;
 
     if (openUploadFilesModalBtn && uploadFilesModal) {
         openUploadFilesModalBtn.addEventListener("click", function () {
@@ -22,15 +23,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (closeUploadFilesModalBtn && uploadFilesModal) {
         closeUploadFilesModalBtn.addEventListener("click", function () {
-            uploadFilesModal.style.display = "none";
-            resetForm();
+            if (isProcessing) {
+                if (confirm("Upload is in progress. Are you sure you want to cancel? All uploaded data will be deleted.")) {
+                    cancelUpload();
+                }
+            } else {
+                uploadFilesModal.style.display = "none";
+                resetForm();
+            }
         });
     }
 
     if (cancelBtn && uploadFilesModal) {
         cancelBtn.addEventListener("click", function () {
-            uploadFilesModal.style.display = "none";
-            resetForm();
+            if (isProcessing) {
+                if (confirm("Upload is in progress. Are you sure you want to cancel? All uploaded data will be deleted.")) {
+                    cancelUpload();
+                }
+            } else {
+                uploadFilesModal.style.display = "none";
+                resetForm();
+            }
         });
     }
 
@@ -73,6 +86,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const csrfToken = form.querySelector('[name="csrfmiddlewaretoken"]').value;
             formData.append("csrfmiddlewaretoken", csrfToken);
 
+            isProcessing = true;
             showProgressUI();
             uploadWithRealTimeProgress(formData);
         });
@@ -148,7 +162,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 </p>
             </div>
             <div class="progress-actions">
-                <button type="button" id="cancel-upload-btn" class="cancel-upload-btn">Cancel</button>
+                <button type="button" id="cancel-upload-btn" class="cancel-upload-btn">
+                    Cancel Upload
+                </button>
             </div>
         `;
 
@@ -157,23 +173,43 @@ document.addEventListener("DOMContentLoaded", function () {
         // Add cancel functionality
         document.getElementById("cancel-upload-btn").addEventListener("click", function() {
             if (confirm("Are you sure you want to cancel the upload? All uploaded data will be deleted.")) {
-                // Request cancellation
-                fetch(`/documents/cancel-upload/${sessionId}/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': form.querySelector('[name="csrfmiddlewaretoken"]').value,
-                        'X-Requested-With': 'XMLHttpRequest',
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Cancellation requested');
-                    // SSE will handle the cancellation progress updates
-                })
-                .catch(error => {
-                    console.error('Cancellation error:', error);
-                });
+                this.disabled = true;
+                this.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Cancelling...';
+                cancelUpload();
             }
+        });
+    }
+
+    function cancelUpload() {
+        if (!sessionId) {
+            console.error('No session ID available');
+            return;
+        }
+
+        // Request cancellation
+        fetch(`/documents/cancel-upload/${sessionId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': form.querySelector('[name="csrfmiddlewaretoken"]').value,
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Cancellation response:', data);
+            
+            // Close SSE connection
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;
+            }
+            
+            // Show cancellation success
+            showCancelled(data);
+        })
+        .catch(error => {
+            console.error('Cancellation error:', error);
+            showError('Failed to cancel upload. Please refresh the page.');
         });
     }
 
@@ -206,8 +242,7 @@ document.addEventListener("DOMContentLoaded", function () {
             console.log('Step 2: Starting processing with SSE...');
             const processUrl = `/documents/process-upload/${data.session_id}/`;
             
-            // Use POST for SSE (some servers handle this better)
-            const eventSource = new EventSource(processUrl);
+            eventSource = new EventSource(processUrl);
             
             eventSource.onopen = function() {
                 console.log('SSE connection established');
@@ -218,16 +253,22 @@ document.addEventListener("DOMContentLoaded", function () {
                     const progressData = JSON.parse(event.data);
                     console.log('Progress update:', progressData);
                     
-                    updateProgressFromServer(progressData, startTime);
-                    
-                    if (progressData.status === 'complete') {
+                    if (progressData.status === 'cancelled') {
+                        console.log('Upload cancelled by user');
+                        eventSource.close();
+                        showCancelled(progressData);
+                    } else if (progressData.status === 'complete') {
                         console.log('Processing complete!');
                         eventSource.close();
-                        showSuccess(progressData.redirect_url);
+                        isProcessing = false;
+                        showSuccess(progressData.redirect_url, progressData.message);
                     } else if (progressData.status === 'error') {
                         console.error('Processing error:', progressData.message);
                         eventSource.close();
+                        isProcessing = false;
                         showError(progressData.message || "Upload failed. Please try again.");
+                    } else {
+                        updateProgressFromServer(progressData, startTime);
                     }
                 } catch (e) {
                     console.error('Error parsing SSE data:', e, event.data);
@@ -237,11 +278,13 @@ document.addEventListener("DOMContentLoaded", function () {
             eventSource.onerror = function(error) {
                 console.error('SSE connection error:', error);
                 eventSource.close();
+                isProcessing = false;
                 showError("Connection lost. Please try again.");
             };
         })
         .catch(error => {
             console.error('Upload error:', error);
+            isProcessing = false;
             showError(error.message || "Upload failed. Please try again.");
         });
     }
@@ -321,14 +364,14 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    function showSuccess(redirectUrl) {
+    function showSuccess(redirectUrl, message) {
         const progressContainer = document.querySelector(".progress-container");
         if (progressContainer) {
             progressContainer.innerHTML = `
                 <div class="progress-success">
                     <i class="fa-solid fa-check-circle"></i>
                     <h3>Upload Complete!</h3>
-                    <p>Successfully processed all files. Redirecting...</p>
+                    <p>${message || 'Successfully processed all files. Redirecting...'}</p>
                 </div>
             `;
         }
@@ -338,7 +381,35 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 1500);
     }
 
+    function showCancelled(data) {
+        isProcessing = false;
+        const progressContainer = document.querySelector(".progress-container");
+        if (progressContainer) {
+            const deletedInfo = data.deleted_counts ? 
+                `<p class="deletion-details">
+                    ${data.deleted_counts.reports > 0 ? `Deleted ${data.deleted_counts.reports} report(s)<br>` : ''}
+                    ${data.deleted_counts.items > 0 ? `Deleted ${data.deleted_counts.items} item(s) from ${data.deleted_counts.merged_reports} merged report(s)` : ''}
+                </p>` : '';
+            
+            progressContainer.innerHTML = `
+                <div class="progress-cancelled">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                    <h3>Upload Cancelled</h3>
+                    <p>${data.message || 'Upload cancelled by user. All data has been deleted.'}</p>
+                    ${deletedInfo}
+                    <button type="button" id="close-modal-btn" class="retry-btn">Close</button>
+                </div>
+            `;
+
+            document.getElementById("close-modal-btn").addEventListener("click", () => {
+                uploadFilesModal.style.display = "none";
+                resetForm();
+            });
+        }
+    }
+
     function showError(message) {
+        isProcessing = false;
         const progressContainer = document.querySelector(".progress-container");
         if (progressContainer) {
             progressContainer.innerHTML = `
@@ -346,7 +417,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     <i class="fa-solid fa-exclamation-circle"></i>
                     <h3>Upload Failed</h3>
                     <p>${message}</p>
-                    <button type="button" id="retry-btn">Try Again</button>
+                    <button type="button" id="retry-btn" class="retry-btn">Try Again</button>
                 </div>
             `;
 
@@ -362,6 +433,7 @@ document.addEventListener("DOMContentLoaded", function () {
             eventSource = null;
         }
         
+        isProcessing = false;
         sessionId = null;
         allFiles = [];
         fileInput.value = "";

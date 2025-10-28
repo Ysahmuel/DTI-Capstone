@@ -3,6 +3,16 @@ from django.urls import reverse
 from ..models.base_models import BaseApplication, DraftModel
 from django.utils import timezone
 from users.models import User
+from notifications.models import Notification
+from notifications.utils import send_user_notification
+from django.contrib.contenttypes.models import ContentType
+import random
+import string
+
+def generate_reference_code():
+    prefix = ''.join(random.choices(string.ascii_uppercase, k=4))
+    suffix = ''.join(random.choices(string.digits, k=10))
+    return f"{prefix}{suffix}"
 
 class SalesPromotionPermitApplication(DraftModel, BaseApplication):
     class Meta:
@@ -52,6 +62,28 @@ class SalesPromotionPermitApplication(DraftModel, BaseApplication):
 
     def get_update_url(self):
         return reverse("update-sales-promotion", args=[self.pk])
+
+    reference_code = models.CharField(max_length=20, blank=True, null=True, default=generate_reference_code)
+    
+    def save(self, *args, **kwargs):
+        is_new = self._state.adding
+        super().save(*args, **kwargs)
+
+        if is_new:
+            message = (
+                f"Your Sales Promotion Permit Application has been created successfully.\n"
+                f"Reference Code: {self.reference_code}\n"
+                f"Please keep this code for tracking your payment and permit status."
+            )
+            notification = Notification.objects.create(
+                user=self.user,
+                sender=None,
+                message=message,
+                type="info",
+                content_type=ContentType.objects.get_for_model(self),
+                object_id=self.pk,
+            )
+            send_user_notification(self.user.id, notification)
     
 class ProductCovered(models.Model):
     permit_application = models.ForeignKey(SalesPromotionPermitApplication, related_name='products', on_delete=models.CASCADE)

@@ -27,6 +27,11 @@ from django.contrib.auth.models import User
 from django.db import IntegrityError
 import random, string
 from .forms import AddStaffForm
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth import get_user_model
+from django.utils import timezone 
+from .forms import AddStaffForm
 
 from documents.models import (
     # Base models
@@ -66,13 +71,175 @@ logger = logging.getLogger(__name__)
 # Create your views here.
 
 
-#add staff view
-from django.shortcuts import render, redirect
+#forgot password view
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views import View
 from django.contrib import messages
-from django.contrib.auth import get_user_model
-from django.utils import timezone  # # Added for date comparison
-from .forms import AddStaffForm
+from django.contrib.auth import login
+from django.urls import reverse
+from .forms import ForgotPasswordForm, ResetPasswordForm
+from .models import User  # adjust if your User model is custom
+import random
 
+# -----------------------------
+# FORGOT PASSWORD
+# -----------------------------
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+
+
+
+class ForgotPasswordView(View):
+    template_name = 'users/forgot_password.html'
+
+    def get(self, request):
+        form = ForgotPasswordForm()
+        return render(request, self.template_name, {
+            'form': form,
+            'verification_type': 'reset_password',
+            'verification_sent': False
+        })
+
+    def post(self, request):
+        form = ForgotPasswordForm(request.POST)
+        is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
+
+        if not form.is_valid():
+            if is_ajax:
+                return JsonResponse({
+                    "success": False,
+                    "error": "Invalid email format."
+                })
+            return render(request, self.template_name, {
+                'form': form,
+                'verification_type': 'reset_password',
+                'verification_sent': False
+            })
+
+        email = form.cleaned_data['email']
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            if is_ajax:
+                return JsonResponse({
+                    "success": False,
+                    "error": "Email not found."
+                })
+            messages.error(request, "Email not found.")
+            return render(request, self.template_name, {
+                'form': form,
+                'verification_type': 'reset_password',
+                'verification_sent': False
+            })
+
+        # ✅ Generate OTP and store
+        user.generate_secure_otp_code()
+        user.save()
+
+        # ✅ Save info to session
+        request.session['pending_verification_user'] = user.id
+        request.session['reset_email'] = user.email
+
+        # ✅ Debug log
+        print(f"[DEBUG] Password reset code for {email}: {user.verification_code}")
+
+        # ✅ Masked email (e.g., "te***@gmail.com")
+        def mask_email(email):
+            username, domain = email.split('@')
+            masked_username = username[0] + "***" + username[-1] if len(username) > 2 else username[0] + "***"
+            return f"{masked_username}@{domain}"
+
+        if is_ajax:
+            return JsonResponse({
+                "success": True,
+                "masked_email": mask_email(email)
+            })
+
+        # For normal form POST (fallback)
+        return render(request, self.template_name, {
+            'form': form,
+            'verification_type': 'reset_password',
+            'verification_sent': True,
+            'email': email
+        })
+
+
+# -----------------------------
+# RESET PASSWORD
+# -----------------------------
+from django.views import View
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import make_password
+from django.urls import reverse
+
+User = get_user_model()
+
+class ResetPasswordView(View):
+    template_name = 'users/reset_password.html'
+
+    def get(self, request):
+        email = request.session.get('reset_email')
+        if not email:
+            messages.error(request, "Your session has expired. Please restart the password reset process.")
+            return redirect('forgot_password')
+        return render(request, self.template_name)
+
+    def post(self, request):
+        password = request.POST.get('password')
+        confirm_password = request.POST.get('confirm_password')
+        email = request.session.get('reset_email')
+
+        if not email:
+            return JsonResponse({
+                'success': False,
+                'message': 'Session expired. Please restart the password reset process.'
+            })
+
+        if not password or not confirm_password:
+            return JsonResponse({
+                'success': False,
+                'message': 'Please fill out both password fields.'
+            })
+
+        if password != confirm_password:
+            return JsonResponse({
+                'success': False,
+                'message': 'Passwords do not match.'
+            })
+
+        if len(password) < 8:
+            return JsonResponse({
+                'success': False,
+                'message': 'Password must be at least 8 characters long.'
+            })
+
+        try:
+            user = User.objects.get(email=email)
+            user.password = make_password(password)
+            user.save()
+
+            # ✅ Clean up session and add success message
+            request.session.pop('reset_email', None)
+            request.session.pop('pending_verification_user', None)
+
+            messages.success(request, "Your password has been successfully reset! You can now sign in.")
+
+            return JsonResponse({
+                'success': True,
+                'redirect': reverse('sign-in')
+            })
+
+        except User.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'message': 'No user account found for this email.'
+            })
+
+
+
+#add staff view
 User = get_user_model()
 
 
@@ -172,7 +339,7 @@ def delete_new_staff(request, user_id):
 class SettingsView(LoginRequiredMixin, TemplateView):
     template_name = "users/settings.html"
 
-#Profile Detail and Edit Views
+#Profile Detail View
 class ProfileDetailView(DetailView):
     model = User
     template_name = "users/profile.html"
@@ -246,14 +413,19 @@ class BusinessOwnerListView(ListView):
         })
         return context
 
+#Profile Edit View
+from .forms import ProfileEditForm
+
 class ProfileEditView(UpdateView):
     model = User
-    fields = ['first_name', 'last_name', 'email', 'profile_picture', 'default_address', 'default_phone']
+    form_class = ProfileEditForm
     template_name = "users/profile_edit.html"
     context_object_name = "profile"
 
     def get_success_url(self):
         return reverse_lazy('profile', kwargs={'pk': self.object.pk})
+
+
 
 
 class CustomLoginView(FormSubmissionMixin, LoginView):
@@ -298,6 +470,7 @@ class CustomRegisterView(FormSubmissionMixin, CreateView):
         if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return JsonResponse({
                 'success': True,
+                'verification_type': 'registration',
                 'message': 'Registration successful! Please enter the verification code.',
                 'show_verification': True,
                 'masked_email': self.mask_email(user.email),
@@ -316,42 +489,46 @@ class CustomRegisterView(FormSubmissionMixin, CreateView):
     
 
 class VerifyUserView(View):
-    """Handles OTP verification separately"""
-
     def post(self, request, *args, **kwargs):
         user_id = request.session.get('pending_verification_user')
         if not user_id:
             return JsonResponse({'success': False, 'error': 'No pending verification'}, status=400)
 
         user = get_object_or_404(User, id=user_id)
-
-        # Get code from request
-        code = request.POST.get('verification_code') or request.POST.get('code', '')
-
-        if not code:
-            digits = [request.POST.get(f'digit_{i}', '') for i in range(1, 7)]
-            code = ''.join(digits)
+        code = request.POST.get('code') or request.POST.get('verification_code', '')
 
         if not code or len(code) != 6:
             return JsonResponse({'success': False, 'error': 'Please enter a valid 6-digit code'}, status=400)
 
-        # Verify
         if user.is_verification_code_valid(code):
             user.is_verified = True
             user.verification_code = None
             user.verification_code_expiration_date = None
             user.save()
 
-            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            del request.session['pending_verification_user']
+            verification_type = request.POST.get('verification_type', '')
 
-            return JsonResponse({
-                'success': True,
-                'message': 'Verification successful!',
-                'redirect': reverse('dashboard')
-            })
-        else:
-            return JsonResponse({'success': False, 'error': 'Invalid or expired verification code'}, status=400)
+            if verification_type == 'reset_password':
+                # For forgot password → reset flow
+                request.session['reset_email'] = user.email
+                del request.session['pending_verification_user']  # 🟢 clean session
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Verification successful!',
+                    'redirect': reverse('reset_password')
+                })
+            else:
+                # For normal registration flow
+                login(request, user)
+                del request.session['pending_verification_user']
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Verification successful!',
+                    'redirect': reverse('dashboard')
+                })
+
+        return JsonResponse({'success': False, 'error': 'Invalid or expired verification code'}, status=400)
+
 
 class ResendCodeView(View):
     """Handles resending OTP"""

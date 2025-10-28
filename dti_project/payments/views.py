@@ -146,49 +146,71 @@ def verify_payment(request, oop_id):
 @login_required
 def download_receipt(request, oop_id):
     oop = get_object_or_404(OrderOfPayment, pk=oop_id)
+    sppa = oop.sales_promotion_permit_application
 
-    # Only allow download if already verified
     if oop.payment_status != OrderOfPayment.PaymentStatus.VERIFIED:
         messages.warning(request, "Receipt is only available after verification.")
         return redirect('documents-list')
 
-    # Generate PDF in memory
     buffer = BytesIO()
     p = canvas.Canvas(buffer, pagesize=A4)
+    width, height = A4
 
-    # Header
+    # HEADER
     p.setFont("Helvetica-Bold", 14)
-    p.drawString(200, 800, "DTI Official Receipt")
-    p.setFont("Helvetica", 10)
-    p.drawString(50, 780, f"Reference Code: {oop.pk:06d}")
-    p.drawString(50, 765, f"Issue Date: {datetime.datetime.now().strftime('%d %b %Y %I:%M %p')}")
-    p.drawString(50, 750, f"Application Name: {oop.sales_promotion_permit_application.sponsor_name}")
-    p.drawString(50, 735, f"Particulars: Sales Promotion Permit Application")
-    p.drawString(50, 720, f"Total Amount: Php {oop.total_amount or 0:,.2f}")
-    p.drawString(50, 705, f"Application Fee: Php {(oop.total_amount or 0) - (oop.doc_stamp_amount or 0):,.2f}")
-    p.drawString(50, 690, f"Documentary Stamp Tax: Php {oop.doc_stamp_amount or 0:,.2f}")
-    p.drawString(50, 670, f"Verified By: {request.user.get_full_name()}")
+    p.drawCentredString(width / 2, height - 70, "ACKNOWLEDGMENT RECEIPT")
+    p.setFont("Helvetica", 9)
+    p.drawCentredString(width / 2, height - 85, "(This serves as proof of online payment)")
+    p.drawCentredString(width / 2, height - 97,
+                        "An official receipt will be issued by the DTI Cashier or authorized payment partner.")
 
-    p.setFont("Helvetica-Oblique", 9)
-    p.drawString(50, 640, "This is your official DTI receipt.")
-    p.drawString(50, 625, "Your transaction has been verified successfully.")
+    # PAYMENT INFO
+    p.setFont("Helvetica", 10)
+    p.drawString(50, height - 130, f"Payment Code: {oop.payment_code or 'N/A'}")
+    p.drawString(50, height - 145, f"Reference Code: {sppa.reference_code}")
+    p.drawString(50, height - 160, f"Issue Date: {datetime.datetime.now().strftime('%d %B %Y, %I:%M %p')}")
+    p.drawString(50, height - 175, f"Application Name: {sppa.sponsor_name}")
+    p.drawString(50, height - 190, f"Authorized Representative: {sppa.sponsor_authorized_rep}")
+    p.drawString(50, height - 205, f"Transaction Type: Sales Promotion Permit Application")
+
+    # AMOUNTS
+    y = height - 235
+    p.setFont("Helvetica-Bold", 10)
+    p.drawString(50, y, "Fee Description")
+    p.drawString(300, y, "Amount (₱)")
+    p.line(50, y - 2, 550, y - 2)
+
+    processing_fee = (oop.total_amount or 0) - (oop.doc_stamp_amount or 0)
+    y -= 20
+    p.setFont("Helvetica", 10)
+    p.drawString(50, y, "Processing Fee")
+    p.drawRightString(550, y, f"{processing_fee:,.2f}")
+
+    y -= 15
+    p.drawString(50, y, "Documentary Stamp Tax")
+    p.drawRightString(550, y, f"{oop.doc_stamp_amount or 0:,.2f}")
+
+    y -= 20
+    p.setFont("Helvetica-Bold", 10)
+    p.drawString(50, y, "TOTAL AMOUNT PAID")
+    p.drawRightString(550, y, f"{oop.total_amount or 0:,.2f}")
+    p.line(400, y - 2, 550, y - 2)
+
+    # FOOTER
+    y -= 40
+    p.setFont("Helvetica", 10)
+    p.drawString(50, y, f"Verified By: {request.user.get_full_name()}")
+    p.drawString(50, y - 15, f"Date Verified: {datetime.datetime.now().strftime('%d %B %Y')}")
+
+    p.setFont("Helvetica-Oblique", 8)
+    p.setFillGray(0.3)
+    footer = ("This acknowledgment receipt is system-generated for proof of online payment.\n"
+            "The official DTI or LGU receipt will be issued by the authorized cashier or integrated payment gateway as per government policy.")
+    p.drawCentredString(width / 2, 80, footer.split('\n')[0])
+    p.drawCentredString(width / 2, 68, footer.split('\n')[1])
 
     p.showPage()
     p.save()
     buffer.seek(0)
-    
-    admins = User.objects.filter(role__in=["admin", "collection_agent"])
-    for admin in admins:
-        notification = Notification.objects.create(
-            user=admin,
-            sender=request.user,
-            message=f"{request.user.get_full_name()} downloaded the receipt for OOP #{oop.pk}.",
-            type="info",
-            content_type=ContentType.objects.get_for_model(oop),
-            object_id=oop.pk,
-        )
-        send_user_notification(admin.id, notification)
-
 
     return FileResponse(buffer, content_type='application/pdf', as_attachment=False)
-
