@@ -1,38 +1,118 @@
 <div class="header-notifications">
-    <i class="fa fa-bell" data-count="{{ user.new_notifications.count }}"></i>
+  <i class="fa fa-bell" data-count="{{ user.new_notifications.count }}"></i>
 
-    <div class="notifications-container">
-        <div class="notifications-header">
-            <h3>Notifications</h3>
-            <button id="mark-all-as-read-btn">Mark all as read</button>
-        </div>
-        <ul class="notifications-list">
-            {% for notification in user.new_notifications %}
-                <li>
-                    {% if notification.sender %}
-                        <div class="sender-profile-pic">
-                            <img src="{{ notification.sender.profile_picture.url }}" alt="">
-                        </div>
-                    {% else %}
-                        <div class="system-icon">
-                            <i class="fa-solid fa-cog"></i>
-                        </div>
-                    {% endif %}
-                    <div class="details">
-                        <div class="row">
-                            {{ notification.display_message }}
-                        </div>
-                        <p class="time-since">{{ notification.time_display }}</p>
-                        {% if notification.type == 'update_request' %}
-                            <div class="decision-choices">
-                                <button id="accept-btn">Accept</button>
-                                <button id="deny-btn">Deny</button>
-                            </div>
-                        {% endif %}
-                    </div>
-                </li>
-            {% endfor %}
-        </ul>
+  <div class="notifications-container">
+    <div class="notifications-header">
+      <h3>Notifications</h3>
+      {% if user.new_notifications.count %}
+        <button id="mark-all-as-read-btn">Mark all as read</button>
+      {% endif %}
     </div>
-
+    <ul class="notifications-list">
+      {% for notification in user.new_notifications %}
+        <li class="{% if not notification.is_read %}unread{% endif %}">
+          {% if notification.sender %}
+            <div class="sender-profile-pic">
+              <img src="{{ notification.sender.profile_picture.url }}" alt="">
+            </div>
+          {% else %}
+            <div class="system-icon">
+              <i class="fa-solid fa-cog"></i>
+            </div>
+          {% endif %}
+          <div class="details">
+            <div class="row">
+              {{ notification.display_message }}
+            </div>
+            <p class="time-since">{{ notification.time_display }}</p>
+            {% if notification.type == 'update_request' %}
+              <div class="decision-choices">
+                <button id="accept-btn">Accept</button>
+                <button id="deny-btn">Deny</button>
+              </div>
+            {% endif %}
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
 </div>
+
+<script>
+document.addEventListener("click", async (e) => {
+  const btn = e.target.closest("#mark-all-as-read-btn");
+  if (!btn) return; // Ignore unrelated clicks
+
+  console.log("Mark all as read button clicked!");
+
+  const csrf =
+    document.querySelector('input[name="csrfmiddlewaretoken"]')?.value ||
+    document.cookie.split("csrftoken=")[1]?.split(";")[0];
+
+  if (!csrf) {
+    console.error("❌ CSRF token not found!");
+    return;
+  }
+
+  btn.disabled = true;
+
+  try {
+    const response = await fetch("{% url 'mark_all_notifications_as_read' %}", {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": csrf,
+        "X-Requested-With": "XMLHttpRequest",
+        "Accept": "application/json",
+      },
+      credentials: "same-origin",
+    });
+
+    if (!response.ok) {
+      console.error("❌ Request failed:", response.status);
+      return;
+    }
+
+    const data = await response.json();
+
+    // Create alerts container if it doesn’t exist
+    let alertsContainer = document.querySelector(".alerts-container");
+    if (!alertsContainer) {
+      alertsContainer = document.createElement("div");
+      alertsContainer.className = "alerts-container";
+      document.body.appendChild(alertsContainer);
+    }
+
+    // Show alert message
+    alertsContainer.innerHTML = `
+      <header>
+        <i class="fa-solid fa-circle-check"></i>
+        <h4>Success!</h4>
+        <i class="fa-solid fa-xmark" id="close-alert-btn"></i>
+      </header>
+      <div class="alert alert-success">
+        ${data.message || "All notifications marked as read!"}
+      </div>
+    `;
+    alertsContainer.classList.add("show", "success");
+
+    // Close alert manually
+    document.getElementById("close-alert-btn")?.addEventListener("click", () => {
+      alertsContainer.classList.remove("show", "success");
+    });
+
+    // Mark all notifications as read visually
+    document.querySelectorAll(".notifications-list li.unread").forEach((li) =>
+      li.classList.remove("unread")
+    );
+
+    // Set bell count to 0 instead of removing it
+    const bell = document.querySelector(".header-notifications i.fa-bell");
+    if (bell) bell.setAttribute("data-count", "0");
+
+  } catch (err) {
+    console.error("⚠️ Fetch error:", err);
+  } finally {
+    btn.disabled = false;
+  }
+});
+</script>

@@ -1,4 +1,5 @@
-from django.db.models import Q
+from django.db.models import Q, Min, Max
+
 
 from ..models.personal_data_sheet_model import PersonalDataSheet
 from ..models.sales_promotion_model import SalesPromotionPermitApplication
@@ -143,7 +144,6 @@ class FilterableDocumentMixin:
             context["CIVIL_STATUS_CHOICES"] = getattr(PersonalDataSheet, "CIVIL_STATUS_CHOICES", [])
 
         return context
-
 class FilterCollectionReportListMixin:
     """
     Adds filtering for CollectionReport objects.
@@ -193,24 +193,23 @@ class FilterCollectionReportListMixin:
             "selected_duration_type": request.GET.get("duration_type", ""),
         })
 
-        # Compute min/max report_collection_date for date input min/max attributes
-        qs_all = self.model.objects.filter(report_collection_date__isnull=False)
-        if qs_all.exists():
-            first = qs_all.order_by("report_collection_date").first().report_collection_date
-            last = qs_all.order_by("-report_collection_date").first().report_collection_date
-            # Date objects are fine in template, but we also provide ISO strings for min/max attributes
-            context["min_report_date"] = first
-            context["max_report_date"] = last
-            context["min_report_date_iso"] = first.isoformat()
-            context["max_report_date_iso"] = last.isoformat()
-        else:
-            context["min_report_date"] = ""
-            context["max_report_date"] = ""
-            context["min_report_date_iso"] = ""
-            context["max_report_date_iso"] = ""
+        # --- Compute min/max report_collection_date for date input min/max attributes ---
+        ModelClass = self.model  # keep mixin generic
+        agg = ModelClass._base_manager.aggregate(
+            min_date=Min("report_collection_date"),
+            max_date=Max("report_collection_date"),
+        )
+
+        min_date = agg["min_date"]
+        max_date = agg["max_date"]
+
+        context["min_report_date"] = min_date or ""
+        context["max_report_date"] = max_date or ""
+        context["min_report_date_iso"] = min_date.isoformat() if min_date else ""
+        context["max_report_date_iso"] = max_date.isoformat() if max_date else ""
 
         return context
-
+    
 class FilterCollectionReportListItemMixin:
     """
     Adds filtering for CollectionReportItem objects.

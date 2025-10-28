@@ -1,4 +1,4 @@
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, JsonResponse
 from django.contrib import messages
 from django.apps import apps
 from django.shortcuts import redirect
@@ -11,6 +11,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.contenttypes.models import ContentType
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from django.contrib.auth.decorators import login_required
+from django.template.loader import render_to_string
 
 MODEL_MAP = {
     model._meta.model_name: model
@@ -79,3 +81,15 @@ class ApproveDocumentsView(LoginRequiredMixin, View):
 
         messages.success(request, f"{updated_count} document(s) approved successfully.")
         return redirect(request.META.get("HTTP_REFERER", "documents:all-documents"))
+    
+@login_required
+def mark_all_notifications_as_read(request):
+    if request.method == "POST":
+        Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+        messages.success(request, "All notifications have been marked as read.")
+
+        # Render your custom alert HTML
+        html = render_to_string("documents/partials/alerts_container.html", {}, request)
+        return JsonResponse({"alert_html": html})
+
+    return JsonResponse({"error": "Invalid request"}, status=400)

@@ -100,6 +100,7 @@ class UploadExcelView(View):
             'status': 'queued',
             'session_id': session_id
         })
+
 class ProcessUploadView(View):
     """
     Separate view that processes the upload.
@@ -130,6 +131,9 @@ class ProcessUploadView(View):
             'certification': None,
             'name_of_collection_officer': None,
             'official_designation': None,
+            'total': None,
+            'undeposited_last_report': None,
+            'collections_this_report': None,
         }
         
         print("\n" + "="*80)
@@ -445,7 +449,21 @@ class ProcessUploadView(View):
     
     def get(self, request, session_id):   
         def process_and_stream():
+            # Track created reports/items for rollback on cancel
+            created_report_ids = []
+            created_item_ids = []
+            merged_report_ids = []
+            
             try:
+                # Check for cancellation at the start
+                if cache.get(f'upload_cancel_{session_id}'):
+                    yield self._sse_message({
+                        'status': 'cancelled',
+                        'message': 'Upload cancelled by user'
+                    })
+                    cache.delete(f'upload_cancel_{session_id}')
+                    return
+                
                 # Get files from cache
                 file_data_list = cache.get(f'upload_files_{session_id}')
                 if not file_data_list:
@@ -459,7 +477,7 @@ class ProcessUploadView(View):
                 })
 
                 created_reports = []
-                merged_reports = []
+                merged_reports_list = []
                 
                 # First pass: Count total rows
                 total_rows = 0
@@ -472,6 +490,15 @@ class ProcessUploadView(View):
                 })
                 
                 for file_data in file_data_list:
+                    # Check for cancellation during counting
+                    if cache.get(f'upload_cancel_{session_id}'):
+                        yield self._sse_message({
+                            'status': 'cancelled',
+                            'message': 'Upload cancelled - no data was created'
+                        })
+                        cache.delete(f'upload_cancel_{session_id}')
+                        return
+                    
                     ext = os.path.splitext(file_data['name'])[1].lower()
                     if file_data['name'].startswith("~$") or ext not in [".xlsx", ".xls"]:
                         file_row_counts.append(0)
@@ -503,6 +530,17 @@ class ProcessUploadView(View):
                 
                 # Process each file
                 for file_index, file_data in enumerate(file_data_list):
+                    # Check for cancellation before each file
+                    if cache.get(f'upload_cancel_{session_id}'):
+                        # Rollback all created data
+                        self._rollback_changes(created_report_ids, created_item_ids, merged_report_ids)
+                        yield self._sse_message({
+                            'status': 'cancelled',
+                            'message': 'Upload cancelled - all data has been deleted'
+                        })
+                        cache.delete(f'upload_cancel_{session_id}')
+                        return
+                    
                     ext = os.path.splitext(file_data['name'])[1].lower()
                     
                     yield self._sse_message({
@@ -542,10 +580,10 @@ class ProcessUploadView(View):
                     # Process all data rows first to find where they end
                     last_data_row = header_row + 2
                     for row_index, row in enumerate(ws.iter_rows(min_row=header_row + 2, values_only=True), start=header_row + 2):
-                        if any(row):  # If row has any data
+                        if any(row):
                             last_data_row = row_index
                     
-                    # Extract metadata AFTER we know where the header row and last data row are
+                    # Extract metadata
                     metadata = self.extract_report_metadata(ws, header_row, last_data_row)
 
                     # Combine header rows
@@ -564,18 +602,16 @@ class ProcessUploadView(View):
                             if h in opts:
                                 field_map[h] = f.name
 
-                    # Manual mappings - enhanced for better detection
+                    # Manual mappings
                     if "official_receipt_number" in headers:
                         field_map["official_receipt_number"] = "number"
                     if "official_receipt_number" not in field_map and "number" in headers:
                         field_map["number"] = "number"
-                    # Check for any header containing both "receipt" and "number"
                     if "number" not in field_map:
                         for h in headers:
                             if "receipt" in h and "number" in h:
                                 field_map[h] = "number"
                                 break
-                    # Last resort: map any column called just "number"
                     if "number" not in field_map:
                         for idx, h in enumerate(headers):
                             if h == "number":
@@ -586,18 +622,16 @@ class ProcessUploadView(View):
                         date_header = next(h for h in headers if "date" in h)
                         field_map[date_header] = "date"
                     
-                    # Map RC Code or Responsibility Center Code
                     if "responsibility_center_code" not in field_map:
                         for h in headers:
                             if h == "rc_code" or h == "responsibility_center_code":
                                 field_map[h] = "responsibility_center_code"
                                 break
 
-                    # --- CHECK FOR EXISTING REPORT AND MERGE ---
+                    # Check for existing report and merge
                     is_merge = False
                     report = None
                     
-                    # First, try to find existing report by report_no (primary check)
                     if metadata['report_no']:
                         try:
                             report = CollectionReport.objects.filter(
@@ -606,6 +640,10 @@ class ProcessUploadView(View):
                             
                             if report:
                                 is_merge = True
+                                if report.id not in merged_report_ids:
+                                    merged_report_ids.append(report.id)
+                                    # Store in cache for cleanup
+                                    cache.set(f'upload_merged_reports_{session_id}', merged_report_ids, timeout=600)
                                 print(f"DEBUG - Found existing report by report_no: {report.report_no}")
                                 
                                 yield self._sse_message({
@@ -614,7 +652,7 @@ class ProcessUploadView(View):
                                     'current_filename': file_data['name']
                                 })
                                 
-                                # Update metadata if provided (optional)
+                                # Update metadata if provided
                                 if metadata['report_collection_date'] and not report.report_collection_date:
                                     report.report_collection_date = metadata['report_collection_date']
                                 if metadata['dti_office'] and not report.dti_office:
@@ -630,7 +668,7 @@ class ProcessUploadView(View):
                         except Exception as e:
                             print(f"Error checking for existing report: {e}")
                     
-                    # If no existing report found by report_no, also check by date as fallback
+                    # Fallback check by date
                     if not report and metadata['report_collection_date']:
                         try:
                             report = CollectionReport.objects.filter(
@@ -639,6 +677,9 @@ class ProcessUploadView(View):
                             
                             if report:
                                 is_merge = True
+                                if report.id not in merged_report_ids:
+                                    merged_report_ids.append(report.id)
+                                    cache.set(f'upload_merged_reports_{session_id}', merged_report_ids, timeout=600)
                                 print(f"DEBUG - Found existing report by date: {report.report_collection_date}")
                                 
                                 yield self._sse_message({
@@ -659,15 +700,32 @@ class ProcessUploadView(View):
                             name_of_collection_officer=metadata['name_of_collection_officer'],
                             official_designation=metadata['official_designation']
                         )
+                        created_report_ids.append(report.id)
+                        # Store in cache for cleanup
+                        cache.set(f'upload_created_reports_{session_id}', created_report_ids, timeout=600)
                         print(f"DEBUG - Created new report: {report.report_no} ({report.report_collection_date})")
                     
                     db_column_indices = [idx for idx, h in enumerate(headers) if h in field_map]
                     empty_row_count = 0
                     MAX_EMPTY_ROWS = 5
                     items_added = 0
+                    row_check_counter = 0
 
                     # Process rows
                     for row_index, row in enumerate(ws.iter_rows(min_row=header_row + 2, values_only=True), start=header_row + 2):
+                        # Check for cancellation every 10 rows
+                        row_check_counter += 1
+                        if row_check_counter % 10 == 0:
+                            if cache.get(f'upload_cancel_{session_id}'):
+                                wb.close()
+                                self._rollback_changes(created_report_ids, created_item_ids, merged_report_ids)
+                                yield self._sse_message({
+                                    'status': 'cancelled',
+                                    'message': 'Upload cancelled - all data has been deleted'
+                                })
+                                cache.delete(f'upload_cancel_{session_id}')
+                                return
+                        
                         if not any(row[idx] if idx < len(row) else None for idx in db_column_indices):
                             empty_row_count += 1
                             if empty_row_count >= MAX_EMPTY_ROWS:
@@ -677,7 +735,7 @@ class ProcessUploadView(View):
                         empty_row_count = 0
                         current_row += 1
                         
-                        # Send update every 5 rows for better performance
+                        # Send update every 5 rows
                         if current_row % 5 == 0:
                             percentage = round((current_row / total_rows * 100) if total_rows > 0 else 0, 2)
                             yield self._sse_message({
@@ -717,45 +775,37 @@ class ProcessUploadView(View):
 
                             data[field_name] = value
                         
-                        # Extra fallback: If 'number' field is missing, try to detect it
+                        # Receipt number fallback logic
                         if 'number' not in data or not data['number']:
-                            # First, find where the date column is
                             date_col_idx = None
                             for idx, h in enumerate(headers):
                                 if field_map.get(h) == 'date':
                                     date_col_idx = idx
                                     break
                             
-                            # Try to find receipt number in any column
                             for idx, value in enumerate(row):
                                 if not value:
                                     continue
                                 
-                                # Skip if this is the date column itself
                                 if date_col_idx is not None and idx == date_col_idx:
                                     continue
                                     
                                 value_str = str(value).strip()
                                 
-                                # Skip if it's clearly not a receipt number
                                 if not value_str or value_str.lower() in ['none', 'n/a', '']:
                                     continue
                                 
-                                # Priority 1: Starts with 'BN-' or similar prefix (HIGHEST PRIORITY)
                                 if value_str.startswith(('BN-', 'RN-', 'OR-', 'AR-')):
                                     data['number'] = value_str
                                     break
                                 
-                                # Priority 2: Contains multiple hyphens
                                 if value_str.count('-') >= 2 and len(value_str) > 10:
                                     data['number'] = value_str
                                     break
                             
-                            # Priority 3: If still not found, look for number to the right of date column
                             if 'number' not in data or not data['number']:
                                 if date_col_idx is not None:
-                                    # Check column immediately to the right of date
-                                    for offset in [1, 2]:  # Check next 2 columns
+                                    for offset in [1, 2]:
                                         check_idx = date_col_idx + offset
                                         if check_idx < len(row):
                                             value = row[check_idx]
@@ -764,10 +814,8 @@ class ProcessUploadView(View):
                                             
                                             value_str = str(value).strip()
                                             
-                                            # Is it a long whole number?
                                             try:
                                                 if isinstance(value, (int, float)):
-                                                    # Excel dates are typically 40000-50000 range, receipt numbers are much larger
                                                     if value == int(value) and int(value) > 100000:
                                                         data['number'] = str(int(value))
                                                         break
@@ -780,9 +828,8 @@ class ProcessUploadView(View):
                         if not data:
                             continue
 
-                        # --- PREVENT DUPLICATE ITEMS WHEN MERGING ---
+                        # Prevent duplicate items when merging
                         if is_merge and 'number' in data and data['number']:
-                            # Check if this item already exists in the report
                             existing_item = report.report_items.filter(
                                 number=data['number'],
                                 date=data.get('date')
@@ -790,21 +837,24 @@ class ProcessUploadView(View):
                             
                             if existing_item:
                                 print(f"DEBUG - Skipping duplicate item: {data['number']} on {data.get('date')}")
-                                continue  # Skip this item, it already exists
+                                continue
 
                         try:
                             with transaction.atomic():
                                 item = CollectionReportItem.objects.create(**data)
+                                created_item_ids.append(item.id)
+                                # Store in cache for cleanup
+                                cache.set(f'upload_created_items_{session_id}', created_item_ids, timeout=600)
                                 report.report_items.add(item)
                                 items_added += 1
                         except Exception as e:
                             print(f"Failed to save row {row_index}: {e}")
                             continue
 
-                    # Track which reports were created vs merged
+                    # Track reports
                     if is_merge:
-                        if report not in merged_reports:
-                            merged_reports.append(report)
+                        if report not in merged_reports_list:
+                            merged_reports_list.append(report)
                         print(f"DEBUG - Merged {items_added} items into report {report.report_no}")
                     else:
                         created_reports.append(report)
@@ -813,7 +863,7 @@ class ProcessUploadView(View):
                     wb.close()
 
                 # Determine redirect URL
-                all_reports = created_reports + merged_reports
+                all_reports = created_reports + merged_reports_list
                 if len(all_reports) > 1:
                     redirect_url = reverse("collection-report-list")
                 elif all_reports:
@@ -821,7 +871,7 @@ class ProcessUploadView(View):
                 else:
                     redirect_url = reverse("all-documents")
                 
-                # First, send 100% progress update
+                # Send 100% progress
                 yield self._sse_message({
                     'status': 'processing',
                     'current_row': total_rows,
@@ -832,20 +882,18 @@ class ProcessUploadView(View):
                     'message': 'Finalizing...'
                 })
                 
-                # Add a small delay to ensure UI updates
-                import time
                 time.sleep(0.3)
                 
                 # Build completion message
                 completion_parts = []
                 if created_reports:
                     completion_parts.append(f'{len(created_reports)} new report(s) created')
-                if merged_reports:
-                    completion_parts.append(f'{len(merged_reports)} report(s) updated')
+                if merged_reports_list:
+                    completion_parts.append(f'{len(merged_reports_list)} report(s) updated')
                 
                 completion_message = ' and '.join(completion_parts) if completion_parts else 'Upload complete!'
                 
-                # Then send completion message
+                # Send completion
                 yield self._sse_message({
                     'status': 'complete',
                     'current_row': total_rows,
@@ -859,6 +907,9 @@ class ProcessUploadView(View):
 
                 # Clean up cache
                 cache.delete(f'upload_files_{session_id}')
+                cache.delete(f'upload_created_reports_{session_id}')
+                cache.delete(f'upload_merged_reports_{session_id}')
+                cache.delete(f'upload_created_items_{session_id}')
 
             except Exception as e:
                 print(f"Processing error: {e}")
@@ -877,9 +928,93 @@ class ProcessUploadView(View):
         response['X-Accel-Buffering'] = 'no'
         return response
     
+    def _rollback_changes(self, created_report_ids, created_item_ids, merged_report_ids):
+        """Rollback all changes made during this upload session"""
+        try:
+            # Delete newly created reports
+            if created_report_ids:
+                from ..models.collection_models import CollectionReport
+                deleted_count = CollectionReport.objects.filter(id__in=created_report_ids).delete()
+                print(f"Rolled back {deleted_count[0]} created reports")
+            
+            # Delete items added to merged reports
+            if created_item_ids:
+                from ..models.collection_models import CollectionReportItem
+                deleted_count = CollectionReportItem.objects.filter(id__in=created_item_ids).delete()
+                print(f"Rolled back {deleted_count[0]} created items")
+        except Exception as e:
+            print(f"Error during rollback: {e}")
+    
     def _sse_message(self, data):
         """Format data as SSE message"""
         return f"data: {json.dumps(data)}\n\n"
+
+
+class CancelUploadView(View):
+    """
+    Cancel an ongoing upload and clean up all created data
+    """
+    
+    def post(self, request, session_id):
+        try:
+            # Set cancellation flag immediately
+            cache.set(f'upload_cancel_{session_id}', True, timeout=600)
+            
+            # Get the list of reports created/modified during this session
+            created_report_ids = cache.get(f'upload_created_reports_{session_id}', [])
+            merged_report_ids = cache.get(f'upload_merged_reports_{session_id}', [])
+            created_item_ids = cache.get(f'upload_created_items_{session_id}', [])
+            
+            deleted_counts = {
+                'reports': 0,
+                'items': 0,
+                'merged_reports': 0
+            }
+            
+            # Delete all newly created reports
+            if created_report_ids:
+                from ..models.collection_models import CollectionReport
+                deleted_reports = CollectionReport.objects.filter(
+                    id__in=created_report_ids
+                ).delete()
+                deleted_counts['reports'] = deleted_reports[0] if deleted_reports else 0
+                print(f"Deleted {deleted_counts['reports']} newly created reports")
+            
+            # For merged reports, only delete the items that were added in this session
+            if created_item_ids:
+                from ..models.collection_models import CollectionReportItem
+                deleted_items = CollectionReportItem.objects.filter(
+                    id__in=created_item_ids
+                ).delete()
+                deleted_counts['items'] = deleted_items[0] if deleted_items else 0
+                print(f"Deleted {deleted_counts['items']} items from merged reports")
+                deleted_counts['merged_reports'] = len(merged_report_ids)
+            
+            # Clean up cache
+            cache.delete(f'upload_files_{session_id}')
+            cache.delete(f'upload_progress_{session_id}')
+            cache.delete(f'upload_created_reports_{session_id}')
+            cache.delete(f'upload_merged_reports_{session_id}')
+            cache.delete(f'upload_created_items_{session_id}')
+            
+            return JsonResponse({
+                'status': 'cancelled',
+                'message': 'Upload cancelled and all data deleted',
+                'deleted_counts': deleted_counts
+            })
+            
+        except Exception as e:
+            print(f"Error during cancellation cleanup: {e}")
+            import traceback
+            traceback.print_exc()
+            
+            # Still set the cancel flag even if cleanup fails
+            cache.set(f'upload_cancel_{session_id}', True, timeout=600)
+            
+            return JsonResponse({
+                'status': 'error',
+                'message': f'Error during cancellation: {str(e)}'
+            })
     
 class UploadProgressStreamView(View):
     """Legacy view - kept for backwards compatibility but not used in new flow"""
@@ -887,11 +1022,3 @@ class UploadProgressStreamView(View):
     def get(self, request, session_id):
         progress_data = cache.get(f'upload_progress_{session_id}')
         return JsonResponse(progress_data or {'status': 'not_found'})
-    
-class CancelUploadView(View):
-    """Cancel an ongoing upload"""
-    
-    def post(self, request, session_id):
-        # Set cancellation flag
-        cache.set(f'upload_cancel_{session_id}', True, timeout=600)
-        return JsonResponse({'status': 'cancellation_requested'})

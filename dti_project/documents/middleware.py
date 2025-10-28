@@ -6,14 +6,30 @@ from django.contrib import messages
 from documents.models.collection_models import CollectionReport
 from django.contrib import messages
 from django.utils import timezone
-from .models import CollectionReport  # assuming the CollectionReport model is imported
+from .models import CollectionReport  
+from django.utils import timezone
+from django.contrib import messages
+from datetime import timedelta, date
 
 class DailyCollectionReportMiddleware:
     """
-    Automatically creates a daily collection report when a collection agent logs in.
-    Creates only one report per day.
-    Report number format: YY-DDD (e.g., 25-001 for Jan 1, 2025)
+    Automatically creates a daily collection report for collection agents.
+    Skips weekends (Sat–Sun) and public holidays.
+    Report number format: YY-NNN (e.g., 25-001 for the first working day of the year).
     """
+
+    HOLIDAYS = {
+        # Static Philippine holidays (MM-DD)
+        "01-01",  # New Year’s Day
+        "04-09",  # Araw ng Kagitingan
+        "05-01",  # Labor Day
+        "06-12",  # Independence Day
+        "08-26",  # National Heroes Day 
+        "11-01",  # All Saints’ Day
+        "11-30",  # Bonifacio Day
+        "12-25",  # Christmas Day
+        "12-30",  # Rizal Day
+    }
 
     def __init__(self, get_response):
         self.get_response = get_response
@@ -21,13 +37,11 @@ class DailyCollectionReportMiddleware:
     def __call__(self, request):
         created_report = None
 
-        # Only run for authenticated collection agents
         if request.user.is_authenticated and self.is_collection_agent(request.user):
             created_report = self.ensure_daily_report_exists(request.user)
 
         response = self.get_response(request)
 
-        # ✅ Show success message only if a new report was created
         if created_report and hasattr(request, "_messages") and not getattr(request, "_messages_added", False):
             messages.success(
                 request,
@@ -42,25 +56,37 @@ class DailyCollectionReportMiddleware:
         return hasattr(user, "role") and user.role == "collection_agent"
 
     def ensure_daily_report_exists(self, user):
-        """Create today's collection report if it doesn't exist, return existing report if it does."""
         today = timezone.localdate()
-        year_short = today.strftime("%y")
-        day_of_year = today.timetuple().tm_yday  # 1–365 or 366
 
-        # 🔢 Report number format: YY-DDD (zero-padded to 3 digits)
-        report_no = f"{year_short}-{day_of_year:03d}"
+        # ⛔ Skip weekends
+        if today.weekday() >= 5:
+            return None
 
-        # Check if report already exists for this user today
+        # ⛔ Skip holidays
+        if today.strftime("%m-%d") in self.HOLIDAYS:
+            return None
+
+        # Already has a report for today
         existing_report = CollectionReport.objects.filter(
             report_collection_date=today,
             name_of_collection_officer=user
         ).first()
-
-        # If report exists, return it without creating a new one
         if existing_report:
-            return None  # No new report created
+            return None
 
-        # If no report exists, create one
+        # Count all working days (Mon–Fri, not holiday) since Jan 1
+        year_short = today.strftime("%y")
+        first_day = date(today.year, 1, 1)
+        working_days = 0
+        current = first_day
+
+        while current <= today:
+            if current.weekday() < 5 and current.strftime("%m-%d") not in self.HOLIDAYS:
+                working_days += 1
+            current += timedelta(days=1)
+
+        report_no = f"{year_short}-{working_days:03d}"
+
         report = CollectionReport.objects.create(
             report_collection_date=today,
             name_of_collection_officer=user,
@@ -69,11 +95,9 @@ class DailyCollectionReportMiddleware:
             official_designation=user.official_designation or "Special Collecting Officer",
             certification=self.get_default_certification(),
         )
-
         return report
 
     def get_default_certification(self):
-        """Default certification text."""
         return (
             "I hereby certify that the above is a true and correct report of "
             "collections made by me during the period covered."

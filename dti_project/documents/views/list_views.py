@@ -139,3 +139,16 @@ class CollectionReportListView(
     context_object_name = "collection_reports"
     active_doc_type = "collection_reports"
     allowed_roles = ["collection_agent", "admin"]
+
+    def get_queryset(self):
+        # Start with base queryset (possibly restricted by RoleFormPageRestrictionMixin)
+        qs = super().get_queryset()
+
+        # Apply filters from your mixin
+        qs = self.apply_filters(qs)
+
+        # Apply sorting from SortCollectionReportListMixin (if defined)
+        if hasattr(self, "apply_sorting"):
+            qs = self.apply_sorting(qs)
+
+        return qs
