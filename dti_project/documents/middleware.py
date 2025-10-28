@@ -24,7 +24,7 @@ class DailyCollectionReportMiddleware:
         "04-09",  # Araw ng Kagitingan
         "05-01",  # Labor Day
         "06-12",  # Independence Day
-        "08-26",  # National Heroes Day (example, movable)
+        "08-26",  # National Heroes Day 
         "11-01",  # All Saints’ Day
         "11-30",  # Bonifacio Day
         "12-25",  # Christmas Day
