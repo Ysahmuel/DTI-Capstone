@@ -519,7 +519,7 @@ class VerifyUserView(View):
                 })
             else:
                 # For normal registration flow
-                login(request, user)
+                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
                 del request.session['pending_verification_user']
                 return JsonResponse({
                     'success': True,
