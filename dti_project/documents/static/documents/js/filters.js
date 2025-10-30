@@ -2,7 +2,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const additionalFiltersBtn = document.getElementById('filter-btn');
     const modalContainer = document.querySelector('.modal-container');
     const closemodalBtn = document.querySelector('.close-modal-btn');
-    
+    const clearBtn = document.getElementById('clear-btn');
+    const form = document.getElementById('document-filters-form');
+
     if (additionalFiltersBtn && modalContainer && closemodalBtn) {
         additionalFiltersBtn.addEventListener('click', function() {
             modalContainer.style.display = 'flex';
@@ -21,21 +23,14 @@ document.addEventListener('DOMContentLoaded', function() {
     checkboxFilterItems.forEach(item => {
         item.addEventListener('click', function(e) {
             if (e.target.tagName.toLowerCase() === 'input') return;
-
             const checkbox = item.querySelector('input[type="checkbox"]');
             checkbox.checked = !checkbox.checked;
-
-            // add or remove "active" class for styling
             item.classList.toggle('active', checkbox.checked);
         });
-    });
 
-    // initialize checked styling on page load
-    checkboxFilterItems.forEach(item => {
+        // initialize checked styling on page load
         const checkbox = item.querySelector('input[type="checkbox"]');
-        if (checkbox.checked) {
-            item.classList.add('active');
-        }
+        if (checkbox.checked) item.classList.add('active');
     });
 
     // Radio handling
@@ -72,4 +67,41 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    // RESET button handling
+    if (clearBtn && form) {
+        clearBtn.addEventListener('click', function() {
+            // Reset text inputs
+            form.querySelectorAll('input[type="text"], input[type="date"], input[type="number"]').forEach(input => {
+                input.value = '';
+            });
+
+            // Reset checkboxes
+            checkboxFilterItems.forEach(item => {
+                const checkbox = item.querySelector('input[type="checkbox"]');
+                checkbox.checked = false;
+                item.classList.remove('active');
+            });
+
+            // Reset radios to default (first radio in each group, usually "All")
+            const radioGroups = {};
+            radioFilterItems.forEach(item => {
+                const radio = item.querySelector('input[type="radio"]');
+                if (!radioGroups[radio.name]) radioGroups[radio.name] = [];
+                radioGroups[radio.name].push(radio);
+            });
+
+            Object.values(radioGroups).forEach(group => {
+                group.forEach((radio, idx) => {
+                    if (idx === 0) {
+                        radio.checked = true;
+                        radio.closest('.radio-filter-item').classList.add('active');
+                    } else {
+                        radio.checked = false;
+                        radio.closest('.radio-filter-item').classList.remove('active');
+                    }
+                });
+            });
+        });
+    }
 });
