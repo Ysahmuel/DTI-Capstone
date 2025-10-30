@@ -115,6 +115,10 @@ class BaseCustomForm(forms.ModelForm):
                     field.validators.append(self.generate_date_not_in_past_validator('Promo Period End'))
                     field.widget.attrs['min'] = date.today().isoformat()
 
+                if name in ['email', 'email_address']:
+                    field.validators.append(self.validate_strict_email)
+                    field.widget.attrs['placeholder'] = 'Enter a valid email address'
+
                 # --- Letter-only fields ---
                 letter_only_fields = [
                     'first_name',
@@ -187,6 +191,12 @@ class BaseCustomForm(forms.ModelForm):
             if value < date.today():
                 raise forms.ValidationError(f'{field_label} cannot be in the past.')
         return validator
+
+    def validate_strict_email(self, value):
+        pattern = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.(com|net|org|gov|edu|ph|io|co\.uk)$"
+        if not re.fullmatch(pattern, value):
+            raise forms.ValidationError("Enter a valid email address.")
+
 
 class SalesPromotionPermitApplicationForm(BaseCustomForm):
     class Meta:

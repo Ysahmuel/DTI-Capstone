@@ -164,6 +164,21 @@ class CustomUserCreationForm(UserCreationForm, BaseUserForm):
             'email', 'password1', 'password2'
         ]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Add the class method validator to the email field
+        self.fields['email'].validators.append(self.validate_email_format)
+
+    @classmethod
+    def validate_email_format(cls, value):
+        """
+        Validates the email address format (must be proper email),
+        but allows any domain including company domains.
+        """
+        pattern = r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
+        if not re.fullmatch(pattern, value):
+            raise forms.ValidationError("Enter a valid email address.")
+
     def save(self, commit=True):
         user = super().save(commit=False)
         user.first_name = self.cleaned_data['first_name']
