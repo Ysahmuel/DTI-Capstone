@@ -159,8 +159,21 @@ class BaseCustomForm(forms.ModelForm):
 
     # --- Validation methods ---
     def validate_contact_number(self, value):
-        if not re.fullmatch(r'\d{11}', str(value)):
+        value = str(value)
+
+        # Must be exactly 11 digits
+        if not re.fullmatch(r'\d{11}', value):
             raise forms.ValidationError("Contact/Mobile number must be exactly 11 digits.")
+
+        # Reject all same digits (e.g., 11111111111)
+        if value == value[0] * 11:
+            raise forms.ValidationError("This is not a valid mobile number.")
+
+        # Reject simple repeating sequences like 12312312312
+        pattern = value[:3]
+        if pattern * 3 + value[-2:] == value:
+            raise forms.ValidationError("This is not a valid mobile number.")
+
 
     def validate_telephone_number(self, value):
         if not re.fullmatch(r'\d{10}', str(value)):
