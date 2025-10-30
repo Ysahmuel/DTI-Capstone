@@ -22,6 +22,40 @@ document.addEventListener('DOMContentLoaded', function () {
         // Get the current form count from existing items
         let formCount = parseInt(managementForm.value) || 0;
 
+        // Function to validate date range
+        function validateDateRange() {
+            const startDateInput = formGrid.querySelector("input[name*='start_date'], input[name*='date_from']");
+            const endDateInput = formGrid.querySelector("input[name*='end_date'], input[name*='date_to']");
+            
+            if (startDateInput && endDateInput && startDateInput.value && endDateInput.value) {
+                const startDate = new Date(startDateInput.value);
+                const endDate = new Date(endDateInput.value);
+                
+                if (endDate < startDate) {
+                    // Show error message
+                    let errorDiv = endDateInput.parentElement.querySelector('.date-error');
+                    if (!errorDiv) {
+                        errorDiv = document.createElement('div');
+                        errorDiv.className = 'date-error';
+                        errorDiv.style.color = 'red';
+                        errorDiv.style.fontSize = '0.875rem';
+                        errorDiv.style.marginTop = '0.25rem';
+                        endDateInput.parentElement.appendChild(errorDiv);
+                    }
+                    errorDiv.textContent = 'End date cannot be earlier than start date';
+                    return false;
+                } else {
+                    // Remove error message if exists
+                    const errorDiv = endDateInput.parentElement.querySelector('.date-error');
+                    if (errorDiv) {
+                        errorDiv.remove();
+                    }
+                    return true;
+                }
+            }
+            return true;
+        }
+
         // Function to check if all required fields are filled
         function validateRequiredFields() {
             const requiredInputs = formGrid.querySelectorAll("input[required], select[required], textarea[required]");
@@ -29,11 +63,18 @@ document.addEventListener('DOMContentLoaded', function () {
             // Debug logging
             console.log('Required inputs found:', requiredInputs.length);
             
-            // If there are no required fields, always enable the button
+            // If there are no required fields, check date range only
             if (requiredInputs.length === 0) {
-                addButton.disabled = false;
-                addButton.style.opacity = "1";
-                addButton.style.cursor = "pointer";
+                const dateRangeValid = validateDateRange();
+                if (dateRangeValid) {
+                    addButton.disabled = false;
+                    addButton.style.opacity = "1";
+                    addButton.style.cursor = "pointer";
+                } else {
+                    addButton.disabled = true;
+                    addButton.style.opacity = "0.5";
+                    addButton.style.cursor = "not-allowed";
+                }
                 return;
             }
             
@@ -49,8 +90,11 @@ document.addEventListener('DOMContentLoaded', function () {
             
             console.log('All required fields filled:', allFilled);
             
+            // Check date range validity
+            const dateRangeValid = validateDateRange();
+            
             // Enable/disable the add button based on validation
-            if (allFilled) {
+            if (allFilled && dateRangeValid) {
                 addButton.disabled = false;
                 addButton.style.opacity = "1";
                 addButton.style.cursor = "pointer";
@@ -70,6 +114,58 @@ document.addEventListener('DOMContentLoaded', function () {
             input.addEventListener("input", validateRequiredFields);
             input.addEventListener("change", validateRequiredFields);
             input.addEventListener("blur", validateRequiredFields);
+            
+            // Block non-numerical characters for contact number fields
+            if (input.name.includes('contact_number') || input.name.includes('mobile_number') || 
+                input.name.includes('telephone') || input.name.includes('zip_code') ||
+                input.name.includes('fax_number')) {
+                
+                input.addEventListener("keypress", function(e) {
+                    // Allow only numbers (0-9)
+                    if (e.key && !/^\d$/.test(e.key)) {
+                        e.preventDefault();
+                    }
+                });
+                
+                input.addEventListener("paste", function(e) {
+                    e.preventDefault();
+                    // Get pasted data and filter out non-numeric characters
+                    const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                    const numericOnly = pastedText.replace(/\D/g, '');
+                    
+                    // Insert the numeric-only text
+                    const start = this.selectionStart;
+                    const end = this.selectionEnd;
+                    const currentValue = this.value;
+                    this.value = currentValue.substring(0, start) + numericOnly + currentValue.substring(end);
+                    
+                    // Set cursor position
+                    this.selectionStart = this.selectionEnd = start + numericOnly.length;
+                    
+                    // Trigger validation
+                    validateRequiredFields();
+                });
+                
+                input.addEventListener("input", function(e) {
+                    // Remove any non-numeric characters that might have been entered
+                    const cursorPosition = this.selectionStart;
+                    const originalLength = this.value.length;
+                    this.value = this.value.replace(/\D/g, '');
+                    const newLength = this.value.length;
+                    
+                    // Adjust cursor position if characters were removed
+                    const diff = originalLength - newLength;
+                    this.selectionStart = this.selectionEnd = Math.max(0, cursorPosition - diff);
+                });
+            }
+            
+            // Add date validation for date fields
+            if (input.type === 'date') {
+                input.addEventListener("change", function() {
+                    validateDateRange();
+                    validateRequiredFields();
+                });
+            }
         });
 
         function updateTotalForms() {
@@ -137,6 +233,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 alert("Please fill in at least one field before adding.");
                 return;
             }
+            
+            // Final date range check before adding
+            if (!validateDateRange()) {
+                alert("Please correct the date range. End date cannot be earlier than start date.");
+                return;
+            }
 
             const previewItem = document.createElement("li");
             previewItem.classList.add("preview-item");
@@ -183,8 +285,14 @@ document.addEventListener('DOMContentLoaded', function () {
             // Append the preview item to the preview list
             previewList.appendChild(previewItem);
 
-            // Clear form inputs
-            inputs.forEach(input => input.value = "");
+            // Clear form inputs and remove error messages
+            inputs.forEach(input => {
+                input.value = "";
+                const errorDiv = input.parentElement.querySelector('.date-error');
+                if (errorDiv) {
+                    errorDiv.remove();
+                }
+            });
             
             formCount++;
             console.log('Total Forms: ', formCount);
