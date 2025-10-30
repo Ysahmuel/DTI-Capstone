@@ -45,6 +45,8 @@ class BaseCustomForm(forms.ModelForm):
 
                 # --- Numeric-only fields ---
                 numerical_fields = [
+                    'sponsor_telephone',
+                    'advertising_agency_telephone',
                     'tax_identification_number',
                     'contact_number',
                     'mobile_number',
@@ -94,7 +96,7 @@ class BaseCustomForm(forms.ModelForm):
                     field.widget.attrs['max'] = date.today().isoformat()
                     field.widget.attrs['placeholder'] = 'Enter Date Established'
 
-                if name == 'telephone_number':
+                if name == 'telephone_number' or name == 'sponsor_telephone' or name == 'advertising_agency_telephone':
                     field.validators.append(self.validate_telephone_number)
                     field.widget.attrs['maxlength'] = 10
                     field.widget.attrs['placeholder'] = 'Enter Telephone Number (10 digits)'
