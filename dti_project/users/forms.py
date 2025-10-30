@@ -157,53 +157,59 @@ class CustomLoginForm(AuthenticationForm):
 # -------------------------------
 class CustomUserCreationForm(UserCreationForm, BaseUserForm):
     email = forms.EmailField(required=True)
-    default_phone = forms.CharField(required=True)  # ensure phone field is included
+    default_phone = forms.CharField(required=True)
+    first_name = forms.CharField(required=True)
+    last_name = forms.CharField(required=True)
 
     class Meta(BaseUserForm.Meta):
         model = User
         fields = BaseUserForm.Meta.fields + [
-            'email', 'password1', 'password2', 'default_phone'
+            'email', 'password1', 'password2', 'default_phone', 'first_name', 'last_name'
         ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Add the class method validators
         self.fields['email'].validators.append(self.validate_email_format)
         self.fields['default_phone'].validators.append(self.validate_mobile_number)
+        self.fields['first_name'].validators.append(self.validate_name)
+        self.fields['last_name'].validators.append(self.validate_name)
+
+    def clean_email(self):
+        """Ensure email is unique."""
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError("A user with this email already exists.")
+        return email
 
     @classmethod
     def validate_email_format(cls, value):
-        """
-        Validates the email address format (must be proper email),
-        but allows any domain including company domains.
-        """
         pattern = r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
         if not re.fullmatch(pattern, value):
             raise forms.ValidationError("Enter a valid email address.")
 
     @classmethod
     def validate_mobile_number(cls, value):
-        """
-        Validates mobile/contact numbers:
-        - Exactly 11 digits
-        - Starts with '09'
-        - Rejects all identical digits
-        - Rejects simple repeating sequences like 12312312312
-        """
         value = str(value)
-
-        # Must be exactly 11 digits starting with 09
         if not re.fullmatch(r'09\d{9}', value):
             raise forms.ValidationError("Mobile number must be 11 digits and start with 09.")
-
-        # Reject all same digits
         if value == value[0] * 11:
             raise forms.ValidationError("This is not a valid mobile number.")
-
-        # Reject simple repeating patterns
         pattern = value[:3]
         if pattern * 3 + value[-2:] == value:
             raise forms.ValidationError("This is not a valid mobile number.")
+
+    @classmethod
+    def validate_name(cls, value):
+        value = value.strip()
+        if not re.fullmatch(r"[A-Za-zÀ-ÖØ-öø-ÿ' -]+", value):
+            raise forms.ValidationError("Name can only contain letters, spaces, hyphens, and apostrophes.")
+        letters_only = re.sub(r"[^A-Za-z]", "", value)
+        if len(letters_only) < 2:
+            raise forms.ValidationError("Name must have at least 2 letters.")
+        seqs = re.findall(r"([a-zA-Z]{3,})", value.lower())
+        for seq in seqs:
+            if seq * 2 in value.lower():
+                raise forms.ValidationError("Name seems invalid or gibberish.")
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -214,7 +220,6 @@ class CustomUserCreationForm(UserCreationForm, BaseUserForm):
         user.default_address = self.cleaned_data['default_address']
         user.role = 'business_owner'
 
-        # Generate unique username
         base_username = slugify(f"{user.first_name}.{user.last_name}")
         username = base_username
         counter = 1
@@ -226,7 +231,6 @@ class CustomUserCreationForm(UserCreationForm, BaseUserForm):
         if commit:
             user.save()
         return user
-
 
 # -----------------------------
 # ✅ Profile Edit Form
