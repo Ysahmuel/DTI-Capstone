@@ -22,6 +22,56 @@ document.addEventListener('DOMContentLoaded', function () {
         // Get the current form count from existing items
         let formCount = parseInt(managementForm.value) || 0;
 
+        // Function to check if all required fields are filled
+        function validateRequiredFields() {
+            const requiredInputs = formGrid.querySelectorAll("input[required], select[required], textarea[required]");
+            
+            // Debug logging
+            console.log('Required inputs found:', requiredInputs.length);
+            
+            // If there are no required fields, always enable the button
+            if (requiredInputs.length === 0) {
+                addButton.disabled = false;
+                addButton.style.opacity = "1";
+                addButton.style.cursor = "pointer";
+                return;
+            }
+            
+            let allFilled = true;
+            
+            requiredInputs.forEach(input => {
+                const value = input.value.trim();
+                console.log(`Field ${input.name}: "${value}" (filled: ${!!value})`);
+                if (!value) {
+                    allFilled = false;
+                }
+            });
+            
+            console.log('All required fields filled:', allFilled);
+            
+            // Enable/disable the add button based on validation
+            if (allFilled) {
+                addButton.disabled = false;
+                addButton.style.opacity = "1";
+                addButton.style.cursor = "pointer";
+            } else {
+                addButton.disabled = true;
+                addButton.style.opacity = "0.5";
+                addButton.style.cursor = "not-allowed";
+            }
+        }
+
+        // Initial validation on page load
+        validateRequiredFields();
+
+        // Add event listeners to all form inputs to validate on change
+        const allInputs = formGrid.querySelectorAll("input, select, textarea");
+        allInputs.forEach(input => {
+            input.addEventListener("input", validateRequiredFields);
+            input.addEventListener("change", validateRequiredFields);
+            input.addEventListener("blur", validateRequiredFields);
+        });
+
         function updateTotalForms() {
             managementForm.value = formCount;
         }
@@ -139,6 +189,9 @@ document.addEventListener('DOMContentLoaded', function () {
             formCount++;
             console.log('Total Forms: ', formCount);
             updateTotalForms();
+            
+            // Re-validate after clearing the form
+            validateRequiredFields();
         }
 
         function updateFormIndices() {

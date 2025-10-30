@@ -19,7 +19,8 @@
                             {% if field.field.widget.input_type == 'select' %}
                                 <select name="template_{{ field.name }}" 
                                         id="template_{{ field.name }}" 
-                                        class="{{ field.field.widget.attrs.class|default:'' }}">
+                                        class="{{ field.field.widget.attrs.class|default:'' }}"
+                                        {% if field.field.required %}required{% endif %}>
                                     <option value="">---------</option>
                                     {% for choice in field.field.choices %}
                                         <option value="{{ choice.0 }}">{{ choice.1 }}</option>
@@ -31,14 +32,16 @@
                                           class="{{ field.field.widget.attrs.class|default:'' }}"
                                           {% if field.field.widget.attrs.rows %}rows="{{ field.field.widget.attrs.rows }}"{% endif %}
                                           {% if field.field.widget.attrs.cols %}cols="{{ field.field.widget.attrs.cols }}"{% endif %}
-                                          {% if field.field.widget.attrs.placeholder %}placeholder="{{ field.field.widget.attrs.placeholder }}"{% endif %}></textarea>
+                                          {% if field.field.widget.attrs.placeholder %}placeholder="{{ field.field.widget.attrs.placeholder }}"{% endif %}
+                                          {% if field.field.required %}required{% endif %}></textarea>
                             {% else %}
                                 <input type="{{ field.field.widget.input_type|default:'text' }}" 
                                        name="template_{{ field.name }}" 
                                        id="template_{{ field.name }}" 
                                        class="{{ field.field.widget.attrs.class|default:'' }}"
                                        {% if field.field.widget.attrs.placeholder %}placeholder="{{ field.field.widget.attrs.placeholder }}"{% endif %}
-                                       {% if field.field.widget.attrs.maxlength %}maxlength="{{ field.field.widget.attrs.maxlength }}"{% endif %}>
+                                       {% if field.field.widget.attrs.maxlength %}maxlength="{{ field.field.widget.attrs.maxlength }}"{% endif %}
+                                       {% if field.field.required %}required{% endif %}>
                             {% endif %}
                             <div class="field-errors"></div>
                         </div>
