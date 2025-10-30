@@ -157,17 +157,19 @@ class CustomLoginForm(AuthenticationForm):
 # -------------------------------
 class CustomUserCreationForm(UserCreationForm, BaseUserForm):
     email = forms.EmailField(required=True)
+    default_phone = forms.CharField(required=True)  # ensure phone field is included
 
     class Meta(BaseUserForm.Meta):
         model = User
         fields = BaseUserForm.Meta.fields + [
-            'email', 'password1', 'password2'
+            'email', 'password1', 'password2', 'default_phone'
         ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Add the class method validator to the email field
+        # Add the class method validators
         self.fields['email'].validators.append(self.validate_email_format)
+        self.fields['default_phone'].validators.append(self.validate_mobile_number)
 
     @classmethod
     def validate_email_format(cls, value):
@@ -178,6 +180,30 @@ class CustomUserCreationForm(UserCreationForm, BaseUserForm):
         pattern = r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
         if not re.fullmatch(pattern, value):
             raise forms.ValidationError("Enter a valid email address.")
+
+    @classmethod
+    def validate_mobile_number(cls, value):
+        """
+        Validates mobile/contact numbers:
+        - Exactly 11 digits
+        - Starts with '09'
+        - Rejects all identical digits
+        - Rejects simple repeating sequences like 12312312312
+        """
+        value = str(value)
+
+        # Must be exactly 11 digits starting with 09
+        if not re.fullmatch(r'09\d{9}', value):
+            raise forms.ValidationError("Mobile number must be 11 digits and start with 09.")
+
+        # Reject all same digits
+        if value == value[0] * 11:
+            raise forms.ValidationError("This is not a valid mobile number.")
+
+        # Reject simple repeating patterns
+        pattern = value[:3]
+        if pattern * 3 + value[-2:] == value:
+            raise forms.ValidationError("This is not a valid mobile number.")
 
     def save(self, commit=True):
         user = super().save(commit=False)
