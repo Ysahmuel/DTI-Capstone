@@ -1,16 +1,29 @@
 {% extends 'users/layout.html' %}
 
+{% block suppress_global_alerts %}{% endblock %}
+
 {% block title %} Create an account {% endblock %}
 
 {% block body %}
 <div class="glass-layer">
     <div class="authentication-form-container">
 
+        {% csrf_token %}
+
+        <!-- {% if messages %}
+        <div class="alert-container">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %} -->
+
         <form action="{% url 'register' %}" class="authentication-form" id="register-form" method="post">
 
             <img src="/media/media/dti-logo.png" alt="DTI Logo Image" id="dti-logo">
 
-            {% csrf_token %}
             <header>
                 <h1>Create an Account</h1>
                 <h3>Create your account by filling out the form below.</h3>
@@ -21,33 +34,21 @@
 
                     <div class="form-group">
                         <label for="id_first_name">First Name</label>
-                        <input 
-                            type="text"
-                            name="first_name"
-                            id="id_first_name"
-                            value="{{ form.first_name.value|default_if_none:'' }}"
-                            required
-                            pattern="[A-Za-zÀ-ÖØ-öø-ÿ' -]+"
-                            title="Letters, spaces, hyphens, and apostrophes only"
-                            oninput="this.value = this.value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ' -]/g, '');"
-                        >
+                        <input type="text" name="first_name" id="id_first_name"
+                            value="{{ form.first_name.value|default_if_none:'' }}" required
+                            pattern="[A-Za-zÀ-ÖØ-öø-ÿ' -]+" title="Letters, spaces, hyphens, and apostrophes only"
+                            oninput="this.value = this.value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ' -]/g, '');">
                     </div>
 
                     <div class="form-group">
                         <label for="id_last_name">Last Name</label>
-                        <input 
-                            type="text"
-                            name="last_name"
-                            id="id_last_name"
-                            value="{{ form.last_name.value|default_if_none:'' }}"
-                            required
-                            pattern="[A-Za-zÀ-ÖØ-öø-ÿ' -]+"
-                            title="Letters, spaces, hyphens, and apostrophes only"
-                            oninput="this.value = this.value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ' -]/g, '');"
-                        >
+                        <input type="text" name="last_name" id="id_last_name"
+                            value="{{ form.last_name.value|default_if_none:'' }}" required
+                            pattern="[A-Za-zÀ-ÖØ-öø-ÿ' -]+" title="Letters, spaces, hyphens, and apostrophes only"
+                            oninput="this.value = this.value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ' -]/g, '');">
                     </div>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="id_email">Email</label>
                     <input type="email" name="email" id="id_email" required

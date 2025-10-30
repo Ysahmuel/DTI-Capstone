@@ -166,8 +166,7 @@ def download_receipt(request, oop_id):
 
     # PAYMENT INFO
     p.setFont("Helvetica", 10)
-    p.drawString(50, height - 130, f"Payment Code: {oop.payment_code or 'N/A'}")
-    p.drawString(50, height - 145, f"Reference Code: {sppa.reference_code}")
+    p.drawString(50, height - 130, f"Reference Code: {oop.reference_code or 'N/A'}")
     p.drawString(50, height - 160, f"Issue Date: {datetime.datetime.now().strftime('%d %B %Y, %I:%M %p')}")
     p.drawString(50, height - 175, f"Application Name: {sppa.sponsor_name}")
     p.drawString(50, height - 190, f"Authorized Representative: {sppa.sponsor_authorized_rep}")

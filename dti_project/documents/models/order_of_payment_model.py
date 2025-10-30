@@ -10,9 +10,6 @@ from django.utils import timezone
 import random
 import string
 
-
-
-
 class OrderOfPayment(DraftModel, models.Model):
     class Meta:
         verbose_name = "Order of Payment"
@@ -34,7 +31,7 @@ class OrderOfPayment(DraftModel, models.Model):
     account_officer_date = models.DateField(null=True, blank=True)
     account_officer_signature = models.ImageField(upload_to='signatures/', null=True, blank=True)
 
-    payment_code = models.CharField(max_length=20, blank=True, null=True, unique=True)
+    reference_code = models.CharField(max_length=20, blank=True, null=True, unique=True)
     acknowledgment_generated_at = models.DateTimeField(blank=True, null=True)
     
     # Dynamically include remark-amount fields
@@ -94,8 +91,8 @@ class OrderOfPayment(DraftModel, models.Model):
             return ''.join(random.choices(string.ascii_uppercase + string.digits, k=15))
 
         # Generate payment code when verified
-        if self.payment_status == self.PaymentStatus.VERIFIED and not self.payment_code:
-            self.payment_code = generate_payment_code()
+        if self.payment_status == self.PaymentStatus.VERIFIED and not self.reference_code:
+            self.reference_code = generate_payment_code()
             self.acknowledgment_generated_at = timezone.now()
 
         super().save(*args, **kwargs)
