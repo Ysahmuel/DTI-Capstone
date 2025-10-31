@@ -72,7 +72,7 @@ class BaseCreateView(
                 context = self.get_preview_context(form)
                 return JsonResponse(context)
             else:
-                self.form_invalid(form, action="preview", formsets=formsets)
+                self.form_invalid(form, action="preview")
         else:
             self.form_invalid(form, action="preview")
 
