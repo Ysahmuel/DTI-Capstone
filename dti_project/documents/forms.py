@@ -17,6 +17,7 @@ class SortForm(forms.Form):
     ]
 
     sort_by = forms.ChoiceField(choices=SORT_CHOICES, required=False, label='sort_by')
+    
 class BaseCustomForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
@@ -90,6 +91,7 @@ class BaseCustomForm(forms.ModelForm):
                             }
                         """,
                     })
+
 
                 if name == 'date_established':
                     field.validators.append(self.generate_date_not_in_future_validator("Date Established"))
