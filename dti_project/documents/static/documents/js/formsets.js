@@ -304,6 +304,8 @@ document.addEventListener('DOMContentLoaded', function () {
             removeBtn.addEventListener("click", function () {
                 previewItem.remove();
                 updateFormIndices();
+                // Notify progress bar of formset change
+                document.dispatchEvent(new CustomEvent('formsetItemChanged'));
             });
 
             previewItem.appendChild(removeBtn);
@@ -319,6 +321,9 @@ document.addEventListener('DOMContentLoaded', function () {
             formCount++;
             updateTotalForms();
             validateRequiredFields();
+            
+            // Notify progress bar of formset change
+            document.dispatchEvent(new CustomEvent('formsetItemChanged'));
         }
 
         // -------------------------------
@@ -364,9 +369,15 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                     deleteInput.value = "on";
                     previewItem.style.display = "none";
+                    
+                    // Notify progress bar of formset change
+                    document.dispatchEvent(new CustomEvent('formsetItemChanged'));
                 } else {
                     previewItem.remove();
                     updateFormIndices();
+                    
+                    // Notify progress bar of formset change
+                    document.dispatchEvent(new CustomEvent('formsetItemChanged'));
                 }
             }
         });

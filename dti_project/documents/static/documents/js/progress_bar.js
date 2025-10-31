@@ -26,7 +26,31 @@ document.addEventListener('DOMContentLoaded', function() {
             let stepRequiredFields = 0;
             let stepCompletedFields = 0;
 
-            if (stepId === 'coverage-fieldset') {
+            // Check if this is a formset step
+            const isFormsetStep = stepFieldset.hasAttribute('data-label');
+
+            if (isFormsetStep) {
+                // For formset steps, check if at least one item has been added to preview
+                const previewListId = `${stepFieldset.dataset.label}-preview-list`;
+                const previewList = document.querySelector(`#${previewListId}`);
+                const previewItems = previewList ? previewList.querySelectorAll('.preview-item:not([style*="display: none"])') : [];
+                
+                // Count formset as complete if there's at least one preview item
+                if (previewItems.length > 0) {
+                    stepRequiredFields = 1;
+                    stepCompletedFields = 1;
+                    allFilled = true;
+                } else {
+                    // Check if formset template fields are filled (ready to add)
+                    const templateFields = stepFieldset.querySelectorAll('.step-grid [required]');
+                    if (templateFields.length > 0) {
+                        stepRequiredFields = 1;
+                        stepCompletedFields = 0;
+                        allFilled = false;
+                    }
+                }
+
+            } else if (stepId === 'coverage-fieldset') {
                 stepRequiredFields++;
 
                 const selectedCoverage = stepFieldset.querySelector('input[name="coverage"]:checked');
@@ -174,4 +198,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (typeof checkStepCompletion === "function") {
         checkStepCompletion();
     }
+
+    // Listen for custom event from formsets.js when items are added/removed
+    document.addEventListener('formsetItemChanged', checkStepCompletion);
 })
