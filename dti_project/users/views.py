@@ -72,25 +72,72 @@ logger = logging.getLogger(__name__)
 
 # verify account
 # users/views.py
-from django.views import View
-from django.views.generic import ListView, DetailView
-from django.shortcuts import get_object_or_404, redirect, render
-from .models import User, VerificationRequest
+from django.shortcuts import render, get_object_or_404, redirect
+from django.views.generic import ListView, View
+from django.contrib.auth import get_user_model
 
-# List all business owners (verified + unverified)
+User = get_user_model()
+
+
+# --- List all business owners (verified + unverified) ---
+from django.views.generic import ListView
+from users.models import User  # make sure this is your custom user model
+
+# --- List all business owners (verified + unverified) ---
+from django.views.generic import ListView
+from users.models import User
+
 class BusinessOwnerListView(ListView):
     model = User
     template_name = 'users/bo_accounts.html'
-    context_object_name = 'users'
+    context_object_name = 'businesshumans'
 
     def get_queryset(self):
-        return User.objects.filter(role__in=[User.Roles.UNVERIFIED_OWNER, User.Roles.BUSINESS_OWNER])
+        # Return both verified and unverified business owners
+        return User.objects.filter(
+            role__in=['unverified_owner', 'business_owner']
+        ).order_by('-date_joined')
 
-# View verification request (admin can see uploaded documents)
-class ViewVerificationRequest(DetailView):
-    model = VerificationRequest
-    template_name = 'users/view_verification.html'
-    context_object_name = 'request'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['businesshumans'] = self.get_queryset()  # keep naming consistent
+        context['user_type'] = 'business_owner'
+        return context
+
+
+
+
+# --- View verification request (admin sees uploaded documents) ---
+class ViewVerificationRequest(View):
+    template_name = "users/view_verification.html"
+
+    def get(self, request, user_id):
+        user = get_object_or_404(User, pk=user_id, role='unverified_owner')
+
+        # Fetch verification documents via the related_name
+        documents = user.verification_requests.all()
+
+        return render(request, self.template_name, {
+            "user": user,
+            "documents": documents
+        })
+
+
+    def post(self, request, user_id):
+        # Handle verification action
+        user = get_object_or_404(User, pk=user_id, role=User.Roles.UNVERIFIED_OWNER)
+        action = request.POST.get("action")
+
+        if action == "verify":
+            user.role = User.Roles.BUSINESS_OWNER
+            user.save()
+        elif action == "deny":
+            user.role = User.Roles.UNVERIFIED  # Or any status you use for denied
+            user.save()
+
+        return redirect("bo_accounts")
+
+
 
 # One-click verify user
 class VerifyUserView(View):
@@ -430,22 +477,6 @@ class StaffListView(ListView):
         })
         return context
     
-class BusinessOwnerListView(ListView):
-    model = User
-    template_name = 'users/bo_accounts.html'
-    
-    def get_queryset(self):
-        qs = User.objects.filter(role='business_owner')
-
-        return qs
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update({
-            'users': self.get_queryset(),
-            'user_type': 'business_owner'
-        })
-        return context
 
 #Profile Edit View
 from .forms import ProfileEditForm

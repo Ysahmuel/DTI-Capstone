@@ -4,8 +4,71 @@
 
 {% block body %}
 
-    {% include 'users/components/users_list_header.html' with title='Manage Business Owners' %}
+{% include 'users/components/users_list_header.html' with title='Manage Business Owners' %}
 
-    {% include 'users/components/user_table.html' %}
+<!-- Table wrapper with padding -->
+<div style="padding: 20px; overflow-x: auto;">
+
+    <table class="documents-table" style="width: 100%; border-collapse: collapse;">
+
+        <thead>
+            <tr>
+                <th style="padding: 12px 15px; text-align: left;">Name</th>
+                <th style="padding: 12px 15px; text-align: left;">Email</th>
+                <th style="padding: 12px 15px; text-align: center;">Status</th>
+                <th style="padding: 12px 15px; text-align: center;">Date Joined</th>
+                <th style="padding: 12px 15px; text-align: center;">Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for user in businesshumans %}
+            <tr style="border-bottom: 1px solid #ddd;">
+                <!-- Name -->
+                <td style="padding: 12px 15px;">{{ user.get_full_name }}</td>
+
+                <!-- Email -->
+                <td style="padding: 12px 15px;">{{ user.email }}</td>
+
+                <!-- Status -->
+                <td style="padding: 12px 15px; text-align: center;">
+                    {% if user.role == 'unverified_owner' %}
+                        <span class="status-badge status-badge-warning">Unverified</span>
+                    {% elif user.role == 'business_owner' %}
+                        <span class="status-badge status-badge-approved">Verified</span>
+                    {% else %}
+                        <span class="status-badge status-badge-light">—</span>
+                    {% endif %}
+                </td>
+
+                <!-- Date Joined -->
+                <td style="padding: 12px 15px; text-align: center;">
+                    {{ user.date_joined|date:"M d, Y" }}
+                </td>
+
+                <!-- Actions -->
+                <td style="padding: 12px 15px; text-align: center;">
+                    {% if user.role == 'unverified_owner' %}
+                       <a href="{% url 'view_verification' user.id %}" 
+                            style="display:inline-block; padding:6px 12px; background-color:#0d6efd; color:white; text-decoration:none; border-radius:4px;">
+                            Verify
+                        </a>
+
+                    {% else %}
+                        <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="padding: 12px 15px; text-align: center; color: #777;">
+                    No business owners found.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+</div>
 
 {% endblock %}
