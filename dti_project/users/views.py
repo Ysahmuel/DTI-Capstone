@@ -69,8 +69,36 @@ from documents.models import (
 logger = logging.getLogger(__name__)
 
 # Create your views here.
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from .models import User
+from documents.verification import VerificationDocument
 
-# verify account
+
+def verify_account_upload(request, user_id):
+    user = get_object_or_404(User, pk=user_id)
+
+    if request.method == "POST":
+        files = request.FILES.getlist("files")
+        if len(files) < 2:
+            messages.error(request, "Please upload at least 2 files to verify your account.")
+            return redirect("settings")
+
+        # Save uploaded files
+        for f in files:
+            VerificationDocument.objects.create(
+                user=user,
+                file=f
+            )
+
+        messages.success(request, "Documents uploaded successfully. Awaiting admin verification.")
+        return redirect("settings")
+
+    return redirect("settings")
+
+
+
+# verify account admin side
 # users/views.py
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, View

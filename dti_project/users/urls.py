@@ -31,6 +31,7 @@ urlpatterns = [
     # Verify Account (Unverified Owner)
     path('settings/verify-account/<int:pk>/', views.VerifyUserView.as_view(), name='verify_account'),
     path('view-verification/<int:user_id>/', views.view_verification, name='view_verification'),
+    path('settings/verify-account/<int:user_id>/upload/', views.verify_account_upload, name='verify_account_upload'),
 
 
 ]
