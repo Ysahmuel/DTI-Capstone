@@ -12,8 +12,8 @@
     <div class="grid">
         {% if user.role == 'unverified_owner' %}
         <div class="verify-notice">
-            <span>Verify your account first through the profile page</span>
-            <a href="{% url 'profile' user.id %}" class="verify-button">Verify</a>
+            <span>Verify your account first through the setting page</span>
+            <a href="{% url 'settings' %}" class="verify-button">Verify</a>
         </div>
 
         {% else %}
