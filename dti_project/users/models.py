@@ -13,7 +13,19 @@ class User(AbstractUser):
         BUSINESS_OWNER = "business_owner", "Business Owner"
         ADMIN = "admin", "Admin"
         COLLECTION_AGENT = "collection_agent", "Collection Agent"
+    role = models.CharField(
+        max_length=20,
+        choices=Roles.choices,
+        default=Roles.UNVERIFIED_OWNER
+    )
+    is_verified = models.BooleanField(default=False)
 
+    def __str__(self):
+        return f"{self.username} ({self.get_role_display()})"
+
+
+    def __str__(self):
+        return f"VerificationRequest({self.user.username})"
     profile_picture = models.ImageField(
         upload_to='profile_pictures/',
         default='profile_pictures/default-avatar-icon.jpg',
@@ -100,3 +112,14 @@ class User(AbstractUser):
             self.role = self.Roles.ADMIN
             
         super().save(*args, **kwargs)
+
+class VerificationRequest(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    uploaded_files = models.FileField(upload_to='verification_files/')
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    is_verified = models.BooleanField(default=False)
+    admin_verified_at = models.DateTimeField(null=True, blank=True)
+    admin_verified_by = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name="verified_requests")
+
+    def __str__(self):
+        return f"VerificationRequest({self.user.username})"    

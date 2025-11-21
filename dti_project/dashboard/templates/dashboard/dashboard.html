@@ -7,16 +7,16 @@
     <h1>Welcome, {{ user }}.</h1>
     {% include 'dashboard/components/dashboard_actions.html' %}
 </header>
-
+{% if user.role == 'unverified_owner' %}
+<main class="dashboard-container">
+    <div class="verify-notice">
+        <span>Verify your account first through the setting page</span>
+        <a href="{% url 'settings' %}" class="verify-button">Verify</a>
+    </div>
+</main>
+{%endif%}
 <main class="dashboard-container">
     <div class="grid">
-        {% if user.role == 'unverified_owner' %}
-        <div class="verify-notice">
-            <span>Verify your account first through the setting page</span>
-            <a href="{% url 'settings' %}" class="verify-button">Verify</a>
-        </div>
-
-        {% else %}
         <!-- Transactions Summary -->
         <section class="card wide transaction-overview">
             <h2>Transactions Overview</h2>
@@ -69,7 +69,6 @@
             </ul>
         </section>
         {% endfor %}
-        {% endif %}
     </div>
 </main>
 

@@ -44,11 +44,19 @@
                             <i class="fas fa-user-edit"></i> Edit Profile
                         </a>
                     </li>
+                    {% if user.role == 'unverified_owner' %}
                     <li>
-                        <a href="#" class="btn btn-secondary disabled">
-                            <i class="fas fa-shield-alt"></i> Privacy Settings (Coming Soon)
+                        <a href="{% url 'verify_account' user.pk %}" class="btn btn-primary">
+                            <i class="fas fa-shield-alt"></i> Verify Account
                         </a>
                     </li>
+                    {%else%}
+                    <li>
+                        <a href="#" class="btn btn-secondary disabled">
+                            <i class="fas fa-shield-alt"></i> Verified
+                        </a>
+                    </li>
+                    {%endif%}
                 </div>
             </ul>
         </div>

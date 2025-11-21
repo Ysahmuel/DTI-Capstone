@@ -8,6 +8,28 @@ from datetime import date
 from .models import User
 
 
+from django import forms
+from .models import VerificationRequest
+
+class VerifyAccountForm(forms.ModelForm):
+    class Meta:
+        model = VerificationRequest
+        fields = ['uploaded_files']
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user')
+        super().__init__(*args, **kwargs)
+
+    def save(self, commit=True):
+        obj = super().save(commit=False)
+        obj.user = self.user
+        if commit:
+            obj.save()
+        return obj
+
+
+
+
 # -------------------------------
 # ✅ Base class for shared fields
 # -------------------------------

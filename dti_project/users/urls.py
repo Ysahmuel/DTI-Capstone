@@ -28,8 +28,9 @@ urlpatterns = [
     path('forgot-password/', views.ForgotPasswordView.as_view(), name='forgot_password'),
     path('reset-password/', views.ResetPasswordView.as_view(), name='reset_password'),
 
-
-
+    # Verify Account (Unverified Owner)
+    path('settings/verify-account/<int:pk>/', views.VerifyUserView.as_view(), name='verify_account'),
+    path('view-verification/<int:pk>/', views.ViewVerificationRequest.as_view(), name='view_verification'),
 
 
 ]

@@ -70,6 +70,40 @@ logger = logging.getLogger(__name__)
 
 # Create your views here.
 
+# verify account
+# users/views.py
+from django.views import View
+from django.views.generic import ListView, DetailView
+from django.shortcuts import get_object_or_404, redirect, render
+from .models import User, VerificationRequest
+
+# List all business owners (verified + unverified)
+class BusinessOwnerListView(ListView):
+    model = User
+    template_name = 'users/bo_accounts.html'
+    context_object_name = 'users'
+
+    def get_queryset(self):
+        return User.objects.filter(role__in=[User.Roles.UNVERIFIED_OWNER, User.Roles.BUSINESS_OWNER])
+
+# View verification request (admin can see uploaded documents)
+class ViewVerificationRequest(DetailView):
+    model = VerificationRequest
+    template_name = 'users/view_verification.html'
+    context_object_name = 'request'
+
+# One-click verify user
+class VerifyUserView(View):
+    def get(self, request, pk):
+        user = get_object_or_404(User, pk=pk)
+        user.role = User.Roles.BUSINESS_OWNER
+        user.is_verified = True
+        user.save()
+        # Optional: mark any VerificationRequest as verified
+        VerificationRequest.objects.filter(user=user).update(is_verified=True, admin_verified_at=timezone.now(), admin_verified_by=request.user)
+        return redirect('bo_accounts')
+
+
 
 #forgot password view
 from django.shortcuts import render, redirect, get_object_or_404

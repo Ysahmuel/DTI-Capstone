@@ -1,0 +1,12 @@
+{% extends 'dashboard/layout.html' %}
+{% block title %}Verification Request{% endblock %}
+{% block body %}
+
+<h2>Verification Documents for {{ request.user.username }}</h2>
+<p>Submitted at: {{ request.submitted_at }}</p>
+<p>
+    <a href="{{ request.document.url }}" target="_blank">View Document</a>
+</p>
+<a href="{% url 'verify_account' request.user.pk %}" class="btn btn-success">Verify User</a>
+
+{% endblock %}
