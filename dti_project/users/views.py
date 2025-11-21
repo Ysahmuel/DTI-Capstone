@@ -108,34 +108,50 @@ class BusinessOwnerListView(ListView):
 
 
 # --- View verification request (admin sees uploaded documents) ---
-class ViewVerificationRequest(View):
-    template_name = "users/view_verification.html"
-
-    def get(self, request, user_id):
-        user = get_object_or_404(User, pk=user_id, role='unverified_owner')
-
-        # Fetch verification documents via the related_name
-        documents = user.verification_requests.all()
-
-        return render(request, self.template_name, {
-            "user": user,
-            "documents": documents
-        })
+from django.contrib import messages
+from django.shortcuts import get_object_or_404, redirect
+from .models import User
+from notifications.models import Notification
 
 
-    def post(self, request, user_id):
-        # Handle verification action
-        user = get_object_or_404(User, pk=user_id, role=User.Roles.UNVERIFIED_OWNER)
-        action = request.POST.get("action")
+def view_verification(request, user_id):
+    user = get_object_or_404(User, pk=user_id)
+
+    if request.method == "POST":
+        action = request.POST.get("action")  # <-- indented correctly
 
         if action == "verify":
             user.role = User.Roles.BUSINESS_OWNER
             user.save()
+
+            # Send notification to the user
+            Notification.objects.create(
+                user=user,
+                sender=request.user,  # admin who verified
+                message="Your account has been verified successfully.",
+                type="approved",
+                url=None
+            )
+
+            messages.success(request, f"{user.get_full_name()} has been verified successfully.")
+            return redirect("bo_accounts")
+
         elif action == "deny":
-            user.role = User.Roles.UNVERIFIED  # Or any status you use for denied
+            user.role = User.Roles.UNVERIFIED_OWNER
             user.save()
 
-        return redirect("bo_accounts")
+            # Send notification to the user
+            Notification.objects.create(
+                user=user,
+                sender=request.user,  # admin who denied
+                message="Your verification documents were rejected as invalid.",
+                type="rejected",
+                url=None
+            )
+
+            messages.warning(request, f"{user.get_full_name()}\'s documents were denied.")
+            return redirect("bo_accounts")
+
 
 
 

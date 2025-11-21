@@ -6,11 +6,8 @@
 
 {% include 'users/components/users_list_header.html' with title='Manage Business Owners' %}
 
-<!-- Table wrapper with padding -->
 <div style="padding: 20px; overflow-x: auto;">
-
     <table class="documents-table" style="width: 100%; border-collapse: collapse;">
-
         <thead>
             <tr>
                 <th style="padding: 12px 15px; text-align: left;">Name</th>
@@ -24,13 +21,8 @@
         <tbody>
             {% for user in businesshumans %}
             <tr style="border-bottom: 1px solid #ddd;">
-                <!-- Name -->
                 <td style="padding: 12px 15px;">{{ user.get_full_name }}</td>
-
-                <!-- Email -->
                 <td style="padding: 12px 15px;">{{ user.email }}</td>
-
-                <!-- Status -->
                 <td style="padding: 12px 15px; text-align: center;">
                     {% if user.role == 'unverified_owner' %}
                         <span class="status-badge status-badge-warning">Unverified</span>
@@ -40,20 +32,15 @@
                         <span class="status-badge status-badge-light">—</span>
                     {% endif %}
                 </td>
-
-                <!-- Date Joined -->
                 <td style="padding: 12px 15px; text-align: center;">
                     {{ user.date_joined|date:"M d, Y" }}
                 </td>
-
-                <!-- Actions -->
                 <td style="padding: 12px 15px; text-align: center;">
                     {% if user.role == 'unverified_owner' %}
-                       <a href="{% url 'view_verification' user.id %}" 
-                            style="display:inline-block; padding:6px 12px; background-color:#0d6efd; color:white; text-decoration:none; border-radius:4px;">
+                        <!-- Trigger modal -->
+                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#verifyModal{{ user.id }}">
                             Verify
-                        </a>
-
+                        </button>
                     {% else %}
                         <span class="text-muted">—</span>
                     {% endif %}
@@ -67,8 +54,44 @@
             </tr>
             {% endfor %}
         </tbody>
-
     </table>
 </div>
+
+<!-- Verification Modals -->
+{% for user in businesshumans %}
+    {% if user.role == 'unverified_owner' %}
+    <div class="modal fade centered-modal" id="verifyModal{{ user.id }}" tabindex="-1" aria-labelledby="verifyModalLabel{{ user.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="verifyModalLabel{{ user.id }}">Verification Documents for {{ user.get_full_name }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {% if user.verification_documents.exists %}
+                        <ul class="list-group">
+                            {% for doc in user.verification_documents.all %}
+                                <li class="list-group-item">
+                                    Uploaded at: {{ doc.created_at }} <br>
+                                    <a href="{{ doc.file.url }}" target="_blank">{{ doc.file.name }}</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">No documents uploaded yet.</p>
+                    {% endif %}
+                </div>
+                <div class="modal-footer">
+                    <form method="POST" action="{% url 'view_verification' user.id %}" class="d-flex gap-2">
+                        {% csrf_token %}
+                        <button type="submit" name="action" value="deny" class="btn btn-danger">Deny</button>
+                        <button type="submit" name="action" value="verify" class="btn btn-success">Verify</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+{% endfor %}
 
 {% endblock %}

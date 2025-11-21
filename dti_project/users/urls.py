@@ -30,7 +30,7 @@ urlpatterns = [
 
     # Verify Account (Unverified Owner)
     path('settings/verify-account/<int:pk>/', views.VerifyUserView.as_view(), name='verify_account'),
-    path('view-verification/<int:pk>/', views.ViewVerificationRequest.as_view(), name='view_verification'),
+    path('view-verification/<int:user_id>/', views.view_verification, name='view_verification'),
 
 
 ]
