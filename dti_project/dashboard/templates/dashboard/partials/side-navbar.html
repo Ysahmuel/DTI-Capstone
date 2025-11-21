@@ -37,6 +37,7 @@
                         </div>
                     </li>
                 {% endif %}
+                {% if user.role != 'unverified_owner' %}
                     <li class="nav-item dropdown">
                         <button class="nav-dropdown-btn">
                             <i class="fa-solid fa-file"></i>
@@ -49,7 +50,7 @@
                             </a>
                         </div>
                     </li>
-
+                {% endif %}
                 {% if user.role == 'admin' %}
                     <li class="nav-item dropdown">
                         <button class="nav-dropdown-btn">
