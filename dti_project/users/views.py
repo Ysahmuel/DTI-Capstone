@@ -402,10 +402,13 @@ class ResetPasswordView(View):
             })
 
 
-
 #add staff view
-User = get_user_model()
+from django.contrib.auth import get_user_model
+from django.utils import timezone
+from django.shortcuts import render
+from .forms import AddStaffForm
 
+User = get_user_model()
 
 def add_staff(request):
     if request.method == 'POST':
@@ -416,23 +419,30 @@ def add_staff(request):
             address = form.cleaned_data.get('default_address', '')
             phone = form.cleaned_data.get('default_phone', '')
             birthday = form.cleaned_data.get('birthday')
+            role = request.POST.get('role', 'collection_agent')  # Only 2 args allowed
 
             today = timezone.localdate()
             if birthday >= today:
                 form.add_error('birthday', 'Birthday must be in the past.')
                 return render(request, 'users/add_staff.html', {'form': form})
 
-            # Generate unique email
-            base_email = f"{last_name.lower()}.dti.agent@gmail.com"
+            # Generate email based on role
+            if role == 'collection_agent':
+                base_email = f"{last_name.lower()}.dti.agent@gmail.com"
+            elif role == 'alt_collection_agent':
+                base_email = f"{last_name.lower()}.dti.alt@gmail.com"
+            else:  # authorized_official or default staff
+                base_email = f"{last_name.lower()}.dti.staff@gmail.com"
+
             email = base_email
             counter = 1
             while User.objects.filter(email=email).exists():
-                email = f"{last_name.lower()}{counter}.dti.agent@gmail.com"
+                email = f"{last_name.lower()}{counter}@{base_email.split('@')[1]}"
                 counter += 1
 
             username = email.split('@')[0]
 
-            # 🔐 Generate password in the format LastnameYYYYMMDD
+            # Password: LastnameYYYYMMDD
             formatted_birthday = birthday.strftime("%Y%m%d")
             password = f"{last_name.capitalize()}{formatted_birthday}"
 
@@ -442,7 +452,7 @@ def add_staff(request):
                 last_name=last_name,
                 email=email,
                 password=password,
-                role='collection_agent',
+                role=role,
                 is_staff=True,
             )
 
@@ -462,6 +472,7 @@ def add_staff(request):
         form = AddStaffForm()
 
     return render(request, 'users/add_staff.html', {'form': form})
+
 
 
 
@@ -560,19 +571,19 @@ class ProfileDetailView(DetailView):
 class StaffListView(ListView):
     model = User
     template_name = 'users/staff_accounts.html'
-    
-    def get_queryset(self):
-        qs = User.objects.filter(role='collection_agent')
+    context_object_name = 'staff_users'  # easier name in template
 
-        return qs
-    
+    def get_queryset(self):
+        # Include all staff roles
+        return User.objects.filter(
+            role__in=['collection_agent', 'alt_collection_agent', 'authorized_official']
+        )
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context.update({
-            'users': self.get_queryset(),
-            'user_type': 'staff'
-        })
+        context['user_type'] = 'staff'
         return context
+
     
 
 #Profile Edit View

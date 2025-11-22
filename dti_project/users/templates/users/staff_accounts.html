@@ -6,6 +6,50 @@
 
     {% include 'users/components/users_list_header.html' with title='Manage Staff' %}
 
-    {% include 'users/components/user_table.html' %}
+    <!-- Add Staff Button -->
+    <div class="mb-3 text-end">
+        <a href="{% url 'add_staff' %}" class="btn btn-success">
+            <i class="fas fa-user-plus"></i> Add Staff
+        </a>
+    </div>
+
+    <div style="padding: 20px; overflow-x: auto;">
+        <table class="documents-table" style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th style="padding: 12px 15px; text-align: left;">Name</th>
+                    <th style="padding: 12px 15px; text-align: left;">Email</th>
+                    <th style="padding: 12px 15px; text-align: center;">Role</th>
+                    <th style="padding: 12px 15px; text-align: center;">Date Joined</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in staff_users %}
+                <tr style="border-bottom: 1px solid #ddd;">
+                    <td style="padding: 12px 15px;">{{ user.get_full_name }}</td>
+                    <td style="padding: 12px 15px;">{{ user.email }}</td>
+                    <td style="padding: 12px 15px; text-align: center;">
+                        {% if user.role == 'collection_agent' %}
+                            <span class="status-badge status-badge-primary">Collection Agent</span>
+                        {% elif user.role == 'alt_collection_agent' %}
+                            <span class="status-badge status-badge-warning">Alternative Collection Agent</span>
+                        {% elif user.role == 'authorized_official' %}
+                            <span class="status-badge status-badge-success">Authorized Official</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 12px 15px; text-align: center;">
+                        {{ user.date_joined|date:"M d, Y" }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" style="padding: 12px 15px; text-align: center; color: #777;">
+                        No staff accounts found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
 {% endblock %}

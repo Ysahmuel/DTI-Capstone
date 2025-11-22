@@ -13,6 +13,8 @@ class User(AbstractUser):
         BUSINESS_OWNER = "business_owner", "Business Owner"
         ADMIN = "admin", "Admin"
         COLLECTION_AGENT = "collection_agent", "Collection Agent"
+        ALT_COLLECTION_AGENT = "alt_collection_agent", "Alternative Collection Agent"
+        AUTHORIZED_OFFICIAL = "authorized_official", "Authorized Official"
     role = models.CharField(
         max_length=20,
         choices=Roles.choices,
