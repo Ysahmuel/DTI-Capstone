@@ -4,6 +4,7 @@
 {% block title %}Add Staff{% endblock %}
 
 {% block extra_css %}
+{% load static %}
 <link rel="stylesheet" href="{% static 'users/css/add_staff.css' %}">
 {% endblock %}
 
@@ -14,7 +15,6 @@
 
     <form id="add-staff-form" method="post" novalidate>
       {% csrf_token %}
-
       <div class="form-group">
         <label for="id_first_name">First Name</label>
         {{ form.first_name }}
@@ -28,26 +28,19 @@
         {{ form.default_address }}
       </div>
       <div class="form-group">
-        <label for="id_default_phone">Contact Number</label>
-        {{ form.default_phone }}
-        {% if form.default_phone.errors %}
-        <div class="form-error">{{ form.default_phone.errors.0 }}</div>
-        {% endif %}
-      </div>
+          <label for="id_default_phone">Contact Number</label>
+              {{ form.default_phone }}
+
+              {% if form.default_phone.errors %}
+          <div class="form-error">
+              {{ form.default_phone.errors.0 }}
+          </div>
+          {% endif %}
+          </div>
       <div class="form-group">
         <label for="id_birthday">Birthday</label>
         {{ form.birthday }}
       </div>
-
-      <div class="form-group">
-        <label for="id_role">Role</label>
-        <select name="role" id="id_role" class="form-control">
-          <option value="authorized_official">Authorized Official</option>
-          <option value="collection_agent" selected>Collection Agent</option>
-          <option value="alt_collection_agent">Alternative Collection Agent</option>
-        </select>
-      </div>
-
 
       <button type="submit" class="btn btn-primary">Create Staff Account</button>
     </form>
