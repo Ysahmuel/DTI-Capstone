@@ -45,12 +45,21 @@
                     </li>
 
                     {% if user.role == 'unverified_owner' %}
+                    {% if has_pending_verification %}
+                    <li>
+                        <button type="button" class="btn btn-warning" disabled>
+                            <i class="fas fa-hourglass-half"></i> Pending Verification
+                        </button>
+                    </li>
+                    {% else %}
                     <li>
                         <!-- Open Modal for Upload -->
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#verifyUploadModal">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#verifyUploadModal">
                             <i class="fas fa-shield-alt"></i> Verify Account
                         </button>
                     </li>
+                    {% endif %}
                     {% else %}
                     <li>
                         <a href="#" class="btn btn-secondary disabled">
@@ -58,6 +67,8 @@
                         </a>
                     </li>
                     {% endif %}
+
+
                 </div>
             </ul>
         </div>
@@ -66,7 +77,8 @@
 
 <!-- Modal for file upload -->
 {% if user.role == 'unverified_owner' %}
-<div class="modal fade" id="verifyUploadModal" tabindex="-1" aria-labelledby="verifyUploadModalLabel" aria-hidden="true">
+<div class="modal fade" id="verifyUploadModal" tabindex="-1" aria-labelledby="verifyUploadModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
@@ -76,7 +88,8 @@
 
             <div class="modal-body">
                 <p>Upload at least 2 photos (certificate and ID) to verify your account.</p>
-                <form method="POST" action="{% url 'verify_account_upload' user.pk %}" enctype="multipart/form-data" id="verify-upload-form">
+                <form method="POST" action="{% url 'verify_account_upload' user.pk %}" enctype="multipart/form-data"
+                    id="verify-upload-form">
                     {% csrf_token %}
                     <input type="file" name="files" multiple accept=".jpg,.jpeg,.png" required>
                     <small class="form-text text-muted">You must select at least 2 files.</small>
@@ -93,17 +106,17 @@
 {% endif %}
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('verify-upload-form');
-    if (form) {
-        form.addEventListener('submit', e => {
-            const files = form.querySelector('input[type="file"]').files;
-            if (files.length < 2) {
-                alert("Please upload at least 2 files to verify your account.");
-                e.preventDefault();
-            }
-        });
-    }
-});
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('verify-upload-form');
+        if (form) {
+            form.addEventListener('submit', e => {
+                const files = form.querySelector('input[type="file"]').files;
+                if (files.length < 2) {
+                    alert("Please upload at least 2 files to verify your account.");
+                    e.preventDefault();
+                }
+            });
+        }
+    });
 </script>
 {% endblock %}

@@ -75,3 +75,12 @@
 </body>
 
 </html>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const alertEl = document.querySelector('.alerts-container');
+    if(alertEl) {
+        setTimeout(() => { alertEl.remove(); }, 4000); // auto-hide after 4 sec
+    }
+});
+</script>

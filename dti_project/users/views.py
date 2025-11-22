@@ -9,6 +9,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.contrib import messages
 import logging
+from django.core.mail import send_mail
+from notifications.models import Notification
+
 
 from users.mixins import FormSubmissionMixin
 from users.models import User
@@ -69,14 +72,17 @@ from documents.models import (
 logger = logging.getLogger(__name__)
 
 # Create your views here.
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib import messages
-from .models import User
+from notifications.models import Notification  # if you want in-app notifications too
+from users.models import User
 from documents.verification import VerificationDocument
-
 
 def verify_account_upload(request, user_id):
     user = get_object_or_404(User, pk=user_id)
+
+    # Disable new uploads if a pending request exists
+    if user.verification_documents.exists() and any(doc.status == 'pending' for doc in user.verification_documents.all()):
+        messages.warning(request, "You already have a pending verification request.")
+        return redirect("settings")
 
     if request.method == "POST":
         files = request.FILES.getlist("files")
@@ -84,17 +90,37 @@ def verify_account_upload(request, user_id):
             messages.error(request, "Please upload at least 2 files to verify your account.")
             return redirect("settings")
 
-        # Save uploaded files
         for f in files:
-            VerificationDocument.objects.create(
-                user=user,
-                file=f
-            )
+            VerificationDocument.objects.create(user=user, file=f, status='pending')
 
         messages.success(request, "Documents uploaded successfully. Awaiting admin verification.")
+
+        # Notify admins via email and in-app notification
+        admins = User.objects.filter(is_staff=True)
+        for admin in admins:
+            send_mail(
+                subject="New Verification Request",
+                message=f"{user.get_full_name()} has submitted documents for verification.",
+                from_email="noreply@example.com",
+                recipient_list=[admin.email],
+                fail_silently=True,
+            )
+
+            # Optional in-app notification
+            Notification.objects.create(
+                user=admin,
+                sender=user,
+                message=f"{user.get_full_name()} submitted verification documents.",
+                type="info",
+                url="/admin/users/view-verification/"  # link to admin view
+            )
+
         return redirect("settings")
 
     return redirect("settings")
+
+
+
 
 
 
@@ -136,49 +162,62 @@ class BusinessOwnerListView(ListView):
 
 
 # --- View verification request (admin sees uploaded documents) ---
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from django.shortcuts import get_object_or_404, redirect
-from .models import User
+from users.models import User
 from notifications.models import Notification
-
+from documents.verification import VerificationDocument
 
 def view_verification(request, user_id):
     user = get_object_or_404(User, pk=user_id)
 
     if request.method == "POST":
-        action = request.POST.get("action")  # <-- indented correctly
+        action = request.POST.get("action")
 
         if action == "verify":
             user.role = User.Roles.BUSINESS_OWNER
             user.save()
 
-            # Send notification to the user
+            # Create notification for the user
             Notification.objects.create(
                 user=user,
-                sender=request.user,  # admin who verified
+                sender=request.user,
                 message="Your account has been verified successfully.",
                 type="approved",
                 url=None
             )
 
+            # Success message for admin
             messages.success(request, f"{user.get_full_name()} has been verified successfully.")
-            return redirect("bo_accounts")
 
         elif action == "deny":
             user.role = User.Roles.UNVERIFIED_OWNER
             user.save()
 
-            # Send notification to the user
+            # Delete all verification documents
+            user.verification_documents.all().delete()
+
+            # Create notification for the user
             Notification.objects.create(
                 user=user,
-                sender=request.user,  # admin who denied
+                sender=request.user,
                 message="Your verification documents were rejected as invalid.",
                 type="rejected",
                 url=None
             )
 
-            messages.warning(request, f"{user.get_full_name()}\'s documents were denied.")
-            return redirect("bo_accounts")
+            # Warning message for admin
+            messages.warning(request, f"{user.get_full_name()}'s verification documents were denied.")
+
+        return redirect("bo_accounts")  
+
+    # For GET request, just show the modal page if needed
+    documents = user.verification_documents.all()
+    return render(request, "users/view_verification.html", {"user": user, "documents": documents})
+
+
+
+
 
 
 
@@ -459,10 +498,24 @@ def delete_new_staff(request, user_id):
 
 
 
-
 #Settings View
+from documents.verification import VerificationDocument  # correct import
+
 class SettingsView(LoginRequiredMixin, TemplateView):
     template_name = "users/settings.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        context['user'] = user
+
+        # ✅ Check if the user has pending verification documents
+        context['has_pending_verification'] = VerificationDocument.objects.filter(
+            user=user, status='pending'
+        ).exists()
+
+        return context
+
 
 #Profile Detail View
 class ProfileDetailView(DetailView):
