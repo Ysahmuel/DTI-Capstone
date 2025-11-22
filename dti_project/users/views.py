@@ -9,9 +9,6 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.contrib import messages
 import logging
-from django.core.mail import send_mail
-from notifications.models import Notification
-
 
 from users.mixins import FormSubmissionMixin
 from users.models import User
@@ -72,167 +69,6 @@ from documents.models import (
 logger = logging.getLogger(__name__)
 
 # Create your views here.
-from notifications.models import Notification  # if you want in-app notifications too
-from users.models import User
-from documents.verification import VerificationDocument
-
-def verify_account_upload(request, user_id):
-    user = get_object_or_404(User, pk=user_id)
-
-    # Disable new uploads if a pending request exists
-    if user.verification_documents.exists() and any(doc.status == 'pending' for doc in user.verification_documents.all()):
-        messages.warning(request, "You already have a pending verification request.")
-        return redirect("settings")
-
-    if request.method == "POST":
-        files = request.FILES.getlist("files")
-        if len(files) < 2:
-            messages.error(request, "Please upload at least 2 files to verify your account.")
-            return redirect("settings")
-
-        for f in files:
-            VerificationDocument.objects.create(user=user, file=f, status='pending')
-
-        messages.success(request, "Documents uploaded successfully. Awaiting admin verification.")
-
-        # Notify admins via email and in-app notification
-        admins = User.objects.filter(is_staff=True)
-        for admin in admins:
-            send_mail(
-                subject="New Verification Request",
-                message=f"{user.get_full_name()} has submitted documents for verification.",
-                from_email="noreply@example.com",
-                recipient_list=[admin.email],
-                fail_silently=True,
-            )
-
-            # Optional in-app notification
-            Notification.objects.create(
-                user=admin,
-                sender=user,
-                message=f"{user.get_full_name()} submitted verification documents.",
-                type="info",
-                url="/admin/users/view-verification/"  # link to admin view
-            )
-
-        return redirect("settings")
-
-    return redirect("settings")
-
-
-
-
-
-
-# verify account admin side
-# users/views.py
-from django.shortcuts import render, get_object_or_404, redirect
-from django.views.generic import ListView, View
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
-
-
-# --- List all business owners (verified + unverified) ---
-from django.views.generic import ListView
-from users.models import User  # make sure this is your custom user model
-
-# --- List all business owners (verified + unverified) ---
-from django.views.generic import ListView
-from users.models import User
-
-class BusinessOwnerListView(ListView):
-    model = User
-    template_name = 'users/bo_accounts.html'
-    context_object_name = 'businesshumans'
-
-    def get_queryset(self):
-        # Return both verified and unverified business owners
-        return User.objects.filter(
-            role__in=['unverified_owner', 'business_owner']
-        ).order_by('-date_joined')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['businesshumans'] = self.get_queryset()  # keep naming consistent
-        context['user_type'] = 'business_owner'
-        return context
-
-
-
-
-# --- View verification request (admin sees uploaded documents) ---
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib import messages
-from users.models import User
-from notifications.models import Notification
-from documents.verification import VerificationDocument
-
-def view_verification(request, user_id):
-    user = get_object_or_404(User, pk=user_id)
-
-    if request.method == "POST":
-        action = request.POST.get("action")
-
-        if action == "verify":
-            user.role = User.Roles.BUSINESS_OWNER
-            user.save()
-
-            # Create notification for the user
-            Notification.objects.create(
-                user=user,
-                sender=request.user,
-                message="Your account has been verified successfully.",
-                type="approved",
-                url=None
-            )
-
-            # Success message for admin
-            messages.success(request, f"{user.get_full_name()} has been verified successfully.")
-
-        elif action == "deny":
-            user.role = User.Roles.UNVERIFIED_OWNER
-            user.save()
-
-            # Delete all verification documents
-            user.verification_documents.all().delete()
-
-            # Create notification for the user
-            Notification.objects.create(
-                user=user,
-                sender=request.user,
-                message="Your verification documents were rejected as invalid.",
-                type="rejected",
-                url=None
-            )
-
-            # Warning message for admin
-            messages.warning(request, f"{user.get_full_name()}'s verification documents were denied.")
-
-        return redirect("bo_accounts")  
-
-    # For GET request, just show the modal page if needed
-    documents = user.verification_documents.all()
-    return render(request, "users/view_verification.html", {"user": user, "documents": documents})
-
-
-
-
-
-
-
-
-# One-click verify user
-class VerifyUserView(View):
-    def get(self, request, pk):
-        user = get_object_or_404(User, pk=pk)
-        user.role = User.Roles.BUSINESS_OWNER
-        user.is_verified = True
-        user.save()
-        # Optional: mark any VerificationRequest as verified
-        VerificationRequest.objects.filter(user=user).update(is_verified=True, admin_verified_at=timezone.now(), admin_verified_by=request.user)
-        return redirect('bo_accounts')
-
 
 
 #forgot password view
@@ -402,13 +238,10 @@ class ResetPasswordView(View):
             })
 
 
-#add staff view
-from django.contrib.auth import get_user_model
-from django.utils import timezone
-from django.shortcuts import render
-from .forms import AddStaffForm
 
+#add staff view
 User = get_user_model()
+
 
 def add_staff(request):
     if request.method == 'POST':
@@ -419,30 +252,23 @@ def add_staff(request):
             address = form.cleaned_data.get('default_address', '')
             phone = form.cleaned_data.get('default_phone', '')
             birthday = form.cleaned_data.get('birthday')
-            role = request.POST.get('role', 'collection_agent')  # Only 2 args allowed
 
             today = timezone.localdate()
             if birthday >= today:
                 form.add_error('birthday', 'Birthday must be in the past.')
                 return render(request, 'users/add_staff.html', {'form': form})
 
-            # Generate email based on role
-            if role == 'collection_agent':
-                base_email = f"{last_name.lower()}.dti.agent@gmail.com"
-            elif role == 'alt_collection_agent':
-                base_email = f"{last_name.lower()}.dti.alt@gmail.com"
-            else:  # authorized_official or default staff
-                base_email = f"{last_name.lower()}.dti.staff@gmail.com"
-
+            # Generate unique email
+            base_email = f"{last_name.lower()}.dti.agent@gmail.com"
             email = base_email
             counter = 1
             while User.objects.filter(email=email).exists():
-                email = f"{last_name.lower()}{counter}@{base_email.split('@')[1]}"
+                email = f"{last_name.lower()}{counter}.dti.agent@gmail.com"
                 counter += 1
 
             username = email.split('@')[0]
 
-            # Password: LastnameYYYYMMDD
+            # 🔐 Generate password in the format LastnameYYYYMMDD
             formatted_birthday = birthday.strftime("%Y%m%d")
             password = f"{last_name.capitalize()}{formatted_birthday}"
 
@@ -452,7 +278,7 @@ def add_staff(request):
                 last_name=last_name,
                 email=email,
                 password=password,
-                role=role,
+                role='collection_agent',
                 is_staff=True,
             )
 
@@ -472,7 +298,6 @@ def add_staff(request):
         form = AddStaffForm()
 
     return render(request, 'users/add_staff.html', {'form': form})
-
 
 
 
@@ -509,24 +334,10 @@ def delete_new_staff(request, user_id):
 
 
 
-#Settings View
-from documents.verification import VerificationDocument  # correct import
 
+#Settings View
 class SettingsView(LoginRequiredMixin, TemplateView):
     template_name = "users/settings.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        user = self.request.user
-        context['user'] = user
-
-        # ✅ Check if the user has pending verification documents
-        context['has_pending_verification'] = VerificationDocument.objects.filter(
-            user=user, status='pending'
-        ).exists()
-
-        return context
-
 
 #Profile Detail View
 class ProfileDetailView(DetailView):
@@ -571,20 +382,36 @@ class ProfileDetailView(DetailView):
 class StaffListView(ListView):
     model = User
     template_name = 'users/staff_accounts.html'
-    context_object_name = 'staff_users'  # easier name in template
-
+    
     def get_queryset(self):
-        # Include all staff roles
-        return User.objects.filter(
-            role__in=['collection_agent', 'alt_collection_agent', 'authorized_official']
-        )
+        qs = User.objects.filter(role='collection_agent')
 
+        return qs
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['user_type'] = 'staff'
+        context.update({
+            'users': self.get_queryset(),
+            'user_type': 'staff'
+        })
         return context
-
     
+class BusinessOwnerListView(ListView):
+    model = User
+    template_name = 'users/bo_accounts.html'
+    
+    def get_queryset(self):
+        qs = User.objects.filter(role='business_owner')
+
+        return qs
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'users': self.get_queryset(),
+            'user_type': 'business_owner'
+        })
+        return context
 
 #Profile Edit View
 from .forms import ProfileEditForm

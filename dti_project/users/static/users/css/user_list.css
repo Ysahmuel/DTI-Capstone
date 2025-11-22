@@ -98,16 +98,3 @@
 .user-value-row input[type="checkbox"] {
     cursor: pointer;
 }
-
-/* Optional: constrain modal width */
-.modal-dialog {
-    max-width: 600px; /* adjust as needed */
-    margin: 0;        /* remove default Bootstrap margin */
-}
-
-/* Proper centering (horizontal + vertical) */
-.modal.show {
-    display: flex !important;
-    align-items: center;       /* vertical centering */
-    justify-content: center;   /* horizontal centering */
-}
