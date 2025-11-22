@@ -8,6 +8,28 @@ from datetime import date
 from .models import User
 
 
+from django import forms
+from .models import VerificationRequest
+
+class VerifyAccountForm(forms.ModelForm):
+    class Meta:
+        model = VerificationRequest
+        fields = ['uploaded_files']
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user')
+        super().__init__(*args, **kwargs)
+
+    def save(self, commit=True):
+        obj = super().save(commit=False)
+        obj.user = self.user
+        if commit:
+            obj.save()
+        return obj
+
+
+
+
 # -------------------------------
 # ✅ Base class for shared fields
 # -------------------------------
@@ -218,7 +240,7 @@ class CustomUserCreationForm(UserCreationForm, BaseUserForm):
         user.email = self.cleaned_data['email']
         user.default_phone = self.cleaned_data['default_phone']
         user.default_address = self.cleaned_data['default_address']
-        user.role = 'business_owner'
+        user.role = 'unverified_owner'
 
         base_username = slugify(f"{user.first_name}.{user.last_name}")
         username = base_username
