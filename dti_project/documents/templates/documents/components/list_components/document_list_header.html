@@ -4,8 +4,11 @@
         {% if request.user.role != 'business_owner' %}
             <button type="submit" form="documents-table-form" formaction="{% url 'approve-documents' %}" id="approve-btn">
                 Approve
-            </button>
+            </button>            
         {% endif %}
+        <button type="submit" form="documents-table-form" formaction="{% url 'generate-documents-report' %}" id="generate-report-btn">
+            Generate Report
+        </button>
         <button id="filter-btn">
             <i class="fas fa-sliders-h"></i>
         </button>

@@ -144,6 +144,7 @@ class FilterableDocumentMixin:
             context["CIVIL_STATUS_CHOICES"] = getattr(PersonalDataSheet, "CIVIL_STATUS_CHOICES", [])
 
         return context
+    
 class FilterCollectionReportListMixin:
     """
     Adds filtering for CollectionReport objects.

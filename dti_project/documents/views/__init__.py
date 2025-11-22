@@ -53,6 +53,9 @@ from .action_views import (
     mark_all_notifications_as_read
 )
 
+from .generate_report_views import (
+    GenerateDocumentsReportView
+)
 
 from .pdf_views import (
     view_oop,

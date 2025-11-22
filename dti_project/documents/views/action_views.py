@@ -81,7 +81,8 @@ class ApproveDocumentsView(LoginRequiredMixin, View):
 
         messages.success(request, f"{updated_count} document(s) approved successfully.")
         return redirect(request.META.get("HTTP_REFERER", "documents:all-documents"))
-    
+
+
 @login_required
 def mark_all_notifications_as_read(request):
     if request.method == "POST":

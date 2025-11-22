@@ -53,4 +53,7 @@ urlpatterns = [
     path('verify-payment/<int:oop_id>/', verify_payment, name='verify-payment'),
     path('oop/view/<int:oop_id>/', views.view_oop, name='view-oop'),
     path('mark-all-as-read/', views.mark_all_notifications_as_read, name='mark_all_notifications_as_read'),
+
+    # GENERATE REPORT VIEWS
+    path('generate-documents-report', views.GenerateDocumentsReportView.as_view(), name='generate-documents-report'),
 ]
