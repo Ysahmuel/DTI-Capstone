@@ -342,8 +342,22 @@ def delete_new_staff(request, user_id):
     return redirect('staff_accounts')
 
 #Settings View
+from documents.verification import VerificationDocument  # correct import
+
 class SettingsView(LoginRequiredMixin, TemplateView):
     template_name = "users/settings.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        context['user'] = user
+
+        # ✅ Check if the user has pending verification documents
+        context['has_pending_verification'] = VerificationDocument.objects.filter(
+            user=user, status='pending'
+        ).exists()
+
+        return context
 
 #Profile Detail View
 class ProfileDetailView(DetailView):
@@ -460,7 +474,9 @@ class BusinessOwnerListView(ListView):
         context['user_type'] = 'business_owner'
         return context
 
-from django.shortcuts import get_object_or_404, redirect
+
+#admin side verify
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from users.models import User
 from notifications.models import Notification
@@ -474,6 +490,8 @@ def verify_user(request, user_id):
         if action == "verify":
             user.role = User.Roles.BUSINESS_OWNER
             user.save()
+
+            # Notification for the user
             Notification.objects.create(
                 user=user,
                 sender=request.user,
@@ -481,12 +499,18 @@ def verify_user(request, user_id):
                 type="approved",
                 url=None
             )
+
+            # Success message for admin
             messages.success(request, f"{user.get_full_name()} has been verified successfully.")
 
         elif action == "deny":
             user.role = User.Roles.UNVERIFIED_OWNER
             user.save()
+
+            # Delete all verification documents
             user.verification_documents.all().delete()
+
+            # Notification for the user
             Notification.objects.create(
                 user=user,
                 sender=request.user,
@@ -494,9 +518,15 @@ def verify_user(request, user_id):
                 type="rejected",
                 url=None
             )
+
+            # Warning message for admin
             messages.warning(request, f"{user.get_full_name()}'s verification documents were denied.")
 
-    return redirect("bo_accounts")
+        return redirect("bo_accounts")
+
+    # For GET request, show verification documents (if admin wants to view)
+    documents = user.verification_documents.all()
+    return render(request, "users/view_verification.html", {"user": user, "documents": documents})
 
 # One-click verify user
 class VerifyUserView(View):
@@ -509,6 +539,7 @@ class VerifyUserView(View):
         VerificationRequest.objects.filter(user=user).update(is_verified=True, admin_verified_at=timezone.now(), admin_verified_by=request.user)
         return redirect('bo_accounts')
 
+from django.core.mail import send_mail
 from notifications.models import Notification  # if you want in-app notifications too
 from users.models import User
 from documents.verification import VerificationDocument
