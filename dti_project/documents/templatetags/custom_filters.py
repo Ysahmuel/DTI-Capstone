@@ -9,6 +9,21 @@ register = template.Library()
 def titlecase(value):
     return str(value).replace('_', ' ').title()
 
+@register.filter(name='get_item')
+def get_item(dictionary, key):
+    """
+    Get an item from a dictionary or object by key/attribute name.
+    Usage: {{ form|get_item:field_name }}
+    """
+    if hasattr(dictionary, key):
+        return getattr(dictionary, key)
+    elif hasattr(dictionary, '__getitem__'):
+        try:
+            return dictionary[key]
+        except (KeyError, TypeError):
+            return None
+    return None
+
 @register.filter
 def get_form_field(form, field_name):
     """Safely get a field from a Django form by name"""

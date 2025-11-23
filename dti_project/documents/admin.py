@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .utils.admin_helpers import get_full_name_from_personal_data
-from .models import CollectionReport, CollectionReportItem, CharacterReference, ChecklistEvaluationSheet, EducationalAttainment, EmployeeBackground, InspectionValidationReport, OrderOfPayment, PersonalDataSheet, ProductCovered, SalesPromotionPermitApplication, Service, ServiceCategory, ServiceRepairAccreditationApplication, TrainingsAttended, ChangeRequest
+from .models import CollectionReport, CollectionReportItem, CharacterReference, ChecklistEvaluationSheet, EducationalAttainment, EmployeeBackground, InspectionValidationReport, OrderOfPayment, PersonalDataSheet, ProductCovered, SalesPromotionPermitApplication, Service, ServiceCategory, ServiceRepairAccreditationApplication, TrainingsAttended, ChangeRequest, OtherBusinessNameRelatedFormModel
 
 
 # Register your models here.
@@ -211,3 +211,9 @@ class ChangeRequestAdmin(admin.ModelAdmin):
     list_display = ('user', 'is_approved', 'approved_by', 'date')
     list_filter = ('is_approved', )
     search_fields = ('user', 'approved_by')
+
+
+@admin.register(OtherBusinessNameRelatedFormModel)
+class OtherBusinessNameRelatedFormModelAdmin(admin.ModelAdmin):
+    list_display = ('user', 'name_of_business')
+    search_fields = ('user', 'name_of_business')

@@ -4,7 +4,9 @@
     <ol>
         {% for step in enumerated_steps %}
             {% if step.1 == 'fieldset' %}
-                <li data-target="{{ step.2.2 }}-fieldset" class="step-item">
+                <li data-target="{{ step.2.2 }}-fieldset" 
+                    class="step-item conditional-step" 
+                    data-conditions="{{ step.2.3|default:'' }}">
                     <span class="step-circle"></span>
                     <strong>{{ step.2.0 }}</strong>
                     <i class="fa-solid fa-angle-right"></i>

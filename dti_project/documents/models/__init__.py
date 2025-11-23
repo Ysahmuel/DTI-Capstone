@@ -9,6 +9,7 @@ from .sales_promotion_model import SalesPromotionPermitApplication, ProductCover
 from .service_repair_accreditation_model import ServiceRepairAccreditationApplication, Service, ServiceCategory
 from .change_request_models import ChangeRequest
 from .collection_models import CollectionReport, CollectionReportItem
+from .other_business_name_related_model import OtherBusinessNameRelatedFormModel
 
 __all__ = [
     # Base models
@@ -48,4 +49,7 @@ __all__ = [
     # collection item
     'CollectionReport',
     'CollectionReportItem',
+
+    # Other business name related
+    'OtherBusinessNameRelatedFormModel'
 ]

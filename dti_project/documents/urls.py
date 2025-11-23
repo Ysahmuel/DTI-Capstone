@@ -10,6 +10,7 @@ urlpatterns = [
     path("create/inspection-validation-report", views.CreateInspectionValidationReportView.as_view(), name="create-inspection-validation-report"),
     path('create/order-of-payment', views.CreateOrderOfPaymentView.as_view(), name="create-order-of-payment"),
     path('create/checklist-evaluation', views.CreateChecklistEvaluationSheetView.as_view(), name='create-checklist-evaluation-sheet'),
+    path('create/other-business-related', views.CreateOtherBusinessRelatedFormView.as_view(), name='create-other-business-related'),
 
     # DETAIL VIEWS
     path("sales-promotion-applications/<int:pk>", views.SalesPromotionDetailView.as_view(), name="sales-promotion-application"),

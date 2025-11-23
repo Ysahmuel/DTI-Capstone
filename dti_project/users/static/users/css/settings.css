@@ -11,7 +11,7 @@
 .settings-card {
     background: #fff;
     width: 100%;
-    max-width: 1200px; /* match profile */
+    max-width: 1200px; 
     border-radius: 1rem;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     overflow: hidden;
@@ -26,14 +26,12 @@
     background: linear-gradient(135deg, var(--primary, #0f0853), #3b82f6);
 }
 
-/* Profile Header Content (outside banner) */
-/* Profile Header Content (outside banner) */
 .profile-header-content {
     display: flex;
-    align-items: center; /* changed from flex-end to center */
+    align-items: center;
     gap: 1.5rem;
     padding: 0 2rem;
-    margin-top: -40px; /* adjust how far below banner you want */
+    margin-top: -40px; 
     position: relative;
     z-index: 10;
 }
@@ -78,17 +76,18 @@
 .profile-username {
     font-size: 1rem;
     margin-top: 0.25rem;
-    color: #374151;
+    color: #6b7280;
 }
 
 .role-badge {
     margin-top: 0.5rem;
-    padding: 0.4rem 0.8rem;
+    padding: 0.35rem 0.75rem;
     border-radius: 999px;
     font-size: 0.8rem;
-    font-weight: bold;
-    background: #3b82f6; /* darker badge for contrast */
+    font-weight: 600;
+    background: linear-gradient(135deg, #3b82f6, #6366f1);
     color: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
 /* Settings Body */
@@ -96,10 +95,15 @@
     padding: 2rem;
 }
 
-.settings-body h2 {
-    font-size: 1.2rem;
-    margin-bottom: 0.75rem;
-    color: var(--primary, #0f0853);
+.settings-body h2 {        
+    font-size: 1.5rem;
+    font-weight: bold;           
+    color: var(--primary, #0f0853);            
+    margin-bottom: 1rem;         
+    border-bottom: 2px solid #e5e7eb; 
+    padding-bottom: 0.5rem;     
+    letter-spacing: 0.5px;    
+    
 }
 
 /* Settings List */

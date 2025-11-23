@@ -237,8 +237,6 @@ class ResetPasswordView(View):
                 'message': 'No user account found for this email.'
             })
 
-
-
 #add staff view
 User = get_user_model()
 
@@ -299,10 +297,6 @@ def add_staff(request):
 
     return render(request, 'users/add_staff.html', {'form': form})
 
-
-
-
-
 # Staff Created Popup View
 from django.shortcuts import render
 
@@ -330,11 +324,6 @@ def delete_new_staff(request, user_id):
         messages.error(request, f"Error deleting account: {e}")
     return redirect('staff_accounts')
 
-
-
-
-
-
 #Settings View
 class SettingsView(LoginRequiredMixin, TemplateView):
     template_name = "users/settings.html"
@@ -357,6 +346,43 @@ class ProfileDetailView(DetailView):
         orders_of_payment = OrderOfPayment.objects.filter(user=profile)
         checklist_evaluation_sheets = ChecklistEvaluationSheet.objects.filter(user=profile)
 
+        related_oops = OrderOfPayment.objects.filter(sales_promotion_permit_application__user=profile)
+
+        transactions_qs = (orders_of_payment | related_oops).distinct().order_by('-id')
+
+        transactions_safe = []
+        for txn in transactions_qs:
+            date_obj = getattr(txn, 'created_at', None) or getattr(txn, 'date', None)
+            date_str = date_obj.strftime("%b %d, %Y") if date_obj else "N/A"
+
+            reference = (
+                getattr(txn, 'reference_code', None)
+                or "N/A"
+            )
+
+            amount_val = getattr(txn, 'total_amount', None) or getattr(txn, 'amount', None) or 0
+            try:
+                amount_str = f"₱{float(amount_val):,.2f}"
+            except Exception:
+                amount_str = "₱0.00"
+
+            status = None
+            get_status_display = getattr(txn, 'get_payment_status_display', None)
+            if callable(get_status_display):
+                try:
+                    status = get_status_display()
+                except Exception:
+                    status = None
+            if not status:
+                status = getattr(txn, 'payment_status', None) or getattr(txn, 'status', None) or "N/A"
+
+            transactions_safe.append({
+                'date': date_str,
+                'reference': reference,
+                'amount': amount_str,
+                'status': status,
+            })
+
         # Total count
         total_documents = (
             sales_promos.count()
@@ -376,6 +402,7 @@ class ProfileDetailView(DetailView):
             "orders_of_payment": orders_of_payment,
             "checklist_evaluation_sheets": checklist_evaluation_sheets,
             "total_documents": total_documents,
+            "transactions": transactions_safe,
         })
         return context
 
@@ -518,10 +545,10 @@ class VerifyUserView(View):
                     'redirect': reverse('reset_password')
                 })
             else:
-                # For normal registration flow
+    # For normal registration flow
                 login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-                del request.session['pending_verification_user']
-                return JsonResponse({
+                request.session.pop('pending_verification_user', None)
+            return JsonResponse({
                     'success': True,
                     'message': 'Verification successful!',
                     'redirect': reverse('dashboard')

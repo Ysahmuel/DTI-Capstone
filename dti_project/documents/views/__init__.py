@@ -5,6 +5,7 @@ from .create_views import (
     CreateInspectionValidationReportView,
     CreateOrderOfPaymentView,
     CreateChecklistEvaluationSheetView,
+    CreateOtherBusinessRelatedFormView
 )
 from .detail_views import (
     SalesPromotionDetailView,
@@ -15,6 +16,7 @@ from .detail_views import (
     ChecklistEvaluationSheetDetailView,
     CollectionReportDetailView,
     CollectionReportItemDetailView,
+    
 )
 
 from .update_views import (

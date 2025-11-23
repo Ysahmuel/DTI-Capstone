@@ -38,6 +38,48 @@ PERSONAL_DATA_SHEET_FIELD_GROUPS = [
     ),
 ]
 
+OTHER_BUSINESS_NAME_RELATED_FIELD_GROUPS = [
+    ("Business Information", [
+        ['name_of_business'],
+        ['certificate_number', 'date_registered'],
+        ['trn_ref_code'],
+        ['valid_id_presented'],
+    ], 'business-info', None),
+    
+    ("BN Certification", [
+        ['bn_certification_purpose'],
+    ], 'bn-certification', None),
+    
+    ("Authentication", [
+        ['no_of_copies'],
+    ], 'authentication', None),
+    
+    ("Change of Info - Territorial Scope", [
+        ['change_territorial_scope'],
+        ['territorial_scope_from', 'territorial_scope_to'],
+    ], 'change-territorial-scope', None),
+    
+    ("Change of Info - Owner's Name", [
+        ['change_owner_name'],
+        ['owner_name_from', 'owner_name_to'],
+        ['owner_name_proof_basis'],
+    ], 'change-owner-name', None),
+    
+    ("Change of Info - Business Address", [
+        ['change_business_address'],
+        ['business_address_from', 'business_address_to'],
+    ], 'change-business-address', None),
+    
+    ("Change of Info - Owner's Address", [
+        ['change_owner_address'],
+        ['owner_address_from', 'owner_address_to'],
+    ], 'change-owner-address', None),
+    
+    ("Cancellation", [
+        ['cancellation_reason'],
+    ], 'cancellation', None),
+]
+
 SERVICE_REPAIR_ACCREDITATION_FIELD_GROUPS = [
     ("Application Details", [['application_type', 'category', 'star_rating']], 'application-details'),
     ("Business/Personal Information", [

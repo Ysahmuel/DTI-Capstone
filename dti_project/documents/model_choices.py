@@ -179,3 +179,18 @@ REGION_CHOICES = [
     ("Region XIII", "Caraga (Region XIII)"),
     ("BARMM", "Bangsamoro Autonomous Region in Muslim Mindanao (BARMM)"),
 ]
+
+OTHER_BUSINESS_NAME_RELATED_FORM_CHOICES = [
+    ('bn_certification', 'BN Certification'),
+    ('authentication', 'Authentication/Certified True Copy (CTC) of BN Certificate of Registration'),
+    ('change_in_territorial_scope', 'Change in Territorial Scope'),
+    ('change_of_business_information', 'Change of Business Information'),
+    ('cancellation', 'Cancellation of Business Name Registration')
+]
+
+BUSINESS_SCOPE_CHOICES = [
+    ('national', 'National'),
+    ('regional', 'Regional'),
+    ('city_or_municipality', 'City/Municipality'),
+    ('barangay', 'Barangay'),
+]
