@@ -22,10 +22,10 @@
     <table class="documents-table">
         <thead>
             <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th class="text-center">Role</th>
-                <th class="text-center">Date Joined</th>
+                <th style="text-align: center;">Name</th>
+                <th style="text-align: center;">Email</th>
+                <th style="text-align: center;">Role</th>
+                <th style="text-align: center;">Date Joined</th>
             </tr>
         </thead>
 
@@ -34,18 +34,18 @@
             <tr style="border-bottom: 1px solid #ddd;">
                 <td style="padding: 12px 15px;">{{ user.get_full_name }}</td>
                 <td style="padding: 12px 15px;">{{ user.email }}</td>
-                <td style="padding: 12px 15px; text-align: justify;">
+                <td style="padding: 12px 15px; text-align: center;">
                     {% if user.role == 'collection_agent' %}
-                    <span>Collection Agent</span>
+                    <span class="status-badge status-badge-approved">Collection Agent</span>
                     {% elif user.role == 'alt_collection_agent' %}
-                    <span>Alternative Collection Agent</span>
+                    <span class="status-badge status-badge-approved">Alternative Collection Agent</span>
                     {% elif user.role == 'authorized_official' %}
-                    <span>Authorized Official</span>
+                    <span class="status-badge status-badge-approved">Authorized Official</span>
                     {% else %}
                     <span>—</span>
                     {% endif %}
                 </td>
-                <td class="text-center">{{ user.date_joined|date:"M d, Y" }}</td>
+                <td style="text-align: center;">{{ user.date_joined|date:"M d, Y" }}</td>
             </tr>
 
             {% empty %}

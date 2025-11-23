@@ -460,14 +460,12 @@ class BusinessOwnerListView(ListView):
         context['user_type'] = 'business_owner'
         return context
 
-# --- View verification request (admin sees uploaded documents) ---
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from users.models import User
 from notifications.models import Notification
-from documents.verification import VerificationDocument
 
-def view_verification(request, user_id):
+def verify_user(request, user_id):
     user = get_object_or_404(User, pk=user_id)
 
     if request.method == "POST":
@@ -476,8 +474,6 @@ def view_verification(request, user_id):
         if action == "verify":
             user.role = User.Roles.BUSINESS_OWNER
             user.save()
-
-            # Create notification for the user
             Notification.objects.create(
                 user=user,
                 sender=request.user,
@@ -485,18 +481,12 @@ def view_verification(request, user_id):
                 type="approved",
                 url=None
             )
-
-            # Success message for admin
             messages.success(request, f"{user.get_full_name()} has been verified successfully.")
 
         elif action == "deny":
             user.role = User.Roles.UNVERIFIED_OWNER
             user.save()
-
-            # Delete all verification documents
             user.verification_documents.all().delete()
-
-            # Create notification for the user
             Notification.objects.create(
                 user=user,
                 sender=request.user,
@@ -504,15 +494,9 @@ def view_verification(request, user_id):
                 type="rejected",
                 url=None
             )
-
-            # Warning message for admin
             messages.warning(request, f"{user.get_full_name()}'s verification documents were denied.")
 
-        return redirect("bo_accounts")  
-
-    # For GET request, just show the modal page if needed
-    documents = user.verification_documents.all()
-    return render(request, "users/view_verification.html", {"user": user, "documents": documents})
+    return redirect("bo_accounts")
 
 # One-click verify user
 class VerifyUserView(View):

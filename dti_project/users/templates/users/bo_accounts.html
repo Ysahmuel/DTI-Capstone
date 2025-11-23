@@ -1,5 +1,5 @@
 {% extends 'dashboard/layout.html' %}
-{% load static custom_filters %}  {# <-- load both static and custom_filters #}
+{% load static custom_filters %}
 
 {% block title %}Business Owners{% endblock %}
 
@@ -30,11 +30,11 @@
     <table class="documents-table">
         <thead>
             <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Status</th>
-                <th>Date Joined</th>
-                <th>Actions</th>
+                <th style= "text-align: center;">Name</th>
+                <th style= "text-align: center;">Email</th>
+                <th style= "text-align: center;">Status</th>
+                <th style= "text-align: center;">Date Joined</th>
+                <th style= "text-align: center;">Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -56,11 +56,7 @@
                 </td>
                 <td style="padding: 12px 15px; text-align: center;">
                     {% if user.role == 'unverified_owner' %}
-                    <!-- Trigger modal -->
-                    <button type="button" class="btn approve-btn" data-bs-toggle="modal"
-                        data-bs-target="#verifyModal{{ user.id }}">
-                        Verify
-                    </button>
+                    <button type="button" class="btn approve-btn" onclick="openPopup('verifyPopup{{ user.id }}')">Verify</button>
                     {% else %}
                     <span class="text-muted">—</span>
                     {% endif %}
@@ -80,18 +76,18 @@
 {% if user.role == 'unverified_owner' %}
 <div id="verifyPopup{{ user.id }}" class="popup-overlay">
   <div class="popup-box">
-    <h2>Verification Documents for {{ user.get_full_name }}</h2>
+    <h2>{{ user.get_full_name }}'s Documents for Verification</h2>
 
     {% if user.verification_documents.exists %}
-    <div class="row">
+    <div class="verification-grid">
         {% for doc in user.verification_documents.all %}
-        <div class="col-md-4 mb-3 text-center">
+        <div>
             <a href="{{ doc.file.url }}" target="_blank">
-                <img src="{{ doc.file.url }}" alt="{{ doc.file.name }}"
-                     class="img-fluid rounded verification-thumb"
-                     style="max-height: 150px; cursor:pointer;">
+                <img src="{{ doc.file.url }}" alt="{{ doc.file.name }}" class="doc-thumb">
             </a>
-            <p class="mt-1"><small>Uploaded at: {{ doc.uploaded_at|date:"M d, Y H:i" }}</small></p>
+            <div class="doc-info">
+                Uploaded: {{ doc.uploaded_at|date:"M d, Y H:i" }}
+            </div>
         </div>
         {% endfor %}
     </div>
@@ -100,7 +96,7 @@
     {% endif %}
 
     <div class="popup-buttons">
-      <form method="POST" action="{% url 'view_verification' user.id %}">
+      <form method="POST" action="{% url 'verify_user' user.id %}">
         {% csrf_token %}
         <button type="submit" name="action" value="deny" class="btn btn-danger">Deny</button>
         <button type="submit" name="action" value="verify" class="btn btn-success">Verify</button>
@@ -111,8 +107,21 @@
 </div>
 {% endif %}
 {% endfor %}
+
 {% endblock %}
 
 {% block extra_js %}
 <script src="{% static 'users/js/bo_accounts.js' %}"></script>
+<script>
+function openPopup(id) {
+    document.getElementById(id).classList.add('active');
+}
+
+document.querySelectorAll('.close-popup').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const popupId = this.getAttribute('data-popup-id');
+        document.getElementById(popupId).classList.remove('active');
+    });
+});
+</script>
 {% endblock %}
