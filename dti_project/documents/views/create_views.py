@@ -13,6 +13,7 @@ from ..constants import (
     INSPECTION_VALIDATION_REPORT_FIELD_GROUPS,
     ORDER_OF_PAYMENT_DETAIL_GROUPS,
     ORDER_OF_PAYMENT_FIELD_GROUPS,
+    OTHER_BUSINESS_NAME_RELATED_DETAIL_GROUPS,
     OTHER_BUSINESS_NAME_RELATED_FIELD_GROUPS,
     PERSONAL_DATA_SHEET_DETAIL_GROUPS,
     PERSONAL_DATA_SHEET_FIELD_GROUPS,
@@ -115,8 +116,11 @@ class CreateOtherBusinessRelatedFormView(BaseCreateView):
     context_object_name = 'form'
     form_class = OtherBusinessNameRelatedForm
     FIELD_GROUPS = OTHER_BUSINESS_NAME_RELATED_FIELD_GROUPS
-    detail_groups = []
+    detail_groups = OTHER_BUSINESS_NAME_RELATED_DETAIL_GROUPS
     allowed_roles = ['business_owner']
+
+    def get_success_url(self):
+        return reverse_lazy('other-business-related', kwargs={'pk': self.object.pk})
 
 class CreatePersonalDataSheetView(BaseCreateView):
     template_name = 'documents/create_templates/create_personal_data_sheet.html'
