@@ -298,7 +298,7 @@ class ServiceRepairAccreditationApplicationForm(BaseCustomForm):
     class Meta:
         model = ServiceRepairAccreditationApplication
         fields = '__all__'
-        exclude = ['status', 'user', 'date']
+        exclude = ['status', 'user', 'date', 'payment_status', 'total_amount']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

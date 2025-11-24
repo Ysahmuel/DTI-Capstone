@@ -341,43 +341,91 @@ class SettingsView(LoginRequiredMixin, TemplateView):
 
 #Profile Detail View
 class ProfileDetailView(DetailView):
-    model = User
-    template_name = "users/profile.html"
-    context_object_name = "profile"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        profile = self.get_object()
-
-        # Document queries
-        sales_promos = SalesPromotionPermitApplication.objects.filter(user=profile)
-        personal_data_sheets = PersonalDataSheet.objects.filter(user=profile)
-        service_accreditations = ServiceRepairAccreditationApplication.objects.filter(user=profile)
-        inspection_reports = InspectionValidationReport.objects.filter(user=profile)
-        orders_of_payment = OrderOfPayment.objects.filter(user=profile)
-        checklist_evaluation_sheets = ChecklistEvaluationSheet.objects.filter(user=profile)
-
-        # Total count
-        total_documents = (
-            sales_promos.count()
-            + personal_data_sheets.count()
-            + service_accreditations.count()
-            + inspection_reports.count()
-            + orders_of_payment.count()
-            + checklist_evaluation_sheets.count()
-        )
-
-        # Add to context
-        context.update({
-            "sales_promos": sales_promos,
-            "personal_data_sheets": personal_data_sheets,
-            "service_accreditations": service_accreditations,
-            "inspection_reports": inspection_reports,
-            "orders_of_payment": orders_of_payment,
-            "checklist_evaluation_sheets": checklist_evaluation_sheets,
-            "total_documents": total_documents,
-        })
-        return context
+        model = User
+        template_name = "users/profile.html"
+        context_object_name = "profile"
+    
+        def get_context_data(self, **kwargs):
+            context = super().get_context_data(**kwargs)
+            profile = self.get_object()
+    
+            # Document queries
+            sales_promos = SalesPromotionPermitApplication.objects.filter(user=profile)
+            personal_data_sheets = PersonalDataSheet.objects.filter(user=profile)
+            # only include VERIFIED service repair accreditations for the transaction history
+            service_accreditations = ServiceRepairAccreditationApplication.objects.filter(
+                user=profile,
+                payment_status=ServiceRepairAccreditationApplication.PaymentStatus.VERIFIED
+            )
+            inspection_reports = InspectionValidationReport.objects.filter(user=profile)
+            # only include VERIFIED orders of payment for the transaction history
+            orders_of_payment = OrderOfPayment.objects.filter(
+                user=profile,
+                payment_status=OrderOfPayment.PaymentStatus.VERIFIED
+            )
+            checklist_evaluation_sheets = ChecklistEvaluationSheet.objects.filter(user=profile)
+    
+            # Total count
+            total_documents = (
+                sales_promos.count()
+                + personal_data_sheets.count()
+                + service_accreditations.count()
+                + inspection_reports.count()
+                + orders_of_payment.count()
+                + checklist_evaluation_sheets.count()
+            )
+    
+            # Build transaction history (combined list of dicts)
+            from decimal import Decimal
+            import datetime
+    
+            def _pick_date(obj):
+                # prefer acknowledgment/verification timestamps, then other common date fields
+                return (
+                    getattr(obj, "acknowledgment_generated_at", None)
+                    or getattr(obj, "date_paid", None)
+                    or getattr(obj, "date", None)
+                    or getattr(obj, "date_filed", None)
+                    or getattr(obj, "created_at", None)
+                    or None
+                )
+    
+            transactions = []
+    
+            for oop in orders_of_payment:
+                transactions.append({
+                    "date": _pick_date(oop),
+                    "reference": oop.reference_code or f"OOP-{oop.pk}",
+                    "amount": oop.total_amount or Decimal("0.00"),
+                    "status": str(getattr(oop, "payment_status", "")).title(),
+                })
+    
+            for sra in service_accreditations:
+                transactions.append({
+                    "date": _pick_date(sra),
+                    "reference": sra.reference_code or f"SRA-{sra.pk}",
+                    "amount": sra.total_amount or (sra.calculate_fee() if hasattr(sra, "calculate_fee") else Decimal("0.00")),
+                    "status": str(getattr(sra, "payment_status", "")).title(),
+                })
+    
+            # sort newest first; None dates go to the end
+            def _sort_key(t):
+                return t["date"] or datetime.datetime.min.replace(tzinfo=None)
+    
+            transactions.sort(key=_sort_key, reverse=True)
+    
+            # Add to context
+            context.update({
+                "sales_promos": sales_promos,
+                "personal_data_sheets": personal_data_sheets,
+                "service_accreditations": service_accreditations,
+                "inspection_reports": inspection_reports,
+                "orders_of_payment": orders_of_payment,
+                "checklist_evaluation_sheets": checklist_evaluation_sheets,
+                "total_documents": total_documents,
+                "transactions": transactions,
+            })
+            return context
 
 class StaffListView(ListView):
     model = User
