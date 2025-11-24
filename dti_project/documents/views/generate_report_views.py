@@ -321,11 +321,38 @@ class GenerateDocumentsReportView(LoginRequiredMixin, FilterableDocumentMixin, V
             for j in range(2):
                 if i + j < len(charts_data):
                     buf, bullets, title = charts_data[i + j]
-                    chart_table = Table([
-                        [Paragraph(title, styles['Heading3'])],
-                        [Image(buf, width=150, height=150)],
-                        [bullets]
-                    ])
+                    # Detect if this is a document-level or field-level chart
+                    if " - " in title:
+                        doc_title, field_title = title.split(" - ", 1)
+
+                        # Main document title (same as your old size)
+                        main_heading = Paragraph(doc_title, styles['Heading3'])
+
+                        # Smaller subheading for the specific field
+                        small_heading_style = ParagraphStyle(
+                            'SmallHeading',
+                            parent=styles['Normal'],     # use Normal instead of Heading4
+                            fontName='Helvetica',        # regular font, not bold
+                            fontSize=9,
+                            leading=11,
+                            spaceAfter=6,
+                        )
+                        sub_heading = Paragraph(field_title, small_heading_style)
+
+                        chart_table = Table([
+                            [main_heading],
+                            [sub_heading],
+                            [Image(buf, width=150, height=150)],
+                            [bullets],
+                        ])
+
+                    else:
+                        # Normal document-wide charts (Document Types, Statuses)
+                        chart_table = Table([
+                            [Paragraph(title, styles['Heading3'])],
+                            [Image(buf, width=150, height=150)],
+                            [bullets],
+                        ])
                     chart_table.setStyle(TableStyle([('VALIGN', (0, 0), (-1, -1), 'TOP')]))
                     row_data.append(chart_table)
                 else:
