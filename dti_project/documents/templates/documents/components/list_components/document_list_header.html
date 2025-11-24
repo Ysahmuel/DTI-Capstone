@@ -1,11 +1,19 @@
 <header class="documents-table-header">
-    <h3>All Documents</h3>
+    <h3>
+        All Documents
+        {% if date_range_display %}
+            <span class="date-range">({{ date_range_display }})</span>
+        {% endif %}
+    </h3>
     <div class="actions">
         {% if request.user.role != 'business_owner' %}
             <button type="submit" form="documents-table-form" formaction="{% url 'approve-documents' %}" id="approve-btn">
                 Approve
-            </button>
+            </button>            
         {% endif %}
+        <button type="submit" form="documents-table-form" formaction="{% url 'generate-documents-report' %}" id="generate-report-btn">
+            Generate Report
+        </button>
         <button id="filter-btn">
             <i class="fas fa-sliders-h"></i>
         </button>

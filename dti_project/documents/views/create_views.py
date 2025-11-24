@@ -13,6 +13,7 @@ from ..constants import (
     INSPECTION_VALIDATION_REPORT_FIELD_GROUPS,
     ORDER_OF_PAYMENT_DETAIL_GROUPS,
     ORDER_OF_PAYMENT_FIELD_GROUPS,
+    OTHER_BUSINESS_NAME_RELATED_FIELD_GROUPS,
     PERSONAL_DATA_SHEET_DETAIL_GROUPS,
     PERSONAL_DATA_SHEET_FIELD_GROUPS,
     SALES_PROMOTION_DETAIL_GROUPS,
@@ -27,7 +28,8 @@ from ..forms import (
     OrderOfPaymentForm,
     PersonalDataSheetForm,
     SalesPromotionPermitApplicationForm,
-    ServiceRepairAccreditationApplicationForm
+    ServiceRepairAccreditationApplicationForm,
+    OtherBusinessNameRelatedForm,
 )
 from ..models import (
     ChecklistEvaluationSheet,
@@ -35,7 +37,8 @@ from ..models import (
     OrderOfPayment,
     PersonalDataSheet,
     SalesPromotionPermitApplication,
-    ServiceRepairAccreditationApplication
+    ServiceRepairAccreditationApplication,
+    OtherBusinessNameRelatedFormModel
 )
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import CreateView
@@ -106,6 +109,14 @@ class CreateSalesPromotionView(BaseCreateView):
     def get_success_url(self):
         return reverse_lazy('sales-promotion-application', kwargs={'pk': self.object.pk})
 
+class CreateOtherBusinessRelatedFormView(BaseCreateView):
+    template_name = 'documents/create_templates/create_other_business_related_form.html'
+    model = OtherBusinessNameRelatedFormModel
+    context_object_name = 'form'
+    form_class = OtherBusinessNameRelatedForm
+    FIELD_GROUPS = OTHER_BUSINESS_NAME_RELATED_FIELD_GROUPS
+    detail_groups = []
+    allowed_roles = ['business_owner']
 
 class CreatePersonalDataSheetView(BaseCreateView):
     template_name = 'documents/create_templates/create_personal_data_sheet.html'

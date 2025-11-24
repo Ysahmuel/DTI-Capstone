@@ -4,7 +4,7 @@ from django import forms
 from locations.models import Barangay, CityMunicipality, Province, Region
 from .utils.form_helpers import create_inline_formset
 from .validators import validate_period
-from .models import CharacterReference, ChecklistEvaluationSheet, EducationalAttainment, EmployeeBackground, InspectionValidationReport, OrderOfPayment, ProductCovered, SalesPromotionPermitApplication, PersonalDataSheet, Service, ServiceCategory, ServiceRepairAccreditationApplication, TrainingsAttended
+from .models import OtherBusinessNameRelatedFormModel, CharacterReference, ChecklistEvaluationSheet, EducationalAttainment, EmployeeBackground, InspectionValidationReport, OrderOfPayment, ProductCovered, SalesPromotionPermitApplication, PersonalDataSheet, Service, ServiceCategory, ServiceRepairAccreditationApplication, TrainingsAttended
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, LayoutObject, TEMPLATE_PACK, Fieldset, HTML, Div, Row, Column, Submit
 from django.template.loader import render_to_string
@@ -17,7 +17,7 @@ class SortForm(forms.Form):
     ]
 
     sort_by = forms.ChoiceField(choices=SORT_CHOICES, required=False, label='sort_by')
-    
+
 class BaseCustomForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
@@ -54,6 +54,7 @@ class BaseCustomForm(forms.ModelForm):
                     'fax_number',
                     'telephone_number',
                     'zip_code',
+                    'certificate_number',
                 ]
 
                 future_only_dates = ['promo_period_end']
@@ -97,6 +98,11 @@ class BaseCustomForm(forms.ModelForm):
                     field.validators.append(self.generate_date_not_in_future_validator("Date Established"))
                     field.widget.attrs['max'] = date.today().isoformat()
                     field.widget.attrs['placeholder'] = 'Enter Date Established'
+
+                if name == 'date_registered':
+                    field.validators.append(self.generate_date_not_in_future_validator("Date Registered"))
+                    field.widget.attrs['max'] = date.today().isoformat()
+                    field.widget.attrs['placeholder'] = 'Enter Date Registered'
 
                 if name == 'telephone_number' or name == 'sponsor_telephone' or name == 'advertising_agency_telephone':
                     field.validators.append(self.validate_telephone_number)
@@ -158,6 +164,54 @@ class BaseCustomForm(forms.ModelForm):
                     elif hasattr(user, attr_name):
                         value = getattr(user, attr_name, '')
                     self.fields[field_name].initial = value
+
+    def clean(self):
+        cleaned_data = super().clean()
+        
+        # Define the "from/to" field pairs with their checkbox
+        from_to_pairs = [
+            ('change_territorial_scope', 'territorial_scope_from', 'territorial_scope_to', 'Territorial Scope'),
+            ('change_owner_name', 'owner_name_from', 'owner_name_to', "Owner's Name"),
+            ('change_business_address', 'business_address_from', 'business_address_to', 'Business Address'),
+            ('change_owner_address', 'owner_address_from', 'owner_address_to', "Owner's Address"),
+        ]
+        
+        for checkbox_field, from_field, to_field, label in from_to_pairs:
+            # Only validate if these fields exist in the form
+            if from_field not in self.fields or to_field not in self.fields:
+                continue
+                
+            from_value = cleaned_data.get(from_field)
+            to_value = cleaned_data.get(to_field)
+            
+            # Convert None to empty string for consistent checking
+            from_value = from_value if from_value is not None else ''
+            to_value = to_value if to_value is not None else ''
+            
+            # Strip whitespace
+            from_str = str(from_value).strip() if from_value else ''
+            to_str = str(to_value).strip() if to_value else ''
+            
+            # If either field is filled, both must be filled
+            if from_str or to_str:
+                # Automatically set the checkbox to True
+                cleaned_data[checkbox_field] = True
+                
+                # Validate both fields are filled
+                if from_str and not to_str:
+                    self.add_error(to_field, f'Both "From" and "To" fields for {label} must be filled.')
+                elif to_str and not from_str:
+                    self.add_error(from_field, f'Both "From" and "To" fields for {label} must be filled.')
+                
+                # Check if both are filled and are the same
+                elif from_str and to_str:
+                    if from_str.lower() == to_str.lower():
+                        self.add_error(to_field, f'The "From" and "To" values for {label} cannot be the same.')
+            else:
+                # If both fields are empty, ensure checkbox is False
+                cleaned_data[checkbox_field] = False
+        
+        return cleaned_data
 
     # --- Validation methods ---
     def validate_contact_number(self, value):
@@ -264,6 +318,23 @@ class PersonalDataSheetForm(BaseCustomForm):
             self.fields['image'].widget.clear_checkbox_label = ''
             self.fields['image'].widget.initial_text = ''
             self.fields['image'].widget.input_text = ''
+
+class OtherBusinessNameRelatedForm(BaseCustomForm):
+    class Meta:
+        model = OtherBusinessNameRelatedFormModel
+        fields = '__all__'
+        exclude = ['status', 'user']
+
+    # def __init__(self, *args, **kwargs):
+    #         super().__init__(*args, **kwargs)
+    #         # Hide the "Currently" label for image field
+    #         self.fields['valid_id_presented'].widget.attrs.update({
+    #             'style': 'display: none;'
+    #         })
+    #         # Remove help text that shows "Currently: filename"
+    #         self.fields['valid_id_presented'].widget.clear_checkbox_label = ''
+    #         self.fields['valid_id_presented'].widget.initial_text = ''
+    #         self.fields['valid_id_presented'].widget.input_text = ''
 
 class EmployeeBackgroundForm(BaseCustomForm):
     class Meta:

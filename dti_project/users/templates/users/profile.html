@@ -64,9 +64,10 @@
                 <p>Joined</p>
             </div>
         </div>
+        
         <!-- Transaction History section -->
         <div class="transaction-history-wrapper">
-            <div class="transaction-card"> {# same style as profile-card but isolated #}
+            <div class="transaction-card"> 
                 <h2>Transaction History</h2>
 
                 {% if transactions %}
@@ -82,7 +83,7 @@
                     <tbody>
                         {% for txn in transactions %}
                         <tr>
-                            <td>{{ txn.date|date:"M d, Y" }}</td>
+                            <td>{{ txn.date }}</td>
                             <td>{{ txn.reference }}</td>
                             <td>{{ txn.amount }}</td>
                             <td>{{ txn.status }}</td>

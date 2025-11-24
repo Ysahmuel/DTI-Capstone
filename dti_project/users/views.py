@@ -237,8 +237,6 @@ class ResetPasswordView(View):
                 'message': 'No user account found for this email.'
             })
 
-
-
 #add staff view
 User = get_user_model()
 
@@ -299,10 +297,6 @@ def add_staff(request):
 
     return render(request, 'users/add_staff.html', {'form': form})
 
-
-
-
-
 # Staff Created Popup View
 from django.shortcuts import render
 
@@ -329,11 +323,6 @@ def delete_new_staff(request, user_id):
     except Exception as e:
         messages.error(request, f"Error deleting account: {e}")
     return redirect('staff_accounts')
-
-
-
-
-
 
 #Settings View
 class SettingsView(LoginRequiredMixin, TemplateView):
@@ -566,10 +555,10 @@ class VerifyUserView(View):
                     'redirect': reverse('reset_password')
                 })
             else:
-                # For normal registration flow
+    # For normal registration flow
                 login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-                del request.session['pending_verification_user']
-                return JsonResponse({
+                request.session.pop('pending_verification_user', None)
+            return JsonResponse({
                     'success': True,
                     'message': 'Verification successful!',
                     'redirect': reverse('dashboard')

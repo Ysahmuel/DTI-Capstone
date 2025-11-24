@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.db.models import Q, Min, Max
 
 
@@ -143,7 +144,30 @@ class FilterableDocumentMixin:
             context["selected_civil_status"] = request.GET.getlist("civil_status")
             context["CIVIL_STATUS_CHOICES"] = getattr(PersonalDataSheet, "CIVIL_STATUS_CHOICES", [])
 
+        def fmt(date_str):
+            try:
+                return datetime.strptime(date_str, "%Y-%m-%d").strftime("%b %d, %Y")
+            except:
+                return None
+
+        start = context.get("selected_start_date")
+        end = context.get("selected_end_date")
+
+        start_fmt = fmt(start) if start else None
+        end_fmt = fmt(end) if end else None
+
+        # Build display string
+        if start_fmt and end_fmt:
+            context["date_range_display"] = f"{start_fmt} – {end_fmt}"
+        elif start_fmt:
+            context["date_range_display"] = f"From {start_fmt}"
+        elif end_fmt:
+            context["date_range_display"] = f"Up to {end_fmt}"
+        else:
+            context["date_range_display"] = ""
+
         return context
+    
 class FilterCollectionReportListMixin:
     """
     Adds filtering for CollectionReport objects.
