@@ -13,6 +13,7 @@ from documents.models import (
     PersonalDataSheet,
     SalesPromotionPermitApplication,
     ServiceRepairAccreditationApplication,
+    OtherBusinessNameRelatedFormModel
 )
 from documents.constants import MODEL_URLS
 from documents.mixins.permissions_mixins import UserRoleMixin
@@ -72,6 +73,7 @@ class DashboardView(LoginRequiredMixin, UserRoleMixin, TemplateView):
         checklist_evaluation_sheets = self.get_queryset_or_all(
             ChecklistEvaluationSheet, user
         )
+        other_business_name_related = self.get_queryset_or_all(OtherBusinessNameRelatedFormModel, user)
 
         # Sections for dashboard tiles
         sections = [
@@ -104,6 +106,11 @@ class DashboardView(LoginRequiredMixin, UserRoleMixin, TemplateView):
                 "title": "Checklist Evaluation Sheets",
                 "data": checklist_evaluation_sheets,
                 "url": "checklist-evaluation-sheet",
+            },
+            {
+                "title": "Other Business Name Related Documents",
+                "data": other_business_name_related,
+                "url": "other-business-related",
             },
         ]
 
