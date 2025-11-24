@@ -199,13 +199,12 @@ class GenerateDocumentsReportView(LoginRequiredMixin, FilterableDocumentMixin, V
                 "application_type", "category", "star_rating",
                 "social_classification", "asset_size", "form_of_organization"
             ],
-            "personaldatasheet": ["sex", "civil_status", "nationality"],  
+            "personaldatasheet": ["sex", "civil_status", "nationality"],
         }
 
         doc_specific_data = {}
 
-        # Collect a single date per document
-        preferred_fields = ["created_at", "submitted_at", "date", "date_filed", "date_of_application"]
+        preferred_date_fields = ["created_at", "submitted_at", "date", "date_filed", "date_of_application"]
 
         for model_name, model in MODEL_MAP.items():
             qs = self.apply_filters(model.objects.all())
@@ -216,32 +215,37 @@ class GenerateDocumentsReportView(LoginRequiredMixin, FilterableDocumentMixin, V
             model_verbose_name = to_title(model._meta.verbose_name)
             doc_type_counts[model_verbose_name] = len(objs)
 
-            # ---- FIXED DATE COLLECTION ----
-            # Get model date fields
+            # ---- FIXED DATE COLLECTION (only 1 date per object) ----
             model_date_fields = [
-                f.name for f in model._meta.fields 
+                f.name for f in model._meta.fields
                 if f.get_internal_type() in ['DateField', 'DateTimeField']
             ]
 
             for o in objs:
                 chosen_date = None
 
-                # Try preferred fields first
-                for p in preferred_fields:
+                # Try preferred fields
+                for p in preferred_date_fields:
                     if p in model_date_fields:
                         chosen_date = getattr(o, p, None)
                         if chosen_date:
                             break
 
-                # If no preferred field found, use first date field
+                # Fallback: first available date field
                 if not chosen_date and model_date_fields:
                     chosen_date = getattr(o, model_date_fields[0], None)
 
-                # Normalize to date and store
                 if chosen_date:
                     if isinstance(chosen_date, datetime.datetime):
                         chosen_date = chosen_date.date()
                     date_samples.append(chosen_date)
+
+            # ---- FIXED STATUS DETECTION ----
+            model_fields = [f.name for f in model._meta.fields]
+            if "status" in model_fields:
+                for o in objs:
+                    status = getattr(o, "status", "Unknown")
+                    status_counts[status] = status_counts.get(status, 0) + 1
 
             # Document-specific fields
             key = model_name.lower()
@@ -258,18 +262,13 @@ class GenerateDocumentsReportView(LoginRequiredMixin, FilterableDocumentMixin, V
 
         # Sample size
         if date_samples:
-            # Convert all to datetime.date
-            date_only_samples = [
-                d.date() if isinstance(d, datetime.datetime) else d
-                for d in date_samples
-            ]
-            oldest = min(date_only_samples)
-            newest = max(date_only_samples)
+            oldest = min(date_samples)
+            newest = max(date_samples)
             elements.append(Paragraph(
-                f"Sample Size: {len(date_only_samples)} documents ({oldest} - {newest})",
+                f"Sample Size: {len(date_samples)} documents ({oldest} - {newest})",
                 styles['Normal']
             ))
-            elements.append(Spacer(1,12))
+            elements.append(Spacer(1, 12))
 
         # Helper function for charts
         def build_pie_chart(counts_dict):
@@ -277,10 +276,10 @@ class GenerateDocumentsReportView(LoginRequiredMixin, FilterableDocumentMixin, V
             sizes = list(counts_dict.values())
             cmap = plt.get_cmap("tab20")
             colors_list = [cmap(i) for i in range(len(sizes))]
-            hex_colors = [f'#{int(r*255):02X}{int(g*255):02X}{int(b*255):02X}' for r,g,b,_ in colors_list]
+            hex_colors = [f'#{int(r*255):02X}{int(g*255):02X}{int(b*255):02X}'
+                        for r, g, b, _ in colors_list]
 
-            # Square pie chart
-            fig, ax = plt.subplots(figsize=(2.5,2.5))
+            fig, ax = plt.subplots(figsize=(2.5, 2.5))
             ax.pie(sizes, labels=None, colors=colors_list, startangle=90)
             ax.axis('equal')
             plt.tight_layout(pad=0.1)
@@ -289,13 +288,15 @@ class GenerateDocumentsReportView(LoginRequiredMixin, FilterableDocumentMixin, V
             plt.close(fig)
             buf.seek(0)
 
-            # Bullet points
             bullet_style = ParagraphStyle('BulletStyle', fontSize=9, leftIndent=10, spaceAfter=2)
             total = sum(sizes)
-            bullets = [Paragraph(
-                f'<font color="{hex_colors[i]}">&#9679;</font> {labels[i]}: {sizes[i]} ({sizes[i]/total*100:.1f}%)',
-                bullet_style
-            ) for i in range(len(labels))]
+            bullets = [
+                Paragraph(
+                    f'<font color="{hex_colors[i]}">&#9679;</font> {labels[i]}: {sizes[i]} ({sizes[i] / total * 100:.1f}%)',
+                    bullet_style
+                )
+                for i in range(len(labels))
+            ]
             return buf, bullets
 
         # Combine all charts
@@ -314,26 +315,25 @@ class GenerateDocumentsReportView(LoginRequiredMixin, FilterableDocumentMixin, V
                 buf, bullets = build_pie_chart(data)
                 charts_data.append((buf, bullets, title))
 
-        # Layout: 2 charts per row (left + right)
+        # Layout: 2 charts per row
         for i in range(0, len(charts_data), 2):
             row_data = []
             for j in range(2):
-                if i+j < len(charts_data):
-                    buf, bullets, title = charts_data[i+j]
-                    # Table with title, chart, bullets
+                if i + j < len(charts_data):
+                    buf, bullets, title = charts_data[i + j]
                     chart_table = Table([
                         [Paragraph(title, styles['Heading3'])],
                         [Image(buf, width=150, height=150)],
                         [bullets]
                     ])
-                    chart_table.setStyle(TableStyle([('VALIGN',(0,0),(-1,-1),'TOP')]))
+                    chart_table.setStyle(TableStyle([('VALIGN', (0, 0), (-1, -1), 'TOP')]))
                     row_data.append(chart_table)
                 else:
-                    row_data.append("")  # empty cell
-            page_table = Table([row_data], colWidths=[doc.width/2.0]*2)
-            page_table.setStyle(TableStyle([('VALIGN',(0,0),(-1,-1),'TOP')]))
+                    row_data.append("")
+            page_table = Table([row_data], colWidths=[doc.width / 2.0] * 2)
+            page_table.setStyle(TableStyle([('VALIGN', (0, 0), (-1, -1), 'TOP')]))
             elements.append(page_table)
-            elements.append(Spacer(1,24))
+            elements.append(Spacer(1, 24))
 
         doc.build(elements)
         buffer.seek(0)
