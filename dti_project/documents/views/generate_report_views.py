@@ -204,6 +204,9 @@ class GenerateDocumentsReportView(LoginRequiredMixin, FilterableDocumentMixin, V
 
         doc_specific_data = {}
 
+        # Collect a single date per document
+        preferred_fields = ["created_at", "submitted_at", "date", "date_filed", "date_of_application"]
+
         for model_name, model in MODEL_MAP.items():
             qs = self.apply_filters(model.objects.all())
             objs = list(qs)
@@ -213,19 +216,32 @@ class GenerateDocumentsReportView(LoginRequiredMixin, FilterableDocumentMixin, V
             model_verbose_name = to_title(model._meta.verbose_name)
             doc_type_counts[model_verbose_name] = len(objs)
 
-            # Collect dates
-            date_fields = [f.name for f in model._meta.fields if f.get_internal_type() in ['DateField', 'DateTimeField']]
-            for f in date_fields:
-                for o in objs:
-                    val = getattr(o, f, None)
-                    if val:
-                        date_samples.append(val)
+            # ---- FIXED DATE COLLECTION ----
+            # Get model date fields
+            model_date_fields = [
+                f.name for f in model._meta.fields 
+                if f.get_internal_type() in ['DateField', 'DateTimeField']
+            ]
 
-            # Status
-            if hasattr(model, 'status'):
-                for o in objs:
-                    status = getattr(o, 'status', 'Unknown')
-                    status_counts[status] = status_counts.get(status, 0) + 1
+            for o in objs:
+                chosen_date = None
+
+                # Try preferred fields first
+                for p in preferred_fields:
+                    if p in model_date_fields:
+                        chosen_date = getattr(o, p, None)
+                        if chosen_date:
+                            break
+
+                # If no preferred field found, use first date field
+                if not chosen_date and model_date_fields:
+                    chosen_date = getattr(o, model_date_fields[0], None)
+
+                # Normalize to date and store
+                if chosen_date:
+                    if isinstance(chosen_date, datetime.datetime):
+                        chosen_date = chosen_date.date()
+                    date_samples.append(chosen_date)
 
             # Document-specific fields
             key = model_name.lower()
