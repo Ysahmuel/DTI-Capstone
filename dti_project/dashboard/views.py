@@ -122,6 +122,7 @@ class DashboardView(LoginRequiredMixin, UserRoleMixin, TemplateView):
                 "inspection_reports": inspection_reports,
                 "orders_of_payment": orders_of_payment,
                 "checklist_evaluation_sheets": checklist_evaluation_sheets,
+                'other_business_name_related': other_business_name_related,
                 "sections": sections,  # ✅ use this in template loop
             }
         )
