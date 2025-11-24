@@ -20,6 +20,7 @@ from reportlab.platypus import Image, Paragraph, Spacer
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus import PageBreak
 from reportlab.lib.pagesizes import landscape, A4
+from matplotlib.ticker import MaxNLocator
 from ..mixins.filter_mixins import FilterableDocumentMixin
 from ..models.base_models import DraftModel
 from ..mixins.permissions_mixins import UserRoleMixin
@@ -203,9 +204,9 @@ class GenerateDocumentsReportView(LoginRequiredMixin, FilterableDocumentMixin, V
         }
 
         doc_specific_data = {}
-
         preferred_date_fields = ["created_at", "submitted_at", "date", "date_filed", "date_of_application"]
 
+        # --- Collect data ---
         for model_name, model in MODEL_MAP.items():
             qs = self.apply_filters(model.objects.all())
             objs = list(qs)
@@ -215,34 +216,24 @@ class GenerateDocumentsReportView(LoginRequiredMixin, FilterableDocumentMixin, V
             model_verbose_name = to_title(model._meta.verbose_name)
             doc_type_counts[model_verbose_name] = len(objs)
 
-            # ---- FIXED DATE COLLECTION (only 1 date per object) ----
-            model_date_fields = [
-                f.name for f in model._meta.fields
-                if f.get_internal_type() in ['DateField', 'DateTimeField']
-            ]
-
+            # Collect one date per object
+            model_date_fields = [f.name for f in model._meta.fields if f.get_internal_type() in ['DateField', 'DateTimeField']]
             for o in objs:
                 chosen_date = None
-
-                # Try preferred fields
                 for p in preferred_date_fields:
                     if p in model_date_fields:
                         chosen_date = getattr(o, p, None)
                         if chosen_date:
                             break
-
-                # Fallback: first available date field
                 if not chosen_date and model_date_fields:
                     chosen_date = getattr(o, model_date_fields[0], None)
-
                 if chosen_date:
                     if isinstance(chosen_date, datetime.datetime):
                         chosen_date = chosen_date.date()
                     date_samples.append(chosen_date)
 
-            # ---- FIXED STATUS DETECTION ----
-            model_fields = [f.name for f in model._meta.fields]
-            if "status" in model_fields:
+            # Status counts
+            if "status" in [f.name for f in model._meta.fields]:
                 for o in objs:
                     status = getattr(o, "status", "Unknown")
                     status_counts[status] = status_counts.get(status, 0) + 1
@@ -260,7 +251,7 @@ class GenerateDocumentsReportView(LoginRequiredMixin, FilterableDocumentMixin, V
                             values_count[val] = values_count.get(val, 0) + 1
                     doc_specific_data[f"{model_verbose_name} - {to_title(field)}"] = values_count
 
-        # Sample size
+        # --- Sample size paragraph ---
         if date_samples:
             oldest = min(date_samples)
             newest = max(date_samples)
@@ -270,14 +261,13 @@ class GenerateDocumentsReportView(LoginRequiredMixin, FilterableDocumentMixin, V
             ))
             elements.append(Spacer(1, 12))
 
-        # Helper function for charts
+        # --- Pie chart helper ---
         def build_pie_chart(counts_dict):
             labels = list(counts_dict.keys())
             sizes = list(counts_dict.values())
             cmap = plt.get_cmap("tab20")
             colors_list = [cmap(i) for i in range(len(sizes))]
-            hex_colors = [f'#{int(r*255):02X}{int(g*255):02X}{int(b*255):02X}'
-                        for r, g, b, _ in colors_list]
+            hex_colors = [f'#{int(r*255):02X}{int(g*255):02X}{int(b*255):02X}' for r, g, b, _ in colors_list]
 
             fig, ax = plt.subplots(figsize=(2.5, 2.5))
             ax.pie(sizes, labels=None, colors=colors_list, startangle=90)
@@ -299,55 +289,44 @@ class GenerateDocumentsReportView(LoginRequiredMixin, FilterableDocumentMixin, V
             ]
             return buf, bullets
 
-        # Combine all charts
+        # --- Combine pie charts ---
         charts_data = []
-
         if doc_type_counts:
             buf, bullets = build_pie_chart(doc_type_counts)
             charts_data.append((buf, bullets, "Document Types"))
-
         if status_counts:
             buf, bullets = build_pie_chart(status_counts)
             charts_data.append((buf, bullets, "Statuses"))
-
         for title, data in doc_specific_data.items():
             if data:
                 buf, bullets = build_pie_chart(data)
                 charts_data.append((buf, bullets, title))
 
-        # Layout: 2 charts per row
+        # --- Layout: 2 charts per row ---
         for i in range(0, len(charts_data), 2):
             row_data = []
             for j in range(2):
                 if i + j < len(charts_data):
                     buf, bullets, title = charts_data[i + j]
-                    # Detect if this is a document-level or field-level chart
                     if " - " in title:
                         doc_title, field_title = title.split(" - ", 1)
-
-                        # Main document title (same as your old size)
                         main_heading = Paragraph(doc_title, styles['Heading3'])
-
-                        # Smaller subheading for the specific field
                         small_heading_style = ParagraphStyle(
                             'SmallHeading',
-                            parent=styles['Normal'],     # use Normal instead of Heading4
-                            fontName='Helvetica',        # regular font, not bold
+                            parent=styles['Normal'],
+                            fontName='Helvetica',
                             fontSize=9,
                             leading=11,
                             spaceAfter=6,
                         )
                         sub_heading = Paragraph(field_title, small_heading_style)
-
                         chart_table = Table([
                             [main_heading],
                             [sub_heading],
                             [Image(buf, width=150, height=150)],
                             [bullets],
                         ])
-
                     else:
-                        # Normal document-wide charts (Document Types, Statuses)
                         chart_table = Table([
                             [Paragraph(title, styles['Heading3'])],
                             [Image(buf, width=150, height=150)],
@@ -362,9 +341,79 @@ class GenerateDocumentsReportView(LoginRequiredMixin, FilterableDocumentMixin, V
             elements.append(page_table)
             elements.append(Spacer(1, 24))
 
-        doc.build(elements)
-        buffer.seek(0)
-        return buffer
+
+        # --- Adaptive bar chart based on date range ---
+        if date_samples:
+            min_date, max_date = min(date_samples), max(date_samples)
+            delta_days = (max_date - min_date).days + 1
+
+            from collections import Counter
+
+            # Daily counts
+            if delta_days < 7:
+                counts_dict = Counter(date_samples)
+                x_labels = sorted(counts_dict.keys())
+                y_values = [counts_dict[d] for d in x_labels]
+                x_labels_fmt = [d.strftime("%b %d") for d in x_labels]
+                chart_title = "Documents per Day"
+
+            # Weekly counts
+            elif delta_days < 28:
+                weekly_counts = Counter()
+                for d in date_samples:
+                    year, week, _ = d.isocalendar()
+                    weekly_counts[(year, week)] += 1
+
+                sorted_weeks = sorted(weekly_counts.keys())
+                x_labels_fmt = []
+                y_values = []
+                for year, week in sorted_weeks:
+                    start_date = datetime.date.fromisocalendar(year, week, 1)
+                    end_date = datetime.date.fromisocalendar(year, week, 7)
+                    x_labels_fmt.append(f"{start_date.strftime('%b %d')}–{end_date.strftime('%b %d')}")
+                    y_values.append(weekly_counts[(year, week)])
+                chart_title = "Documents per Week"
+
+            # Monthly counts
+            else:
+                monthly_counts = Counter()
+                for d in date_samples:
+                    monthly_counts[d.strftime("%Y-%m")] += 1
+                sorted_months = sorted(monthly_counts.keys())
+                x_labels_fmt = sorted_months
+                y_values = [monthly_counts[m] for m in sorted_months]
+                chart_title = "Documents per Month"
+
+            # --- Plot bar chart ---
+            num_bars = len(x_labels_fmt)
+            fig_width = max(10, num_bars * 0.8)
+            fig, ax = plt.subplots(figsize=(fig_width, 5))
+            bar_width = 0.6 if num_bars > 1 else 0.3
+
+            ax.bar(range(num_bars), y_values, color='skyblue', width=bar_width)
+            ax.set_title(chart_title, fontsize=16)
+            ax.set_xlabel("Time Period")
+            ax.set_ylabel("Total Documents")
+            ax.set_xticks(range(num_bars))
+            ax.set_xticklabels(x_labels_fmt, rotation=45, ha='right')
+
+            # Only integer y-axis
+            ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+
+            plt.tight_layout(pad=2.0)
+            buf = BytesIO()
+            plt.savefig(buf, format='PNG')
+            plt.close(fig)
+            buf.seek(0)
+
+            elements.append(Spacer(1, 24))
+            elements.append(Image(buf, width=doc.width, height=doc.height*0.5))
+            elements.append(Spacer(1, 24))
+
+        # --- Build the PDF ---
+        doc.build(elements) 
+        buffer.seek(0)       
+        return buffer        
 
     def post(self, request, *args, **kwargs):
         excel_buffer = self.export_excel()
