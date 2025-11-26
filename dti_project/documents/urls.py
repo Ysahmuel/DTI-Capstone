@@ -1,7 +1,7 @@
 from django.urls import path
 from documents import views 
 from payments.views import verify_payment
-
+from documents.views.export_excel_views import ExportCollectionReportView
 urlpatterns = [
     # CREATE VIEWS
     path("create/sales-promotion", views.CreateSalesPromotionView.as_view(), name="create-sales-promotion"),
@@ -49,6 +49,7 @@ urlpatterns = [
     path('upload-excel/', views.UploadExcelView.as_view(), name='upload-excel'),
     path('process-upload/<str:session_id>/', views.ProcessUploadView.as_view(), name='process-upload'),
     path('cancel-upload/<str:session_id>/', views.CancelUploadView.as_view(), name='cancel-upload'),
+    path('collections/export/', ExportCollectionReportView.as_view(), name='export_collections'),
 
     # ACTION VIEWS
     path('approve-documents', views.ApproveDocumentsView.as_view(), name='approve-documents'),
