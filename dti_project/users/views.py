@@ -33,6 +33,7 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone 
 from .forms import AddStaffForm
 
+from django.db.models import Q
 from documents.models import (
     # Base models
     BaseApplication,
@@ -86,6 +87,13 @@ import random
 # -----------------------------
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+
+#Settings View
+from django.views.generic import TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator
+from .models import ActivityLog
+from .utils import log_activity
 
 
 
@@ -324,87 +332,128 @@ def delete_new_staff(request, user_id):
         messages.error(request, f"Error deleting account: {e}")
     return redirect('staff_accounts')
 
-#Settings View
+
 class SettingsView(LoginRequiredMixin, TemplateView):
     template_name = "users/settings.html"
-
-#Profile Detail View
-class ProfileDetailView(DetailView):
-    model = User
-    template_name = "users/profile.html"
-    context_object_name = "profile"
+    paginate_by = 50
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        profile = self.get_object()
-
-        # Document queries
-        sales_promos = SalesPromotionPermitApplication.objects.filter(user=profile)
-        personal_data_sheets = PersonalDataSheet.objects.filter(user=profile)
-        service_accreditations = ServiceRepairAccreditationApplication.objects.filter(user=profile)
-        inspection_reports = InspectionValidationReport.objects.filter(user=profile)
-        orders_of_payment = OrderOfPayment.objects.filter(user=profile)
-        checklist_evaluation_sheets = ChecklistEvaluationSheet.objects.filter(user=profile)
-
-        related_oops = OrderOfPayment.objects.filter(sales_promotion_permit_application__user=profile)
-
-        transactions_qs = (orders_of_payment | related_oops).distinct().order_by('-id')
-
-        transactions_safe = []
-        for txn in transactions_qs:
-            date_obj = getattr(txn, 'created_at', None) or getattr(txn, 'date', None)
-            date_str = date_obj.strftime("%b %d, %Y") if date_obj else "N/A"
-
-            reference = (
-                getattr(txn, 'reference_code', None)
-                or "N/A"
-            )
-
-            amount_val = getattr(txn, 'total_amount', None) or getattr(txn, 'amount', None) or 0
-            try:
-                amount_str = f"₱{float(amount_val):,.2f}"
-            except Exception:
-                amount_str = "₱0.00"
-
-            status = None
-            get_status_display = getattr(txn, 'get_payment_status_display', None)
-            if callable(get_status_display):
-                try:
-                    status = get_status_display()
-                except Exception:
-                    status = None
-            if not status:
-                status = getattr(txn, 'payment_status', None) or getattr(txn, 'status', None) or "N/A"
-
-            transactions_safe.append({
-                'date': date_str,
-                'reference': reference,
-                'amount': amount_str,
-                'status': status,
-            })
-
-        # Total count
-        total_documents = (
-            sales_promos.count()
-            + personal_data_sheets.count()
-            + service_accreditations.count()
-            + inspection_reports.count()
-            + orders_of_payment.count()
-            + checklist_evaluation_sheets.count()
-        )
-
-        # Add to context
-        context.update({
-            "sales_promos": sales_promos,
-            "personal_data_sheets": personal_data_sheets,
-            "service_accreditations": service_accreditations,
-            "inspection_reports": inspection_reports,
-            "orders_of_payment": orders_of_payment,
-            "checklist_evaluation_sheets": checklist_evaluation_sheets,
-            "total_documents": total_documents,
-            "transactions": transactions_safe,
-        })
+        
+        # Use the model's method to get visible logs based on role
+        logs = ActivityLog.get_visible_logs(self.request.user)
+        
+        paginator = Paginator(logs, self.paginate_by)
+        page_number = self.request.GET.get('page', 1)
+        page_obj = paginator.get_page(page_number)
+        
+        context['activity_logs'] = page_obj.object_list
+        context['page_obj'] = page_obj
+        context['is_paginated'] = page_obj.has_other_pages()
+        context['total_activities'] = logs.count()
+        context['is_admin'] = self.request.user.role == User.Roles.ADMIN
+        
         return context
+
+#Profile Detail View
+class ProfileDetailView(DetailView):
+        model = User
+        template_name = "users/profile.html"
+        context_object_name = "profile"
+    
+        def get_context_data(self, **kwargs):
+            context = super().get_context_data(**kwargs)
+            profile = self.get_object()
+    
+            # Document queries
+            sales_promos = SalesPromotionPermitApplication.objects.filter(user=profile)
+            personal_data_sheets = PersonalDataSheet.objects.filter(user=profile)
+            # only include VERIFIED service repair accreditations for the transaction history
+            service_accreditations = ServiceRepairAccreditationApplication.objects.filter(
+                user=profile,
+                payment_status=ServiceRepairAccreditationApplication.PaymentStatus.VERIFIED
+            )
+            inspection_reports = InspectionValidationReport.objects.filter(user=profile)
+            # only include VERIFIED orders of payment for the transaction history
+            orders_of_payment = OrderOfPayment.objects.filter(
+                payment_status=OrderOfPayment.PaymentStatus.VERIFIED
+            ).filter(
+                Q(user=profile) | Q(sales_promotion_permit_application__user=profile)
+            ).select_related('sales_promotion_permit_application')
+            checklist_evaluation_sheets = ChecklistEvaluationSheet.objects.filter(user=profile)
+    
+            # Total count
+            total_documents = (
+                sales_promos.count()
+                + personal_data_sheets.count()
+                + service_accreditations.count()
+                + inspection_reports.count()
+                + orders_of_payment.count()
+                + checklist_evaluation_sheets.count()
+            )
+    
+            # Build transaction history (combined list of dicts)
+            from decimal import Decimal
+            import datetime
+    
+            def _pick_date(obj):
+                # prefer acknowledgment/verification timestamps, then other common date fields
+                return (
+                    getattr(obj, "acknowledgment_generated_at", None)
+                    or getattr(obj, "date_paid", None)
+                    or getattr(obj, "date", None)
+                    or getattr(obj, "date_filed", None)
+                    or getattr(obj, "created_at", None)
+                    or None
+                )
+    
+            transactions = []
+    
+            # OOP transactions (sales promos)
+            for oop in orders_of_payment:
+                display_ref = oop.reference_code or f"OOP-{oop.pk}"
+                # prefer the Sales Promotion name when available
+                app_name = None
+                if getattr(oop, "sales_promotion_permit_application", None):
+                    sppa = oop.sales_promotion_permit_application
+                    app_name = getattr(sppa, "sponsor_name", None) or str(sppa)
+
+                transactions.append({
+                    "date": _pick_date(oop),
+                    "reference": display_ref,
+                    "label": app_name or "Sales Promotion",
+                    "amount": oop.total_amount or Decimal("0.00"),
+                    "status": str(getattr(oop, "payment_status", "")).title(),
+                })
+
+            # Service Repair Accreditation transactions (verified only)
+            for sra in service_accreditations:
+                transactions.append({
+                    "date": _pick_date(sra),
+                    "reference": sra.reference_code or f"SRA-{sra.pk}",
+                    "label": getattr(sra, "name_of_business", str(sra)),
+                    "amount": sra.total_amount or (sra.calculate_fee() if hasattr(sra, "calculate_fee") else Decimal("0.00")),
+                    "status": str(getattr(sra, "payment_status", "")).title(),
+                })
+    
+            # sort newest first; None dates go to the end
+            def _sort_key(t):
+                return t["date"] or datetime.datetime.min.replace(tzinfo=None)
+    
+            transactions.sort(key=_sort_key, reverse=True)
+    
+            # Add to context
+            context.update({
+                "sales_promos": sales_promos,
+                "personal_data_sheets": personal_data_sheets,
+                "service_accreditations": service_accreditations,
+                "inspection_reports": inspection_reports,
+                "orders_of_payment": orders_of_payment,
+                "checklist_evaluation_sheets": checklist_evaluation_sheets,
+                "total_documents": total_documents,
+                "transactions": transactions,
+            })
+            return context
 
 class StaffListView(ListView):
     model = User

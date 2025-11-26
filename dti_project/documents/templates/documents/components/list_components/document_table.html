@@ -44,9 +44,9 @@
                             {{ document.user }}
                         {% endif %}
                     </td>
+                    
                     <!-- Status column -->
                     <td>
-                        {# Status badge #}
                         {% if document.status == "draft" %}
                             <span class="status-badge status-badge-draft">Draft</span>
                         {% elif document.status in "submitted submitted_paid submitted_unpaid" %}
@@ -55,7 +55,6 @@
                             <span class="status-badge status-badge-approved">Approved</span>
                         {% endif %}
 
-                        {# Row-level approve button for submitted documents #}
                         {% if request.user.role != 'business_owner' and document.status in "submitted submitted_paid submitted_unpaid" %}
                             <form method="POST" action="{% url 'approve-documents' %}" style="display:inline; margin-left: 8px;">
                                 {% csrf_token %}
@@ -64,7 +63,6 @@
                             </form>
                         {% endif %}
                     </td>
-
 
                     <td>
                         {% if document.date %}
@@ -86,12 +84,11 @@
                                             {% if oop.payment_status == 'awaiting' %}
                                                 <span class="payment-badge payment-badge-secondary">Awaiting Payment</span>
                                             {% elif oop.payment_status == 'paid' %}
-                                                <a href="{% url 'verify-payment' oop.pk %}" class="payment-btn payment-btn-blue">Verify Payment</a>
+                                                <a href="{% url 'verify-payment' 'oop' oop.pk %}" class="payment-btn payment-btn-blue">Verify Payment</a>
                                             {% elif oop.payment_status == 'verified' %}
                                                 <div class="payment-status-vertical">
                                                     <span class="payment-badge payment-badge-success">Paid & Verified</span>
-                                                    
-                                                    <a href="{% url 'download-receipt' oop.pk %}" target="_blank" class="payment-btn payment-btn-blue" onclick="event.stopPropagation();">Download Receipt</a>
+                                                    <a href="{% url 'download-receipt' 'oop' oop.pk %}" target="_blank" class="payment-btn payment-btn-blue" onclick="event.stopPropagation();">Download Receipt</a>
                                                 </div>
                                             {% else %}
                                                 <span class="payment-badge payment-badge-light">Unknown</span>
@@ -99,17 +96,47 @@
 
                                     {% else %}
                                         {% if oop.payment_status == 'awaiting' %}
-                                            <a href="{% url 'payment-page' oop.pk %}" class="payment-btn payment-btn-green">Pay</a>
+                                            <a href="{% url 'payment-page' 'oop' oop.pk %}" class="payment-btn payment-btn-green">Pay</a>
                                         {% elif oop.payment_status == 'paid' %}
                                             <span class="payment-badge payment-badge-info">Pending Verification</span>
                                         {% elif oop.payment_status == 'verified' %}
                                             <div class="payment-status-horizontal">
                                                 <span class="payment-badge payment-badge-success">Paid</span>
-                                                <a href="{% url 'download-receipt' oop.pk %}" class="payment-btn payment-btn-blue">Download Receipt</a>
+                                                <a href="{% url 'download-receipt' 'oop' oop.pk %}" class="payment-btn payment-btn-blue">Download Receipt</a>
                                             </div>
                                         {% else %}
                                             <span class="payment-badge payment-badge-light">Unknown</span>
                                         {% endif %}
+                                    {% endif %}
+                                {% endif %}
+                            {% endwith %}
+                        {% elif document.model_verbose_name == 'Accreditation of Service and Repair Enterprise' %}
+                            {% with document as sra %}
+                                {% if request.user.role == 'admin' or request.user.role == 'collection_agent' %}
+                                    {% if sra.payment_status == 'awaiting' %}
+                                        <span class="payment-badge payment-badge-secondary">Awaiting Payment</span>
+                                    {% elif sra.payment_status == 'paid' %}
+                                        <a href="{% url 'verify-payment' 'service' sra.pk %}" class="payment-btn payment-btn-blue" onclick="event.stopPropagation();">Verify Payment</a>
+                                    {% elif sra.payment_status == 'verified' %}
+                                        <div class="payment-status-vertical">
+                                            <span class="payment-badge payment-badge-success">Paid & Verified</span>
+                                            <a href="{% url 'download-receipt' 'service' sra.pk %}" target="_blank" class="payment-btn payment-btn-blue" onclick="event.stopPropagation();">Download Receipt</a>
+                                        </div>
+                                    {% else %}
+                                        <span class="payment-badge payment-badge-light">Unknown</span>
+                                    {% endif %}
+                                {% else %}
+                                    {% if sra.payment_status == 'awaiting' %}
+                                        <a href="{% url 'payment-page' 'service' sra.pk %}" class="payment-btn payment-btn-green" onclick="event.stopPropagation();">Pay</a>
+                                    {% elif sra.payment_status == 'paid' %}
+                                        <span class="payment-badge payment-badge-info">Pending Verification</span>
+                                    {% elif sra.payment_status == 'verified' %}
+                                        <div class="payment-status-horizontal">
+                                            <span class="payment-badge payment-badge-success">Paid</span>
+                                            <a href="{% url 'download-receipt' 'service' sra.pk %}" class="payment-btn payment-btn-blue">Download Receipt</a>
+                                        </div>
+                                    {% else %}
+                                        <span class="payment-badge payment-badge-light">Unknown</span>
                                     {% endif %}
                                 {% endif %}
                             {% endwith %}
