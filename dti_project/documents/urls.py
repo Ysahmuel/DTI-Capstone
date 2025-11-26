@@ -19,6 +19,7 @@ urlpatterns = [
     path("inspection-validation-reports/<int:pk>", views.InspectionValidationReportDetailView.as_view(), name="inspection-validation-report"),
     path("order-of-payments/<int:pk>", views.OrderOfPaymentDetailView.as_view(), name="order-of-payment"),
     path("checklist-evaluation-sheets/<int:pk>", views.ChecklistEvaluationSheetDetailView.as_view(), name='checklist-evaluation-sheet'),
+    path("other-business-related/<int:pk>", views.OtherBusinessRelatedDetailView.as_view(), name='other-business-related'),
 
     # UPDATE VIEWS
     path("sales-promotion-applications/<int:pk>/update", views.UpdateSalesPromotionView.as_view(), name='update-sales-promotion'),
