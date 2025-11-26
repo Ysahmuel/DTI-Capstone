@@ -33,6 +33,7 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone 
 from .forms import AddStaffForm
 
+from django.db.models import Q
 from documents.models import (
     # Base models
     BaseApplication,
@@ -86,6 +87,13 @@ import random
 # -----------------------------
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+
+#Settings View
+from django.views.generic import TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator
+from .models import ActivityLog
+from .utils import log_activity
 
 
 
@@ -324,9 +332,28 @@ def delete_new_staff(request, user_id):
         messages.error(request, f"Error deleting account: {e}")
     return redirect('staff_accounts')
 
-#Settings View
+
 class SettingsView(LoginRequiredMixin, TemplateView):
     template_name = "users/settings.html"
+    paginate_by = 50
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Use the model's method to get visible logs based on role
+        logs = ActivityLog.get_visible_logs(self.request.user)
+        
+        paginator = Paginator(logs, self.paginate_by)
+        page_number = self.request.GET.get('page', 1)
+        page_obj = paginator.get_page(page_number)
+        
+        context['activity_logs'] = page_obj.object_list
+        context['page_obj'] = page_obj
+        context['is_paginated'] = page_obj.has_other_pages()
+        context['total_activities'] = logs.count()
+        context['is_admin'] = self.request.user.role == User.Roles.ADMIN
+        
+        return context
 
 #Profile Detail View
 class ProfileDetailView(DetailView):
@@ -349,9 +376,10 @@ class ProfileDetailView(DetailView):
             inspection_reports = InspectionValidationReport.objects.filter(user=profile)
             # only include VERIFIED orders of payment for the transaction history
             orders_of_payment = OrderOfPayment.objects.filter(
-                user=profile,
                 payment_status=OrderOfPayment.PaymentStatus.VERIFIED
-            )
+            ).filter(
+                Q(user=profile) | Q(sales_promotion_permit_application__user=profile)
+            ).select_related('sales_promotion_permit_application')
             checklist_evaluation_sheets = ChecklistEvaluationSheet.objects.filter(user=profile)
     
             # Total count
@@ -381,18 +409,29 @@ class ProfileDetailView(DetailView):
     
             transactions = []
     
+            # OOP transactions (sales promos)
             for oop in orders_of_payment:
+                display_ref = oop.reference_code or f"OOP-{oop.pk}"
+                # prefer the Sales Promotion name when available
+                app_name = None
+                if getattr(oop, "sales_promotion_permit_application", None):
+                    sppa = oop.sales_promotion_permit_application
+                    app_name = getattr(sppa, "sponsor_name", None) or str(sppa)
+
                 transactions.append({
                     "date": _pick_date(oop),
-                    "reference": oop.reference_code or f"OOP-{oop.pk}",
+                    "reference": display_ref,
+                    "label": app_name or "Sales Promotion",
                     "amount": oop.total_amount or Decimal("0.00"),
                     "status": str(getattr(oop, "payment_status", "")).title(),
                 })
-    
+
+            # Service Repair Accreditation transactions (verified only)
             for sra in service_accreditations:
                 transactions.append({
                     "date": _pick_date(sra),
                     "reference": sra.reference_code or f"SRA-{sra.pk}",
+                    "label": getattr(sra, "name_of_business", str(sra)),
                     "amount": sra.total_amount or (sra.calculate_fee() if hasattr(sra, "calculate_fee") else Decimal("0.00")),
                     "status": str(getattr(sra, "payment_status", "")).title(),
                 })
