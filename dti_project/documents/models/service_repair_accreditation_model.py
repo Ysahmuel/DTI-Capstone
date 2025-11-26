@@ -7,6 +7,9 @@ from django.utils import timezone
 from ..model_choices import REGION_CHOICES, SERVICE_CATEGORY_CHOICES, STAR_RATING_CHOICES
 from users.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
+from decimal import Decimal
+import random
+import string
 
 class ServiceRepairAccreditationApplication(DraftModel, models.Model):
     class Meta:
@@ -107,10 +110,30 @@ class ServiceRepairAccreditationApplication(DraftModel, models.Model):
         null=True
     )
     
-    
+    # PAYMENT / OOP-LIKE FIELDS (fixed fees based on star rating / category)
+    FILING_FEE = Decimal('50.00')
+    ACCREDITATION_FEES = {
+        1: Decimal('350.00'),
+        2: Decimal('400.00'),
+        3: Decimal('425.00'),
+        4: Decimal('450.00'),
+        5: Decimal('500.00'),
+    }
+    # For MEDICAL & DENTAL EQUIPMENT override to 350 (original & renewal)
+    MEDICAL_CATEGORY_KEY = 'MEDICAL & DENTAL EQUIPMENT'
+
+    reference_code = models.CharField(max_length=20, blank=True, null=True, unique=True)
+    acknowledgment_generated_at = models.DateTimeField(blank=True, null=True)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    class PaymentStatus(models.TextChoices):
+        AWAITING = 'awaiting', 'Awaiting Payment'
+        PAID = 'paid', 'Paid'
+        VERIFIED = 'verified', 'Verified'
+    payment_status = models.CharField(max_length=20, choices=PaymentStatus.choices, default=PaymentStatus.AWAITING)
 
     def __str__(self):
-        return self.get_str_display(f"{self.name_of_business} - {self.application_type} - {self.category}")
+        # show only the business name in lists/tables
+        return self.get_str_display(self.name_of_business)
 
     def get_absolute_url(self):
         return reverse("service-repair-accreditation", args=[self.pk])
@@ -158,8 +181,37 @@ class ServiceRepairAccreditationApplication(DraftModel, models.Model):
         elif number < 1000:
             return ones[number // 100] + ' hundred' + ('' if number % 100 == 0 else ' ' + self.number_to_words(number % 100))
         else:
-            return str(number)  # For larger numbers, just return the digit
+            return str(number)  
         
+    def calculate_fee(self):
+        """
+        Calculate total: filing fee + accreditation fee based on star_rating and category.
+        Medical/Dental equipment => fixed accreditation fee of 350.00
+        """
+        try:
+            if self.category == self.MEDICAL_CATEGORY_KEY:
+                accreditation_fee = Decimal('350.00')
+            else:
+                accreditation_fee = self.ACCREDITATION_FEES.get(int(self.star_rating), Decimal('0.00'))
+        except Exception:
+            accreditation_fee = Decimal('0.00')
+        return (self.FILING_FEE + accreditation_fee).quantize(Decimal('0.01'))
+
+    def save(self, *args, **kwargs):
+        try:
+            self.total_amount = self.calculate_fee()
+        except Exception:
+            self.total_amount = Decimal('0.00')
+
+        def _generate_reference():
+            return ''.join(random.choices(string.ascii_uppercase + string.digits, k=15))
+
+        if self.payment_status == self.PaymentStatus.VERIFIED and not self.reference_code:
+            self.reference_code = _generate_reference()
+            self.acknowledgment_generated_at = timezone.now()
+
+        super().save(*args, **kwargs)
+
 class ServiceCategory(models.Model):
     key = models.CharField(max_length=50, choices=SERVICE_CATEGORY_CHOICES, unique=True)
     name = models.CharField(max_length=100)

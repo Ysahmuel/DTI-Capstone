@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User
+from .models import User, ActivityLog
 
 
 class UserAdmin(BaseUserAdmin):
@@ -47,3 +47,11 @@ class UserAdmin(BaseUserAdmin):
 
 # register AFTER defining the class
 admin.site.register(User, UserAdmin)
+
+@admin.register(ActivityLog)
+class ActivityLogAdmin(admin.ModelAdmin):
+    list_display = ("timestamp", "user", "action", "content_type", "object_id", "ip_address")
+    list_filter = ("user", "content_type")
+    search_fields = ("action", "object_id", "user__email", "user__first_name", "user__last_name")
+    readonly_fields = ("timestamp", "user", "action", "content_type", "object_id", "ip_address", "extra")
+    ordering = ("-timestamp",)
