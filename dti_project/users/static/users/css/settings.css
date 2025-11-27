@@ -312,3 +312,26 @@
     margin-top: 0.5rem;
     font-size: 0.9rem;
 }
+.log-action-type {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-right: 8px;
+}
+.log-type-login { background: #d4edda; color: #155724; }
+.log-type-logout { background: #e2e3e5; color: #383d41; }
+.log-type-create { background: #cce5ff; color: #004085; }
+.log-type-update { background: #fff3cd; color: #856404; }
+.log-type-delete { background: #f8d7da; color: #721c24; }
+.log-type-approved { background: #d4edda; color: #155724; }
+.log-type-rejected { background: #f8d7da; color: #721c24; }
+.log-type-submitted { background: #cce5ff; color: #004085; }
+
+.activity-table { width:100%; border-collapse: collapse; margin-top:10px; }
+.activity-table th, .activity-table td { padding:10px; border-bottom:1px solid #eee; text-align:left; }
+.activity-table th { background:#f7f9fb; font-weight:600; font-size:0.9rem; }
+.by-cell { white-space:nowrap; width:180px; }
+.role-cell { white-space:nowrap; width:140px; color:#555; font-size:0.9rem; }

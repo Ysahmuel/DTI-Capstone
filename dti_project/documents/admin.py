@@ -136,12 +136,20 @@ class CharacterReferencesAdmin(admin.ModelAdmin):  # Not DraftModel
 @admin.register(ServiceRepairAccreditationApplication)
 class ServiceRepairAccreditationApplicationAdmin(StatusModelAdmin):
     list_display = (
+        "id",
         "name_of_business",
         "full_name",
         "application_type",
         "category",
         "star_rating",
+        "reference_code",
+        "total_amount",
+        "payment_status",
+        "acknowledgment_generated_at",
+        "status",
+        "date",
     )
+    readonly_fields = ("reference_code", "acknowledgment_generated_at")
     search_fields = ("name_of_business", "first_name", "last_name")
     list_filter = (
         "application_type",
@@ -150,7 +158,12 @@ class ServiceRepairAccreditationApplicationAdmin(StatusModelAdmin):
         "social_classification",
         "asset_size",
         "form_of_organization",
+        "payment_status",
+        "status",
+        "date",
     )
+    ordering = ("-date",)
+    save_on_top = True
 
     def full_name(self, obj):
         return f"{obj.first_name} {obj.middle_name or ''} {obj.last_name}".strip()

@@ -11,7 +11,7 @@
 <div class="settings-wrapper">
     <div class="settings-card">
 
-        <!-- HEADER -->
+        <!-- Header -->
         <div class="settings-header"></div>
 
         <div class="profile-header-content">
@@ -63,6 +63,70 @@
                 </div>
             </ul>
         </div>
+
+        <!-- Activity Logs - Only show for Admin -->
+        {% if user.role == 'admin' %}
+        <div class="activity-logs-wrapper">
+            <div class="activity-logs-card">
+                <div class="logs-header">
+                    <h2>Activity Logs <span style="background:#ff6b6b;color:#fff;padding:2px 8px;border-radius:4px;margin-left:8px;font-size:0.75rem;">ADMIN VIEW</span></h2>
+                    <p class="logs-subtitle">Complete history of all system activities</p>
+                </div>
+
+                <div class="activity-logs-body">
+                    {% if activity_logs %}
+                        <table class="activity-table">
+                            <thead>
+                                <tr>
+                                    <th>Action</th>
+                                    <th class="by-cell">By</th>
+                                    <th class="role-cell">Role</th>
+                                    <th>Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for log in activity_logs %}
+                                <tr>
+                                    <td>{{ log.action }}</td>
+                                    <td class="by-cell">
+                                        {% if log.user %}
+                                            {{ log.user.username }}
+                                        {% else %}
+                                            System
+                                        {% endif %}
+                                    </td>
+                                    <td class="role-cell">
+                                        {% if log.role %}
+                                            {{ log.role }}
+                                        {% elif log.user %}
+                                            {{ log.user.get_role_display }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ log.timestamp|date:"M d, Y H:i" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                        {% if is_paginated %}
+                            <div class="pagination" style="margin-top:12px;text-align:center;">
+                                {% if page_obj.has_previous %}
+                                    <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-sm">‹ Prev</a>
+                                {% endif %}
+                                <span style="margin:0 8px;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                                {% if page_obj.has_next %}
+                                    <a href="?page={{ page_obj.next_page_number }}" class="btn btn-sm">Next ›</a>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
     </div>
 </div>
 

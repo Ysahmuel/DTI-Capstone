@@ -4,6 +4,9 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.urls import reverse
 from django.utils import timezone
+from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
 
 # Create your models here.
 
@@ -102,3 +105,83 @@ class User(AbstractUser):
             self.role = self.Roles.ADMIN
             
         super().save(*args, **kwargs)
+
+class ActivityLog(models.Model):
+    class ActionType(models.TextChoices):
+        # Authentication Events
+        LOGIN = "login", "Login"
+        LOGOUT = "logout", "Logout"
+        LOGIN_FAILED = "login_failed", "Failed Login"
+        
+        # Page Visits
+        PAGE_VIEW = "page_view", "Page Visit"
+        
+        # CRUD Actions
+        CREATE = "create", "Created"
+        UPDATE = "update", "Updated"
+        DELETE = "delete", "Deleted"
+        UPLOAD = "upload", "Uploaded File"
+        
+        # Payment Activities
+        PAYMENT_INITIATED = "payment_initiated", "Payment Initiated"
+        PAYMENT_VERIFIED = "payment_verified", "Payment Verified"
+        PAYMENT_FAILED = "payment_failed", "Payment Failed"
+        REFUND_INITIATED = "refund_initiated", "Refund Initiated"
+        
+        # Approval Workflow
+        APPROVED = "approved", "Approved"
+        REJECTED = "rejected", "Rejected"
+        SUBMITTED = "submitted", "Submitted"
+        
+        # System Events
+        SESSION_EXPIRED = "session_expired", "Session Expired"
+        PASSWORD_CHANGED = "password_changed", "Password Changed"
+        EMAIL_CHANGED = "email_changed", "Email Changed"
+
+    class Visibility(models.TextChoices):
+        PRIVATE = "private", "Private (User only)"
+        PUBLIC = "public", "All users"
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="activity_logs")
+    role = models.CharField(max_length=20, blank=True, null=True)
+    action_type = models.CharField(max_length=30, choices=ActionType.choices)
+    action = models.CharField(max_length=500)  # Human-readable description
+    timestamp = models.DateTimeField(auto_now_add=True, db_index=True)
+    
+    # Visibility control
+    visibility = models.CharField(max_length=20, choices=Visibility.choices, default=Visibility.PRIVATE)
+    
+    # Object reference
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
+    object_id = models.CharField(max_length=255, null=True, blank=True)
+    content_object = GenericForeignKey("content_type", "object_id")
+    
+    # Network info
+    ip_address = models.CharField(max_length=45, null=True, blank=True)
+    user_agent = models.TextField(blank=True, null=True)
+    
+    # Additional data
+    extra = models.JSONField(null=True, blank=True, default=dict)
+
+    class Meta:
+        ordering = ["-timestamp"]
+        indexes = [
+            models.Index(fields=["user", "-timestamp"]),
+            models.Index(fields=["action_type", "-timestamp"]),
+        ]
+
+    def __str__(self):
+        who = self.user.get_full_name() if self.user else "System"
+        return f"{self.timestamp:%Y-%m-%d %H:%M} — {self.action}"
+
+    @classmethod
+    def get_visible_logs(cls, viewing_user):
+        """Get activity logs visible to the viewing user based on their role"""
+        from users.models import User
+        
+        if viewing_user.role == User.Roles.ADMIN:
+            # Admins see everything
+            return cls.objects.all().order_by('-timestamp')
+        else:
+            # Business owners and collection agents see nothing
+            return cls.objects.none()
