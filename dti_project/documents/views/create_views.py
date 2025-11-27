@@ -105,7 +105,7 @@ class CreateSalesPromotionView(BaseCreateView):
     FIELD_GROUPS = SALES_PROMOTION_FIELD_GROUPS
     detail_groups = SALES_PROMOTION_DETAIL_GROUPS
     additional_sections = ['coverage']
-    allowed_roles = ['business_owner']
+    allowed_roles = ['business_owner', 'authorized_official']
 
     def get_success_url(self):
         return reverse_lazy('sales-promotion-application', kwargs={'pk': self.object.pk})
@@ -116,8 +116,10 @@ class CreateOtherBusinessRelatedFormView(BaseCreateView):
     context_object_name = 'form'
     form_class = OtherBusinessNameRelatedForm
     FIELD_GROUPS = OTHER_BUSINESS_NAME_RELATED_FIELD_GROUPS
+    detail_groups = []
+    allowed_roles = ['business_owner', 'authorized_official']
     detail_groups = OTHER_BUSINESS_NAME_RELATED_DETAIL_GROUPS
-    allowed_roles = ['business_owner']
+    allowed_roles = ['business_owner''authorized_official']
 
     def get_success_url(self):
         return reverse_lazy('other-business-related', kwargs={'pk': self.object.pk})
@@ -126,7 +128,7 @@ class CreatePersonalDataSheetView(BaseCreateView):
     template_name = 'documents/create_templates/create_personal_data_sheet.html'
     model = PersonalDataSheet
     form_class = PersonalDataSheetForm
-    allowed_roles = ['business_owner']
+    allowed_roles = ['business_owner', 'authorized_official']
 
     formset_classes = {
         'employee_background': FORMSET_CLASSES['employee_background'],
@@ -154,7 +156,7 @@ class CreateServiceRepairAccreditationApplicationView(BaseCreateView):
     form_class = ServiceRepairAccreditationApplicationForm
     FIELD_GROUPS = SERVICE_REPAIR_ACCREDITATION_FIELD_GROUPS
     detail_groups = SERVICE_REPAIR_ACCREDITATION_DETAIL_GROUPS
-    allowed_roles = ['business_owner']
+    allowed_roles = ['business_owner', 'authorized_official']
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -176,7 +178,7 @@ class CreateInspectionValidationReportView(BaseCreateView, ServiceCategoryMixin)
     FIELD_GROUPS = INSPECTION_VALIDATION_REPORT_FIELD_GROUPS
     detail_groups = INSPECTION_VALIDATION_DETAIL_GROUPS
     additional_sections = ['service_categories']
-    allowed_roles = ['collection_agent']
+    allowed_roles = ['collection_agent', 'alt_collection_agent']
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -194,8 +196,8 @@ class CreateOrderOfPaymentView(BaseCreateView):
     form_class = OrderOfPaymentForm
     FIELD_GROUPS = ORDER_OF_PAYMENT_FIELD_GROUPS
     detail_groups = ORDER_OF_PAYMENT_DETAIL_GROUPS
-    allowed_roles = ['collection_agent','admin']
-    
+    allowed_roles = ['collection_agent', 'alt_collection_agent', 'admin']
+  
     def get_initial(self):
         initial = super().get_initial()
         sppa_id = self.request.GET.get('sppa')
@@ -270,7 +272,7 @@ class CreateChecklistEvaluationSheetView(BaseCreateView):
     form_class = ChecklistEvaluationSheetForm
     FIELD_GROUPS = CHECKLIST_EVALUATION_FIELD_GROUPS
     detail_groups = CHECKLIST_EVALUATION_DETAIL_GROUPS
-    allowed_roles = ['collection_agent']
+    allowed_roles = ['collection_agent', 'alt_collection_agent']
     
     def get_success_url(self):
         return reverse_lazy('checklist-evaluation-sheet', kwargs={'pk': self.object.pk})
